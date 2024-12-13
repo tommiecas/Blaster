@@ -34,6 +34,7 @@ public:
 	virtual void OnRep_PlayerState() override;
 	virtual void PossessedBy(AController* NewController) override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	virtual void PostInitializeComponents() override;
 
 protected:
 	virtual void BeginPlay() override;
@@ -57,6 +58,15 @@ protected:
 
 	void Look(const FInputActionValue& Value);
 
+	/*
+	** Equipping Weapons
+	*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+	UInputAction* EquipAction;
+
+	void EquipButtonPressed(const FInputActionValue& Value);
+
+
 	UFUNCTION(BlueprintImplementableEvent)
 	void ShowPlayerName();
 
@@ -75,6 +85,9 @@ private:
 
 	UFUNCTION()
 	void OnRep_OverlappingWeapon(AWeapon* LastWeapon);
+
+	UPROPERTY(VisibleAnywhere)
+	class UCombatComponent* Combat;
 
 public:
 	void SetOverlappingWeapon(AWeapon* Weapon);
