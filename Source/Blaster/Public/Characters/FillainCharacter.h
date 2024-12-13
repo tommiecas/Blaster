@@ -64,7 +64,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	UInputAction* EquipAction;
 
-	void EquipButtonPressed(const FInputActionValue& Value);
+	void EquipButtonPressed();
 
 	/*
 	** Crouching
@@ -72,7 +72,16 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	UInputAction* CrouchAction;
 
-	void CrouchButtonPressed(const FInputActionValue& Value);
+	void CrouchButtonPressed();
+
+	/*
+	** Aiming
+	*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+	UInputAction* AimAction;
+
+	void AimButtonPressed();
+	void AimButtonReleased();
 
 
 	UFUNCTION(BlueprintImplementableEvent)
@@ -103,5 +112,6 @@ private:
 public:
 	void SetOverlappingWeapon(AWeapon* Weapon);
 	bool IsWeaponEquipped();
+	bool IsAiming();
 
 };

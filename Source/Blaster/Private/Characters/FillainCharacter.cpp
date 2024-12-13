@@ -41,6 +41,8 @@ AFillainCharacter::AFillainCharacter()
 
 	Combat = CreateDefaultSubobject<UCombatComponent>(TEXT("CombatComponent"));
 	Combat->SetIsReplicated(true);
+
+	GetCharacterMovement()->NavAgentProps.bCanCrouch = true;
 }
 
 void AFillainCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -91,6 +93,9 @@ void AFillainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &AFillainCharacter::Jump);
 		EnhancedInputComponent->BindAction(EquipAction, ETriggerEvent::Triggered, this, &AFillainCharacter::EquipButtonPressed);
 		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Triggered, this, &AFillainCharacter::CrouchButtonPressed);
+		EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Triggered, this, &AFillainCharacter::AimButtonPressed);
+		EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Completed, this, &AFillainCharacter::AimButtonReleased);
+
 	}
 }
 
@@ -126,7 +131,7 @@ void AFillainCharacter::Look(const FInputActionValue& Value)
 	
 }
 
-void AFillainCharacter::EquipButtonPressed(const FInputActionValue& Value)
+void AFillainCharacter::EquipButtonPressed()
 {
 	if (Combat)
 	{
@@ -141,9 +146,32 @@ void AFillainCharacter::EquipButtonPressed(const FInputActionValue& Value)
 	}
 }
 
-void AFillainCharacter::CrouchButtonPressed(const FInputActionValue& Value)
+void AFillainCharacter::CrouchButtonPressed()
 {
-	Crouch();
+	if (bIsCrouched)
+	{
+		UnCrouch();
+	}
+	else 
+	{
+		Crouch();
+	}
+}
+
+void AFillainCharacter::AimButtonPressed()
+{
+	if (Combat)
+	{
+		Combat->SetAiming(true);
+	}
+}
+
+void AFillainCharacter::AimButtonReleased()
+{
+	if (Combat)
+	{
+		Combat->SetAiming(false);
+	}
 }
 
 void AFillainCharacter::ServerEquipButtonPressed_Implementation()
@@ -175,6 +203,11 @@ void AFillainCharacter::SetOverlappingWeapon(AWeapon* Weapon)
 bool AFillainCharacter::IsWeaponEquipped()
 {
 	return (Combat && Combat->EquippedWeapon);
+}
+
+bool AFillainCharacter::IsAiming()
+{
+	return (Combat && Combat->bAiming);
 }
 
 void AFillainCharacter::OnRep_OverlappingWeapon(AWeapon* LastWeapon)
