@@ -11,6 +11,8 @@
 #include "Components/WidgetComponent.h"
 #include "GameFramework/PlayerState.h"
 #include "HUD/OverheadWidget.h"
+#include "Net/UnrealNetwork.h"
+#include "Weapons/Weapon.h"
 
 
 AFillainCharacter::AFillainCharacter()
@@ -37,6 +39,14 @@ AFillainCharacter::AFillainCharacter()
 	OverheadWidget->SetupAttachment(RootComponent);
 }
 
+void AFillainCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AFillainCharacter, OverlappingWeapon);
+}
+
+
 void AFillainCharacter::BeginPlay()
 {
 	Super::BeginPlay();
@@ -53,6 +63,17 @@ void AFillainCharacter::BeginPlay()
 	{
 		ShowPlayerName();
 	}
+}
+
+void AFillainCharacter::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	if (OverlappingWeapon)
+	{
+		OverlappingWeapon->ShowPickupWidget(true);
+	}
+
 }
 
 void AFillainCharacter::Move(const FInputActionValue& Value)
@@ -77,10 +98,34 @@ void AFillainCharacter::Look(const FInputActionValue& Value)
 	
 }
 
-void AFillainCharacter::Tick(float DeltaTime)
+void AFillainCharacter::SetOverlappingWeapon(AWeapon* Weapon)
 {
-	Super::Tick(DeltaTime);
+	if (OverlappingWeapon)
+	{
+		OverlappingWeapon->ShowPickupWidget(false);
+	}
 
+	OverlappingWeapon = Weapon;
+	
+	if (IsLocallyControlled())
+	{
+		if (OverlappingWeapon)
+		{
+			OverlappingWeapon->ShowPickupWidget(true);
+		}
+	}
+}
+
+void AFillainCharacter::OnRep_OverlappingWeapon(AWeapon* LastWeapon)
+{
+	if (OverlappingWeapon)
+	{
+		OverlappingWeapon->ShowPickupWidget(true);
+	}
+	if (LastWeapon)
+	{
+		LastWeapon->ShowPickupWidget(false);
+	}
 }
 
 void AFillainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -112,4 +157,5 @@ void AFillainCharacter::PossessedBy(AController* NewController)
 	Super::PossessedBy(NewController);
 	ShowPlayerName();
 }
+
 
