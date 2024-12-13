@@ -9,6 +9,9 @@
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
 #include "Components/WidgetComponent.h"
+#include "GameFramework/PlayerState.h"
+#include "HUD/OverheadWidget.h"
+
 
 AFillainCharacter::AFillainCharacter()
 {
@@ -45,6 +48,11 @@ void AFillainCharacter::BeginPlay()
 			Subsystem->AddMappingContext(FillainMappingContext, 0);
 		}
 	}
+
+	if (HasAuthority() && IsLocallyControlled())
+	{
+		ShowPlayerName();
+	}
 }
 
 void AFillainCharacter::Move(const FInputActionValue& Value)
@@ -69,7 +77,6 @@ void AFillainCharacter::Look(const FInputActionValue& Value)
 	
 }
 
-
 void AFillainCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -92,5 +99,17 @@ void AFillainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 void AFillainCharacter::Jump()
 {
 	Super::Jump();
+}
+
+void AFillainCharacter::OnRep_PlayerState()
+{
+	Super::OnRep_PlayerState();
+	ShowPlayerName();
+}
+
+void AFillainCharacter::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+	ShowPlayerName();
 }
 

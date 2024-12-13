@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "InputActionValue.h"
+#include "HUD/OverheadWidget.h"
 #include "FillainCharacter.generated.h"
 
 class USpringArmComponent;
@@ -29,7 +30,9 @@ public:
 	UInputAction* JumpAction;
 
 	virtual void Jump() override;
-	
+
+	virtual void OnRep_PlayerState() override;
+	virtual void PossessedBy(AController* NewController) override;
 
 protected:
 	virtual void BeginPlay() override;
@@ -52,6 +55,9 @@ protected:
 	UInputAction* LookAction;
 
 	void Look(const FInputActionValue& Value);
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void ShowPlayerName();
 
 private:	
 	UPROPERTY(VisibleAnywhere, Category = Camera)

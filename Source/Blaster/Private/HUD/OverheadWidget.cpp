@@ -5,19 +5,19 @@
 #include "Components/TextBlock.h"
 #include "GameFramework/PlayerState.h"
 
-void UOverheadWidget::SetDisplayText(FString TextToDisplay)
+void UOverheadWidget::SetRoleText(FString RoleTextToDisplay)
 {
-	if (DisplayText)
+	if (RoleText)
 	{
-		DisplayText->SetText(FText::FromString(TextToDisplay));
+		RoleText->SetText(FText::FromString(RoleTextToDisplay));
 	}
 }
 
-void UOverheadWidget::SetNameText(FString TextToDisplay)
+void UOverheadWidget::SetNameText(FString NameTextToDisplay)
 {
 	if (NameText)
 	{
-		NameText->SetText(FText::FromString(TextToDisplay));
+		NameText->SetText(FText::FromString(NameTextToDisplay));
 	}
 }
 
@@ -41,17 +41,25 @@ void UOverheadWidget::ShowPlayerNetRole(APawn* InPawn)
 		break;
 	}
 	FString RemoteRoleString = FString::Printf(TEXT("Remote Role: %s"), *Role);
-	SetDisplayText(RemoteRoleString);
+	SetRoleText(RemoteRoleString);
 }
 
 void UOverheadWidget::ShowPlayerName(APawn* InPawn)
 {
+	if (InPawn == nullptr || InPawn->GetPlayerState() == nullptr)
+	{
+		// Handle the null case, maybe log an error or set a default player name
+		SetNameText(FString("Unknown Player"));
+		return;
+	}
+
 	FString PlayerName = InPawn->GetPlayerState()->GetPlayerName();
 	SetNameText(PlayerName);
 }
-
+/*
 void UOverheadWidget::NativeDestruct()
 {
 	RemoveFromParent();
 	Super::NativeDestruct();
 }
+*/

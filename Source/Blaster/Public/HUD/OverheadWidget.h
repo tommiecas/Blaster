@@ -16,13 +16,13 @@ class BLASTER_API UOverheadWidget : public UUserWidget
 
 public:
 	UPROPERTY(meta = (BindWidget))
-	class UTextBlock* DisplayText;
+	class UTextBlock* RoleText;
 	
 	UPROPERTY(meta = (BindWidget))
 	class UTextBlock* NameText;
 
-	void SetDisplayText(FString TextToDisplay);
-	void SetNameText(FString TextToDisplay);
+	void SetRoleText(FString RoleTextToDisplay);
+	void SetNameText(FString NameTextToDisplay);
 
 	UFUNCTION(BlueprintCallable)
 	void ShowPlayerNetRole(APawn* InPawn);
@@ -31,6 +31,6 @@ public:
 	void ShowPlayerName(APawn* InPawn);
 
 protected:
-	virtual void NativeDestruct() override;
+//	virtual void NativeDestruct() override;
 	
 };
