@@ -66,6 +66,14 @@ protected:
 
 	void EquipButtonPressed(const FInputActionValue& Value);
 
+	/*
+	** Crouching
+	*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+	UInputAction* CrouchAction;
+
+	void CrouchButtonPressed(const FInputActionValue& Value);
+
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void ShowPlayerName();
@@ -94,5 +102,6 @@ private:
 
 public:
 	void SetOverlappingWeapon(AWeapon* Weapon);
+	bool IsWeaponEquipped();
 
 };
