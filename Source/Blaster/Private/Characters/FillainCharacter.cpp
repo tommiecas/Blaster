@@ -15,6 +15,7 @@
 #include "Weapons/Weapon.h"
 #include "Components/CombatComponent.h"
 #include "Components/CapsuleComponent.h"
+#include <Kismet/KismetMathLibrary.h>
 
 
 
@@ -84,6 +85,8 @@ void AFillainCharacter::Tick(float DeltaTime)
 	{
 		OverlappingWeapon->ShowPickupWidget(true);
 	}
+
+	AimOffset(DeltaTime);
 
 }
 
@@ -177,6 +180,32 @@ void AFillainCharacter::AimButtonReleased()
 	{
 		Combat->SetAiming(false);
 	}
+}
+
+void AFillainCharacter::AimOffset(float DeltaTime)
+{
+	if (Combat && Combat->EquippedWeapon == nullptr) return;
+
+	FVector Velocity = GetVelocity();
+	Velocity.Z = 0.f;
+	float Speed = Velocity.Size();
+	bool bIsInAir = GetCharacterMovement()->IsFalling();
+
+	if (Speed == 0.f && !bIsInAir) //standing still and not jumping
+	{
+		FRotator CurrentAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);
+		FRotator DeltaRotation = UKismetMathLibrary::NormalizedDeltaRotator(CurrentAimRotation, StartingAimRotation);
+		AO_Yaw = DeltaRotation.Yaw;
+		bUseControllerRotationYaw = false;
+	}
+	if (Speed > 0.f || bIsInAir) //moving or jumping
+	{
+		StartingAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);
+		AO_Yaw = 0.f;
+		bUseControllerRotationYaw = true;
+	}
+
+	AO_Pitch = GetBaseAimRotation().Pitch;
 }
 
 void AFillainCharacter::ServerEquipButtonPressed_Implementation()
