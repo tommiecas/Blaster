@@ -258,6 +258,12 @@ bool AFillainCharacter::IsAiming()
 	return (Combat && Combat->bAiming);
 }
 
+AWeapon* AFillainCharacter::GetEquippedWeapon()
+{
+	if (Combat == nullptr) return nullptr;
+	return Combat->EquippedWeapon;
+}
+
 
 
 

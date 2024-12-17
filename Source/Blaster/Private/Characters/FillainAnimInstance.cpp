@@ -5,6 +5,7 @@
 #include "Characters/FillainCharacter.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Weapons/Weapon.h"
 
 
 void UFillainAnimInstance::NativeInitializeAnimation()
@@ -31,6 +32,7 @@ void UFillainAnimInstance::NativeUpdateAnimation(float DeltaTime)
 	bIsInAir = FillainCharacter->GetCharacterMovement()->IsFalling();
 	bIsAccelerating = FillainCharacter->GetCharacterMovement()->GetCurrentAcceleration().Size() > 0.f ? true : false;
 	bWeaponEquipped = FillainCharacter->IsWeaponEquipped();
+	EquippedWeapon = FillainCharacter->GetEquippedWeapon();
 	bIsCrouched = FillainCharacter->bIsCrouched;
 	bAiming = FillainCharacter->IsAiming();
 
@@ -50,4 +52,14 @@ void UFillainAnimInstance::NativeUpdateAnimation(float DeltaTime)
 
 	AO_Yaw = FillainCharacter->GetAO_Yaw();
 	AO_Pitch = FillainCharacter->GetAO_Pitch();
+
+	if (bWeaponEquipped && EquippedWeapon && EquippedWeapon->GetWeaponMesh() && FillainCharacter->GetMesh())
+	{
+		LeftHandTransform = EquippedWeapon->GetWeaponMesh()->GetSocketTransform(FName("LeftHandSocket"), ERelativeTransformSpace::RTS_World);
+		FVector OutPosition;
+		FRotator OutRotation;
+		FillainCharacter->GetMesh()->TransformToBoneSpace(FName("hand_r"), LeftHandTransform.GetLocation(), FRotator::ZeroRotator, OutPosition, OutRotation);
+		LeftHandTransform.SetLocation(OutPosition);
+		LeftHandTransform.SetRotation(FQuat(OutRotation));
+	}
 }
