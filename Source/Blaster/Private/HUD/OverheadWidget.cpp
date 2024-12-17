@@ -56,10 +56,3 @@ void UOverheadWidget::ShowPlayerName(APawn* InPawn)
 	FString PlayerName = InPawn->GetPlayerState()->GetPlayerName();
 	SetNameText(PlayerName);
 }
-/*
-void UOverheadWidget::NativeDestruct()
-{
-	RemoveFromParent();
-	Super::NativeDestruct();
-}
-*/

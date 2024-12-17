@@ -15,7 +15,7 @@ UCombatComponent::UCombatComponent()
 	PrimaryComponentTick.bCanEverTick = false;
 
 	BaseWalkSpeed = 600.f;
-	AimWalkSpeed = 400.f;
+	AimWalkSpeed = 450.f;
 
 }
 
@@ -44,6 +44,10 @@ void UCombatComponent::SetAiming(bool bIsAiming)
 void UCombatComponent::ServerSetAiming_Implementation(bool bIsAiming)
 {
 	bAiming = bIsAiming;
+	if (PlayerCharacter)
+	{
+		PlayerCharacter->GetCharacterMovement()->MaxWalkSpeed = bIsAiming ? AimWalkSpeed : BaseWalkSpeed;
+	}
 }
 
 void UCombatComponent::OnRep_EquippedWeapon()

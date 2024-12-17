@@ -38,7 +38,7 @@ private:
 	class AFillainCharacter* PlayerCharacter;
 
 	UPROPERTY(ReplicatedUsing = OnRep_EquippedWeapon)
-	class AWeapon* EquippedWeapon;
+	AWeapon* EquippedWeapon;
 
 	UPROPERTY(Replicated)
 	bool bAiming;

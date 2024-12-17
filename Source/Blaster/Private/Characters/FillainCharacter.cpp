@@ -23,12 +23,10 @@ AFillainCharacter::AFillainCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
-	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = false;
-	bUseControllerRotationRoll = false;
 
 	GetCharacterMovement()->bOrientRotationToMovement = true;
-	GetCharacterMovement()->RotationRate = FRotator(0.f, 400.f, 0.f);
+	// GetCharacterMovement()->RotationRate = FRotator(0.f, 400.f, 0.f);
 
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(GetMesh());
@@ -55,7 +53,7 @@ void AFillainCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(AFillainCharacter, OverlappingWeapon);
+	DOREPLIFETIME(AFillainCharacter, OverlappingWeapon, COND_OwnerOnly);
 }
 
 
@@ -80,11 +78,6 @@ void AFillainCharacter::BeginPlay()
 void AFillainCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	if (OverlappingWeapon)
-	{
-		OverlappingWeapon->ShowPickupWidget(true);
-	}
 
 	AimOffset(DeltaTime);
 
@@ -154,6 +147,14 @@ void AFillainCharacter::EquipButtonPressed()
 	}
 }
 
+void AFillainCharacter::ServerEquipButtonPressed_Implementation()
+{
+	if (Combat)
+	{
+		Combat->EquipWeapon(OverlappingWeapon);
+	}
+}
+
 void AFillainCharacter::CrouchButtonPressed()
 {
 	if (bIsCrouched)
@@ -194,8 +195,8 @@ void AFillainCharacter::AimOffset(float DeltaTime)
 	if (Speed == 0.f && !bIsInAir) //standing still and not jumping
 	{
 		FRotator CurrentAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);
-		FRotator DeltaRotation = UKismetMathLibrary::NormalizedDeltaRotator(CurrentAimRotation, StartingAimRotation);
-		AO_Yaw = DeltaRotation.Yaw;
+		FRotator DeltaAimRotation = UKismetMathLibrary::NormalizedDeltaRotator(CurrentAimRotation, StartingAimRotation);
+		AO_Yaw = DeltaAimRotation.Yaw;
 		bUseControllerRotationYaw = false;
 	}
 	if (Speed > 0.f || bIsInAir) //moving or jumping
@@ -215,13 +216,7 @@ void AFillainCharacter::AimOffset(float DeltaTime)
 	}
 }
 
-void AFillainCharacter::ServerEquipButtonPressed_Implementation()
-{
-	if (Combat)
-	{
-		Combat->EquipWeapon(OverlappingWeapon);
-	}
-}
+
 
 void AFillainCharacter::SetOverlappingWeapon(AWeapon* Weapon)
 {
@@ -241,16 +236,6 @@ void AFillainCharacter::SetOverlappingWeapon(AWeapon* Weapon)
 	}
 }
 
-bool AFillainCharacter::IsWeaponEquipped()
-{
-	return (Combat && Combat->EquippedWeapon);
-}
-
-bool AFillainCharacter::IsAiming()
-{
-	return (Combat && Combat->bAiming);
-}
-
 void AFillainCharacter::OnRep_OverlappingWeapon(AWeapon* LastWeapon)
 {
 	if (OverlappingWeapon)
@@ -262,6 +247,18 @@ void AFillainCharacter::OnRep_OverlappingWeapon(AWeapon* LastWeapon)
 		LastWeapon->ShowPickupWidget(false);
 	}
 }
+
+bool AFillainCharacter::IsWeaponEquipped()
+{
+	return (Combat && Combat->EquippedWeapon);
+}
+
+bool AFillainCharacter::IsAiming()
+{
+	return (Combat && Combat->bAiming);
+}
+
+
 
 
 void AFillainCharacter::Jump()

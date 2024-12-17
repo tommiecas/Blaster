@@ -31,6 +31,5 @@ public:
 	void ShowPlayerName(APawn* InPawn);
 
 protected:
-//	virtual void NativeDestruct() override;
 	
 };

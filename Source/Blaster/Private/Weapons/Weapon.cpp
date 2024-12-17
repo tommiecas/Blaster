@@ -16,7 +16,7 @@ AWeapon::AWeapon()
 	SetRootComponent(WeaponMesh);
 
 	WeaponMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
-	WeaponMesh->SetCollisionResponseToChannel(ECC_Pawn, ECollisionResponse::ECR_Ignore);
+	WeaponMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
 	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	AreaSphere = CreateDefaultSubobject<USphereComponent>(TEXT("AreaSphere"));
@@ -33,11 +33,6 @@ void AWeapon::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (PickupWidget)
-	{
-		PickupWidget->SetVisibility(false);
-	}
-	
 	if (HasAuthority())
 	{
 		AreaSphere->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
@@ -45,6 +40,13 @@ void AWeapon::BeginPlay()
 		AreaSphere->OnComponentBeginOverlap.AddDynamic(this, &AWeapon::OnSphereOverlap);
 		AreaSphere->OnComponentEndOverlap.AddDynamic(this, &AWeapon::OnSphereEndOverlap);
 	}
+
+	if (PickupWidget)
+	{
+		PickupWidget->SetVisibility(false);
+	}
+	
+	
 }
 
 void AWeapon::Tick(float DeltaTime)
