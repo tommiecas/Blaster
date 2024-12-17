@@ -35,6 +35,7 @@ void UFillainAnimInstance::NativeUpdateAnimation(float DeltaTime)
 	EquippedWeapon = FillainCharacter->GetEquippedWeapon();
 	bIsCrouched = FillainCharacter->bIsCrouched;
 	bAiming = FillainCharacter->IsAiming();
+	TurningInPlace = FillainCharacter->GetTurningInPlace();
 
 	//Offset Yaw for Strafing
 	FRotator AimRotation = FillainCharacter->GetBaseAimRotation();
