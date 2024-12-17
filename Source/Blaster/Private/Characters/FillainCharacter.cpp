@@ -47,6 +47,7 @@ AFillainCharacter::AFillainCharacter()
 
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
 	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
+	GetCharacterMovement()->RotationRate = FRotator(0.f, 0.f, 1000.f);
 
 	TurningInPlace = ETurningInPlace::ETIP_NotTurning;
 	NetUpdateFrequency = 66.f;
@@ -301,7 +302,14 @@ AWeapon* AFillainCharacter::GetEquippedWeapon()
 
 void AFillainCharacter::Jump()
 {
-	Super::Jump();
+	if (bIsCrouched)
+	{
+		UnCrouch();
+	}
+	else
+	{
+		Super::Jump();
+	}
 }
 
 void AFillainCharacter::OnRep_PlayerState()

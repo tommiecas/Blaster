@@ -31,5 +31,6 @@ public:
 	void ShowPlayerName(APawn* InPawn);
 
 protected:
+	virtual void NativeConstruct() override;
 	
 };
