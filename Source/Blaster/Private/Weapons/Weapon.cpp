@@ -24,8 +24,11 @@ AWeapon::AWeapon()
 	AreaSphere->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 	AreaSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
-	PickupWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("PickupWidget"));
-	PickupWidget->SetupAttachment(RootComponent);
+	PickupWidgetA = CreateDefaultSubobject<UWidgetComponent>(TEXT("PickupWidgetA"));
+	PickupWidgetA->SetupAttachment(RootComponent);
+
+	PickupWidgetB = CreateDefaultSubobject<UWidgetComponent>(TEXT("PickupWidgetB"));
+	PickupWidgetB->SetupAttachment(RootComponent);
 
 }
 
@@ -41,10 +44,15 @@ void AWeapon::BeginPlay()
 		AreaSphere->OnComponentEndOverlap.AddDynamic(this, &AWeapon::OnSphereEndOverlap);
 	}
 
-	if (PickupWidget)
+	if (PickupWidgetA)
 	{
-		PickupWidget->SetVisibility(false);
+		PickupWidgetA->SetVisibility(false);
 	}
+	if (PickupWidgetB)
+	{
+		PickupWidgetB->SetVisibility(false);
+	}
+	
 	
 	
 }
@@ -85,7 +93,7 @@ void AWeapon::SetWeaponState(EWeaponState State)
 	switch (WeaponState)
 	{
 	case EWeaponState::EWS_Equipped:
-		ShowPickupWidget(false);
+		ShowPickupWidgets(false);
 		AreaSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		break;
 	}
@@ -96,17 +104,21 @@ void AWeapon::OnRep_WeaponState()
 	switch (WeaponState)
 	{
 	case EWeaponState::EWS_Equipped:
-		ShowPickupWidget(false);
+		ShowPickupWidgets(false);
 		break;
 	}
 }
 
 
-void AWeapon::ShowPickupWidget(bool bShowWidget)
+void AWeapon::ShowPickupWidgets(bool bShowWidget)
 {
-	if (PickupWidget)
+	if (PickupWidgetA)
 	{
-		PickupWidget->SetVisibility(bShowWidget);
+		PickupWidgetA->SetVisibility(bShowWidget);
+	}
+	if (PickupWidgetB)
+	{
+		PickupWidgetB->SetVisibility(bShowWidget);
 	}
 }
 

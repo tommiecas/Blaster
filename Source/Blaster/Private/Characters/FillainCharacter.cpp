@@ -255,7 +255,7 @@ void AFillainCharacter::SetOverlappingWeapon(AWeapon* Weapon)
 {
 	if (OverlappingWeapon)
 	{
-		OverlappingWeapon->ShowPickupWidget(false);
+		OverlappingWeapon->ShowPickupWidgets(false);
 	}
 
 	OverlappingWeapon = Weapon;
@@ -264,7 +264,7 @@ void AFillainCharacter::SetOverlappingWeapon(AWeapon* Weapon)
 	{
 		if (OverlappingWeapon)
 		{
-			OverlappingWeapon->ShowPickupWidget(true);
+			OverlappingWeapon->ShowPickupWidgets(true);
 		}
 	}
 }
@@ -273,11 +273,11 @@ void AFillainCharacter::OnRep_OverlappingWeapon(AWeapon* LastWeapon)
 {
 	if (OverlappingWeapon)
 	{
-		OverlappingWeapon->ShowPickupWidget(true);
+		OverlappingWeapon->ShowPickupWidgets(true);
 	}
 	if (LastWeapon)
 	{
-		LastWeapon->ShowPickupWidget(false);
+		LastWeapon->ShowPickupWidgets(false);
 	}
 }
 
