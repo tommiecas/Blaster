@@ -92,6 +92,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	UInputAction* FireAction;
 
+
 	void FireButtonPressed();
 	void FireButtonReleased();
 
