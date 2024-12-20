@@ -36,6 +36,7 @@ void UFillainAnimInstance::NativeUpdateAnimation(float DeltaTime)
 	bIsCrouched = FillainCharacter->bIsCrouched;
 	bAiming = FillainCharacter->IsAiming();
 	TurningInPlace = FillainCharacter->GetTurningInPlace();
+	bRotateRootBone = FillainCharacter->ShouldRotateRootBone();
 
 	//Offset Yaw for Strafing
 	FRotator AimRotation = FillainCharacter->GetBaseAimRotation();
