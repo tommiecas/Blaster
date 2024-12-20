@@ -9,6 +9,9 @@
 #include "Particles/ParticleSystem.h"
 #include "Sound/SoundCue.h"
 
+#include "Characters/FillainCharacter.h"
+#include "Blaster/Blaster.h"
+
 AProjectile::AProjectile()
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -21,6 +24,9 @@ AProjectile::AProjectile()
 	CollisionBox->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 	CollisionBox->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);	
 	CollisionBox->SetCollisionResponseToChannel(ECollisionChannel::ECC_WorldStatic, ECollisionResponse::ECR_Block);
+	CollisionBox->SetCollisionResponseToChannel(ECC_SkeletalMesh, ECR_Block);
+	CollisionBox->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Block);
+
 
 	AmmoMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("AmmoMesh"));
 	AmmoMesh->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
@@ -57,6 +63,12 @@ void AProjectile::BeginPlay()
 
 void AProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherCOmp, FVector NormalImpulse, const FHitResult& Hit)
 {
+	AFillainCharacter* FillainCharacter = Cast<AFillainCharacter>(OtherActor);
+	if (FillainCharacter)
+	{
+		FillainCharacter->MulticastHit();
+	}
+
 	Destroy();
 }
 
