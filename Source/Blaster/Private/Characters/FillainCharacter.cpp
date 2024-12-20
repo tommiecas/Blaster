@@ -331,6 +331,12 @@ AWeapon* AFillainCharacter::GetEquippedWeapon()
 	return Combat->EquippedWeapon;
 }
 
+FVector AFillainCharacter::GetHitTarget() const
+{
+	if (Combat == nullptr) return FVector();
+	return Combat->HitTarget;;
+}
+
 
 
 
