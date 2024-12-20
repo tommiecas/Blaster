@@ -11,8 +11,9 @@
 #include "Kismet/GameplayStatics.h"
 #include "DrawDebugHelpers.h"
 #include "PlayerController/FIllainPlayerController.h"
-#include "HUD/FillainHUD.h"
 #include "Camera/CameraComponent.h"
+#include "HUD/FillainHUD.h"
+
 
 UCombatComponent::UCombatComponent()
 {
@@ -70,8 +71,6 @@ void UCombatComponent::SetHUDCrosshairs(float DeltaTime)
 		PlayerHUD = PlayerHUD == nullptr ? Cast<AFillainHUD>(PlayerController->GetHUD()) : PlayerHUD;
 		if (PlayerHUD)
 		{
-			FHUDPackage HUDPackage;
-
 			if (EquippedWeapon)
 			{
 				HUDPackage.CrosshairsCenter = EquippedWeapon->CrosshairsCenter;
@@ -216,6 +215,14 @@ void UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 			End,
 			ECollisionChannel::ECC_Visibility
 		);
+		if (TraceHitResult.GetActor() && TraceHitResult.GetActor()->Implements<UInteractWithCrosshairsInterface>())
+		{
+			HUDPackage.CrosshairsColor = FLinearColor::Red;
+		}
+		else
+		{
+			HUDPackage.CrosshairsColor = FLinearColor::White;
+		}
 	}
 }
 

@@ -7,6 +7,7 @@
 #include "InputActionValue.h"
 #include "HUD/OverheadWidget.h"
 #include "Blaster/BlasterTypes/TurningInPlace.h"
+#include "Interfaces/InteractWithCrosshairsInterface.h"
 #include "FillainCharacter.generated.h"
 
 class USpringArmComponent;
@@ -15,7 +16,7 @@ class UInputMappingContext;
 class UInputAction;
 
 UCLASS()
-class BLASTER_API AFillainCharacter : public ACharacter
+class BLASTER_API AFillainCharacter : public ACharacter, public IInteractWithCrosshairsInterface
 {
 	GENERATED_BODY()
 
