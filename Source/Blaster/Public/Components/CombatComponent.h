@@ -19,9 +19,6 @@ public:
 	friend class AFillainCharacter;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
-
-
-
 	void EquipWeapon(class AWeapon* WeaponToEquip);
 
 protected:
@@ -35,6 +32,7 @@ protected:
 	void OnRep_EquippedWeapon();
 
 	void FireButtonPressed(bool bPressed);
+	void Fire();
 
 	UFUNCTION(Server, Reliable)
 	void ServerFire(const FVector_NetQuantize& TraceHitTarget);
@@ -45,8 +43,6 @@ protected:
 	void TraceUnderCrosshairs(FHitResult& TraceHitResult);
 
 	void SetHUDCrosshairs(float DeltaTime);
-
-
 
 private:
 	class AFillainCharacter* PlayerCharacter;
@@ -70,7 +66,6 @@ private:
 	/*
 	** HUD and Crosshairs
 	*/
-
 	float CrosshairVelocityFactor;
 	float CrosshairInAirFactor;
 	float CrosshairAimFactor;
@@ -83,8 +78,6 @@ private:
 	/*
 	** Aiming and FOV
 	*/
-
-
 	float DefaultFOV;
 	//field of view when not aiming; set to the camera's base FOV in BeginPlay
 
@@ -97,6 +90,15 @@ private:
 	float ZoomInterpSpeed = 20.f;
 
 	void InterpFOV(float DeltaTime);
+
+	/*
+	** Automatic Fire
+	*/
+	FTimerHandle FireTimer;
+
+	bool bCanGunFire = true;
+	void StartFireTimer();
+	void FireTimerFinished();
 
 public:	
 	

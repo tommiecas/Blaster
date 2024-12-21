@@ -15,6 +15,11 @@ void AFillainHUD::DrawHUD()
 
 		float SpreadScaled = CrosshairSpreadMax * HUDPackage.CrosshairSpread;
 
+		if (HUDPackage.CrosshairsColor == FLinearColor::Red)
+		{
+			SpreadScaled = SpreadScaled * .8f;
+		}
+
 		if (HUDPackage.CrosshairsCenter)
 		{
 			FVector2D Spread(0.f, 0.f);

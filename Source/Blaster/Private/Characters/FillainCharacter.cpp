@@ -125,7 +125,7 @@ void AFillainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Triggered, this, &AFillainCharacter::CrouchButtonPressed);
 		EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Triggered, this, &AFillainCharacter::AimButtonPressed);
 		EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Completed, this, &AFillainCharacter::AimButtonReleased);
-		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Triggered, this, &AFillainCharacter::FireButtonPressed);
+		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &AFillainCharacter::FireButtonPressed);
 		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Completed, this, &AFillainCharacter::FireButtonReleased);
 
 	}
