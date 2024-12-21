@@ -11,6 +11,8 @@
 
 #include "Characters/FillainCharacter.h"
 #include "Blaster/Blaster.h"
+#include "Interfaces/InteractWithCrosshairsInterface.h"
+#include "Net/UnrealNetwork.h"
 
 AProjectile::AProjectile()
 {
@@ -61,15 +63,22 @@ void AProjectile::BeginPlay()
 	}
 }
 
+void AProjectile::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(AProjectile, bHitPlayerCharacter);
+}
+
 void AProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherCOmp, FVector NormalImpulse, const FHitResult& Hit)
 {
-	AFillainCharacter* FillainCharacter = Cast<AFillainCharacter>(OtherActor);
-	if (FillainCharacter)
-	{
-		FillainCharacter->MulticastHit();
-	}
-
-	Destroy();
+		AFillainCharacter* FillainCharacter = Cast<AFillainCharacter>(OtherActor);
+		if (FillainCharacter && OtherActor && OtherActor->Implements<UInteractWithCrosshairsInterface>())
+		{
+			bHitPlayerCharacter = true;
+			FillainCharacter->MulticastHit();
+			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactPlayerCharacterParticles, GetActorTransform());
+		}
+		MulticastDestroy();
 }
 
 void AProjectile::Tick(float DeltaTime)
@@ -81,13 +90,32 @@ void AProjectile::Tick(float DeltaTime)
 void AProjectile::Destroyed()
 {
 	Super::Destroyed();
-	if (ImpactParticles)
+	if (bHitPlayerCharacter == true)
 	{
-		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticles, GetActorTransform());
-	}
-	if (ImpactSound)
-	{
-		UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation());
+		if (ImpactPlayerCharacterParticles)
+		{
+			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactPlayerCharacterParticles, GetActorTransform());
+		}
+		if (ImpactPlayerCharacterSound)
+		{
+			UGameplayStatics::PlaySoundAtLocation(this, ImpactPlayerCharacterSound, GetActorLocation());
+		}
+		else if (bHitPlayerCharacter == false)
+		{
+			if (ImpactParticles)
+			{
+				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticles, GetActorTransform());
+			}
+			if (ImpactSound)
+			{
+				UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation());
+			}
+		}
 	}
 }
+
+	void AProjectile::MulticastDestroy_Implementation()
+	{
+		Destroy();
+	}
 

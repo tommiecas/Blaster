@@ -14,6 +14,7 @@ class BLASTER_API AProjectile : public AActor
 public:	
 	AProjectile();
 	virtual void Tick(float DeltaTime) override;
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void Destroyed() override;
 
 
@@ -22,6 +23,12 @@ protected:
 
 	UFUNCTION()
 	virtual void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherCOmp, FVector NormalImpulse, const FHitResult& Hit);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastDestroy();
+
+	UPROPERTY(Replicated)
+	bool bHitPlayerCharacter = false;
 
 private:	
 	UPROPERTY(VisibleAnywhere)
@@ -43,5 +50,11 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	class USoundCue* ImpactSound;
+
+	UPROPERTY(EditAnywhere)
+	UParticleSystem* ImpactPlayerCharacterParticles;
+
+	UPROPERTY(EditAnywhere)
+	class USoundCue* ImpactPlayerCharacterSound;
 
 };
