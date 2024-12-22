@@ -6,6 +6,7 @@
 #include "HUD/CharacterOverlay.h"
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
+#include "Characters/FillainCharacter.h"
 
 
 
@@ -13,6 +14,17 @@ void AFillainPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 	FillainHUD = Cast <AFillainHUD>(GetHUD());
+}
+
+void AFillainPlayerController::OnPossess(APawn* InPawn)
+{
+	Super::OnPossess(InPawn);
+
+	AFillainCharacter* FillainCharacter = Cast<AFillainCharacter>(InPawn);
+	if (FillainCharacter)
+	{
+		SetHUDHealth(FillainCharacter->GetHealth(), FillainCharacter->GetMaxHealth());
+	}
 }
 
 void AFillainPlayerController::SetHUDHealth(float Health, float MaxHealth)
@@ -28,3 +40,5 @@ void AFillainPlayerController::SetHUDHealth(float Health, float MaxHealth)
 		FillainHUD->CharacterOverlay->HealthText->SetText(FText::FromString(HealthText));
 	}
 }
+
+
