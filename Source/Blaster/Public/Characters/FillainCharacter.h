@@ -37,9 +37,12 @@ public:
 	virtual void PossessedBy(AController* NewController) override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void PostInitializeComponents() override;
-	void PlayFireMontage(bool bAiming);
-
 	virtual void OnRep_ReplicatedMovement() override;
+	void PlayFireMontage(bool bAiming);
+	
+	UFUNCTION(NetMulticast, Reliable)
+	void Eliminate();
+	
 
 protected:
 	virtual void BeginPlay() override;
@@ -102,6 +105,7 @@ protected:
 	void FireButtonReleased();
 
 	void PlayHitReactMontage();
+	void PlayEliminatedMontage();
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void ShowPlayerName();
@@ -147,6 +151,10 @@ private:
 	UPROPERTY(Replicated, EditAnywhere, Category = Combat)
 	class UAnimMontage* HitReactMontage;
 
+	UPROPERTY(Replicated, EditAnywhere, Category = Combat)
+	class UAnimMontage* EliminatedMontage;
+
+
 	
 
 	void HideCharacterIfCameraClose();
@@ -177,6 +185,8 @@ private:
 
 	class AFillainPlayerController* FillainPlayerController;
 
+	bool bIsEliminated = false;
+
 public:
 	void SetOverlappingWeapon(AWeapon* Weapon);
 	bool IsWeaponEquipped();
@@ -189,6 +199,6 @@ public:
 	FVector GetHitTarget() const;
 	FORCEINLINE UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 	FORCEINLINE bool ShouldRotateRootBone() const { return bRotateRootBone; }
-
+	FORCEINLINE bool IsEliminated() const { return bIsEliminated; }
 
 };

@@ -19,6 +19,7 @@
 #include "Characters/FillainAnimInstance.h"
 #include "Blaster/Blaster.h"
 #include "PlayerController/FillainPlayerController.h"
+#include "GameMode/HaFGameMode.h"
 
 
 AFillainCharacter::AFillainCharacter()
@@ -163,6 +164,12 @@ void AFillainCharacter::PlayFireMontage(bool bAiming)
 	}
 }
 
+void AFillainCharacter::Eliminate_Implementation()
+{
+	bIsEliminated = true;
+	PlayEliminatedMontage();
+}
+
 void AFillainCharacter::UpdateHUDHealth()
 {
 	FillainPlayerController = FillainPlayerController == nullptr ? Cast<AFillainPlayerController>(Controller) : FillainPlayerController;
@@ -183,7 +190,15 @@ void AFillainCharacter::PlayHitReactMontage()
 		FName SectionName("FromFront");
 		AnimInstance->Montage_JumpToSection(SectionName);
 	}
+}
 
+void AFillainCharacter::PlayEliminatedMontage()
+{
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && EliminatedMontage)
+	{
+		AnimInstance->Montage_Play(EliminatedMontage);
+	}
 }
 
 void AFillainCharacter::ReceiveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatorController, AActor* DamageCauser)
@@ -191,6 +206,17 @@ void AFillainCharacter::ReceiveDamage(AActor* DamagedActor, float Damage, const 
 	Health = FMath::Clamp(Health - Damage, 0.f, MaxHealth);
 	UpdateHUDHealth();
 	PlayHitReactMontage();
+
+	if (Health == 0.f)
+	{
+		AHaFGameMode* HaFGameMode = GetWorld()->GetAuthGameMode<AHaFGameMode>();
+		if (HaFGameMode)
+		{
+			FillainPlayerController = FillainPlayerController == nullptr ? Cast<AFillainPlayerController>(Controller) : FillainPlayerController;
+			AFillainPlayerController* KillerController = Cast<AFillainPlayerController>(InstigatorController);
+			HaFGameMode->PlayerEliminated(this, FillainPlayerController, KillerController);
+		}
+	}
 }
 
 void AFillainCharacter::OnRep_Health()
