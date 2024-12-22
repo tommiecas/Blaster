@@ -16,9 +16,9 @@
 #include "Components/CombatComponent.h"
 #include "Components/CapsuleComponent.h"
 #include <Kismet/KismetMathLibrary.h>
-
 #include "Characters/FillainAnimInstance.h"
 #include "Blaster/Blaster.h"
+#include "PlayerController/FillainPlayerController.h"
 
 
 AFillainCharacter::AFillainCharacter()
@@ -64,6 +64,8 @@ void AFillainCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME_CONDITION(AFillainCharacter, OverlappingWeapon, COND_OwnerOnly);
+	DOREPLIFETIME(AFillainCharacter, HitReactMontage);
+	DOREPLIFETIME(AFillainCharacter, Health);
 }
 
 
@@ -89,6 +91,12 @@ void AFillainCharacter::BeginPlay()
 	if (HasAuthority() && IsLocallyControlled())
 	{
 		ShowPlayerName();
+	}
+
+	FillainPlayerController = Cast<AFillainPlayerController>(Controller);
+	if (FillainPlayerController)
+	{
+		FillainPlayerController->SetHUDHealth(Health, MaxHealth);
 	}
 }
 
@@ -391,6 +399,11 @@ float AFillainCharacter::CalculateSpeed()
 	FVector Velocity = GetVelocity();
 	Velocity.Z = 0.f;
 	return Velocity.Size();
+}
+
+void AFillainCharacter::OnRep_Health()
+{
+
 }
 
 void AFillainCharacter::SetOverlappingWeapon(AWeapon* Weapon)

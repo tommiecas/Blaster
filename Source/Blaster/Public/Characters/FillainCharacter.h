@@ -142,7 +142,7 @@ private:
 	UPROPERTY(EditAnywhere, Category = Combat)
 	class UAnimMontage* FireWeaponMontage;
 
-	UPROPERTY(EditAnywhere, Category = Combat)
+	UPROPERTY(Replicated, EditAnywhere, Category = Combat)
 	class UAnimMontage* HitReactMontage;
 
 	
@@ -159,6 +159,21 @@ private:
 	float ProxyYaw;
 	float TimeSinceLastMovementReplication;
 	float CalculateSpeed();
+
+	/*
+	** Player Health
+	*/
+
+	UPROPERTY(ReplicatedUsing = OnRep_Health, VisibleAnywhere, Category = "Player Stats")
+	float Health = 100.f;
+
+	UPROPERTY(EditAnywhere, Category = "Player Stats")
+	float MaxHealth = 100.f;
+
+	UFUNCTION()
+	void OnRep_Health();
+
+	class AFillainPlayerController* FillainPlayerController;
 
 public:
 	void SetOverlappingWeapon(AWeapon* Weapon);
