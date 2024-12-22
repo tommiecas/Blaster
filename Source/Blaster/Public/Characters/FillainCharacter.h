@@ -8,6 +8,7 @@
 #include "HUD/OverheadWidget.h"
 #include "Blaster/BlasterTypes/TurningInPlace.h"
 #include "Interfaces/InteractWithCrosshairsInterface.h"
+#include "Components/TimelineComponent.h"
 #include "FillainCharacter.generated.h"
 
 class USpringArmComponent;
@@ -194,6 +195,29 @@ private:
 
 	UPROPERTY(EditDefaultsOnly)
 	float EliminationDelay = 3.f;
+
+	/*
+	** Dissolve Effect
+	*/
+
+	UPROPERTY(VisibleAnywhere)
+	UTimelineComponent* DissolveTimeline;
+	FOnTimelineFloat DissolveTrack;
+
+	UPROPERTY(EditAnywhere)
+	UCurveFloat* DissolveCurve;
+
+	UFUNCTION()
+	void UpdateDissolveMaterial(float DissolveValue);
+	void StartDissolve();
+
+	//Dynamic Instance that we can change at runtime
+	UPROPERTY(VisibleAnywhere, Category = Eliminations)
+	UMaterialInstanceDynamic* DynamicDissolveMaterialInstance;
+
+	//Material Instance set ono the blueprint used with the dynamic material instance
+	UPROPERTY(EditAnywhere, Category = Eliminations)
+	UMaterialInstance* DissolveMaterialInstance;
 
 public:
 	void SetOverlappingWeapon(AWeapon* Weapon);
