@@ -2,6 +2,8 @@
 
 
 #include "HUD/FillainHUD.h"
+#include "GameFramework/PlayerController.h"
+#include "HUD/CharacterOverlay.h"
 
 void AFillainHUD::DrawHUD()
 {
@@ -45,6 +47,22 @@ void AFillainHUD::DrawHUD()
 			FVector2D Spread(0.f, SpreadScaled);
 			DrawCrosshair(HUDPackage.CrosshairsBottom, ViewportCenter, Spread, HUDPackage.CrosshairsColor);
 		}
+	}
+}
+
+void AFillainHUD::BeginPlay()
+{
+	Super::BeginPlay();
+	AddCharacterOverlay();
+}
+
+void AFillainHUD::AddCharacterOverlay()
+{
+	APlayerController* PlayerController = GetOwningPlayerController();
+	if (PlayerController && CharacterOverlayClass)
+	{
+		CharacterOverlay = CreateWidget<UCharacterOverlay>(PlayerController, CharacterOverlayClass);
+		CharacterOverlay->AddToViewport();
 	}
 }
 
