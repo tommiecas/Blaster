@@ -20,14 +20,14 @@
 #include "Blaster/Blaster.h"
 #include "PlayerController/FillainPlayerController.h"
 #include "GameMode/HaFGameMode.h"
+#include "TimerManager.h"
 
 
 AFillainCharacter::AFillainCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
-
+	SpawnCollisionHandlingMethod = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 	bUseControllerRotationYaw = false;
-
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	// GetCharacterMovement()->RotationRate = FRotator(0.f, 400.f, 0.f);
 
@@ -164,10 +164,30 @@ void AFillainCharacter::PlayFireMontage(bool bAiming)
 	}
 }
 
-void AFillainCharacter::Eliminate_Implementation()
+void AFillainCharacter::Eliminate()
+{
+	MulticastEliminate();
+	GetWorldTimerManager().SetTimer(
+		EliminationTimer,
+		this,
+		&AFillainCharacter::EliminationTimerFinished,
+		EliminationDelay
+	);
+}
+
+void AFillainCharacter::MulticastEliminate_Implementation()
 {
 	bIsEliminated = true;
 	PlayEliminatedMontage();
+}
+
+void AFillainCharacter::EliminationTimerFinished()
+{
+	AHaFGameMode* HaFGameMode = GetWorld()->GetAuthGameMode<AHaFGameMode>();
+	if (HaFGameMode)
+	{
+		HaFGameMode->RequestRespawn(this, FillainPlayerController);
+	}	
 }
 
 void AFillainCharacter::UpdateHUDHealth()

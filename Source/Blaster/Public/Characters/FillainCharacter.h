@@ -39,9 +39,10 @@ public:
 	virtual void PostInitializeComponents() override;
 	virtual void OnRep_ReplicatedMovement() override;
 	void PlayFireMontage(bool bAiming);
-	
-	UFUNCTION(NetMulticast, Reliable)
 	void Eliminate();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastEliminate();
 	
 
 protected:
@@ -186,6 +187,13 @@ private:
 	class AFillainPlayerController* FillainPlayerController;
 
 	bool bIsEliminated = false;
+
+	FTimerHandle EliminationTimer;
+
+	void EliminationTimerFinished();
+
+	UPROPERTY(EditDefaultsOnly)
+	float EliminationDelay = 3.f;
 
 public:
 	void SetOverlappingWeapon(AWeapon* Weapon);
