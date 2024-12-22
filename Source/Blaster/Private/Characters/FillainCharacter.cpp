@@ -21,7 +21,9 @@
 #include "PlayerController/FillainPlayerController.h"
 #include "GameMode/HaFGameMode.h"
 #include "TimerManager.h"
-
+#include "Kismet/GameplayStatics.h"
+#include "Sound/SoundCue.h"
+#include "Particles/ParticleSystemComponent.h"
 
 AFillainCharacter::AFillainCharacter()
 {
@@ -208,6 +210,26 @@ void AFillainCharacter::MulticastEliminate_Implementation()
 	// Disable Collision
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	
+	//Spawn Elimination-Bot
+	if (EliminationBotEffect)
+	{
+		FVector EliminationBotSpawnPoint(GetActorLocation().X, GetActorLocation().Y, GetActorLocation().Z + 200.f);
+		UGameplayStatics::SpawnEmitterAtLocation(
+			GetWorld(),
+			EliminationBotEffect,
+			EliminationBotSpawnPoint,
+			GetActorRotation()
+		);
+	}
+	if (EliminationBotSound)
+	{
+		UGameplayStatics::SpawnSoundAtLocation(
+			this,
+			EliminationBotSound,
+			GetActorLocation()
+		);
+	}
 }
 
 void AFillainCharacter::EliminationTimerFinished()
@@ -217,6 +239,15 @@ void AFillainCharacter::EliminationTimerFinished()
 	{
 		HaFGameMode->RequestRespawn(this, FillainPlayerController);
 	}	
+}
+
+void AFillainCharacter::Destroyed()
+{
+	Super::Destroyed();
+	if (EliminationBotComponent)
+	{
+		EliminationBotComponent->DestroyComponent();
+	}
 }
 
 void AFillainCharacter::UpdateHUDHealth()

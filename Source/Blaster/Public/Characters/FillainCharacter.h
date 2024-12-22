@@ -41,6 +41,7 @@ public:
 	virtual void OnRep_ReplicatedMovement() override;
 	void PlayFireMontage(bool bAiming);
 	void Eliminate();
+	virtual void Destroyed() override;
 
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastEliminate();
@@ -194,7 +195,7 @@ private:
 	void EliminationTimerFinished();
 
 	UPROPERTY(EditDefaultsOnly)
-	float EliminationDelay = 3.f;
+	float EliminationDelay = 12.f;
 
 	/*
 	** Dissolve Effect
@@ -218,6 +219,19 @@ private:
 	//Material Instance set ono the blueprint used with the dynamic material instance
 	UPROPERTY(EditAnywhere, Category = Eliminations)
 	UMaterialInstance* DissolveMaterialInstance;
+
+	/*
+	** Elimination-Bot
+	*/
+
+	UPROPERTY(EditAnywhere)
+	UParticleSystem* EliminationBotEffect;
+
+	UPROPERTY(VisibleAnywhere)
+	UParticleSystemComponent* EliminationBotComponent;
+	
+	UPROPERTY(EditAnywhere)
+	class USoundCue* EliminationBotSound;
 
 public:
 	void SetOverlappingWeapon(AWeapon* Weapon);
