@@ -69,13 +69,12 @@ void AProjectile::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifet
 	DOREPLIFETIME(AProjectile, bHitPlayerCharacter);
 }
 
-void AProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherCOmp, FVector NormalImpulse, const FHitResult& Hit)
+void AProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
 		AFillainCharacter* FillainCharacter = Cast<AFillainCharacter>(OtherActor);
 		if (FillainCharacter && OtherActor && OtherActor->Implements<UInteractWithCrosshairsInterface>())
 		{
 			bHitPlayerCharacter = true;
-			FillainCharacter->MulticastHit();
 			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactPlayerCharacterParticles, GetActorTransform());
 		}
 		MulticastDestroy();

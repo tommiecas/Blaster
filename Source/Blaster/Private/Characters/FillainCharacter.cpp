@@ -93,10 +93,10 @@ void AFillainCharacter::BeginPlay()
 		ShowPlayerName();
 	}
 
-	FillainPlayerController = Cast<AFillainPlayerController>(Controller);
-	if (FillainPlayerController)
+	UpdateHUDHealth();
+	if (HasAuthority())
 	{
-		FillainPlayerController->SetHUDHealth(Health, MaxHealth);
+		OnTakeAnyDamage.AddDynamic(this, &AFillainCharacter::ReceiveDamage);
 	}
 }
 
@@ -163,6 +163,15 @@ void AFillainCharacter::PlayFireMontage(bool bAiming)
 	}
 }
 
+void AFillainCharacter::UpdateHUDHealth()
+{
+	FillainPlayerController = FillainPlayerController == nullptr ? Cast<AFillainPlayerController>(Controller) : FillainPlayerController;
+	if (FillainPlayerController)
+	{
+		FillainPlayerController->SetHUDHealth(Health, MaxHealth);
+	}
+}
+
 void AFillainCharacter::PlayHitReactMontage()
 {
 	if (Combat == nullptr || Combat->EquippedWeapon == nullptr) return;
@@ -175,6 +184,19 @@ void AFillainCharacter::PlayHitReactMontage()
 		AnimInstance->Montage_JumpToSection(SectionName);
 	}
 
+}
+
+void AFillainCharacter::ReceiveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatorController, AActor* DamageCauser)
+{
+	Health = FMath::Clamp(Health - Damage, 0.f, MaxHealth);
+	UpdateHUDHealth();
+	PlayHitReactMontage();
+}
+
+void AFillainCharacter::OnRep_Health()
+{
+	PlayHitReactMontage();
+	UpdateHUDHealth();
 }
 
 void AFillainCharacter::Move(const FInputActionValue& Value)
@@ -369,11 +391,6 @@ void AFillainCharacter::TurnInPlace(float DeltaTime)
 	}
 }
 
-void AFillainCharacter::MulticastHit_Implementation()
-{
-	PlayHitReactMontage();
-}
-
 void AFillainCharacter::HideCharacterIfCameraClose()
 {
 	if (!IsLocallyControlled()) return;
@@ -399,11 +416,6 @@ float AFillainCharacter::CalculateSpeed()
 	FVector Velocity = GetVelocity();
 	Velocity.Z = 0.f;
 	return Velocity.Size();
-}
-
-void AFillainCharacter::OnRep_Health()
-{
-
 }
 
 void AFillainCharacter::SetOverlappingWeapon(AWeapon* Weapon)
