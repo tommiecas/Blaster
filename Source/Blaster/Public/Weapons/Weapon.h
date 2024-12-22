@@ -68,6 +68,8 @@ public:
 	UPROPERTY(EditAnywhere, Category = Combat)
 	bool bIsAutomaticWeapon = true;
 
+	void DropWeapon();
+
 protected:
 	virtual void BeginPlay() override;
 

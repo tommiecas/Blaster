@@ -169,6 +169,10 @@ void AFillainCharacter::PlayFireMontage(bool bAiming)
 
 void AFillainCharacter::Eliminate()
 {
+	if (Combat && Combat->EquippedWeapon)
+	{
+		Combat->EquippedWeapon->DropWeapon();
+	}
 	MulticastEliminate();
 	GetWorldTimerManager().SetTimer(
 		EliminationTimer,
@@ -183,6 +187,7 @@ void AFillainCharacter::MulticastEliminate_Implementation()
 	bIsEliminated = true;
 	PlayEliminatedMontage();
 
+	// Start Dissolve Effect
 	if (DissolveMaterialInstance)
 	{
 		DynamicDissolveMaterialInstance = UMaterialInstanceDynamic::Create(DissolveMaterialInstance, this);
@@ -191,6 +196,18 @@ void AFillainCharacter::MulticastEliminate_Implementation()
 		DynamicDissolveMaterialInstance->SetScalarParameterValue(TEXT("Glow"), 300.f);
 	}
 	StartDissolve();
+
+	// Disable Character Movement
+	GetCharacterMovement()->DisableMovement();
+	GetCharacterMovement()->StopMovementImmediately();
+	if (FillainPlayerController)
+	{
+		DisableInput(FillainPlayerController);
+	}
+
+	// Disable Collision
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 void AFillainCharacter::EliminationTimerFinished()
