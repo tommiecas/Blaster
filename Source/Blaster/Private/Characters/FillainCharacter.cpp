@@ -24,6 +24,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "Sound/SoundCue.h"
 #include "Particles/ParticleSystemComponent.h"
+#include "PlayerState/HAFPlayerState.h"
+
 
 AFillainCharacter::AFillainCharacter()
 {
@@ -123,6 +125,7 @@ void AFillainCharacter::Tick(float DeltaTime)
 		CalculateAO_Pitch();
 		AimOffset(DeltaTime);
 		HideCharacterIfCameraClose();
+		PollInit();
 	}
 }
 
@@ -256,6 +259,18 @@ void AFillainCharacter::UpdateHUDHealth()
 	if (FillainPlayerController)
 	{
 		FillainPlayerController->SetHUDHealth(Health, MaxHealth);
+	}
+}
+
+void AFillainCharacter::PollInit()
+{
+	if (HAFPlayerState == nullptr)
+	{
+		HAFPlayerState = GetPlayerState<AHAFPlayerState>();
+		if (HAFPlayerState)
+		{
+			HAFPlayerState->AddToScore(0.f);
+		}
 	}
 }
 

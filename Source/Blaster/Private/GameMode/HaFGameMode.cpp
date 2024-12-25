@@ -6,9 +6,18 @@
 #include "PlayerController/FillainPlayerController.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/PlayerStart.h"
+#include "PlayerState/HAFPlayerState.h"
+
 
 void AHaFGameMode::PlayerEliminated(AFillainCharacter* EliminatedCharacter, AFillainPlayerController* VictimController, AFillainPlayerController* KillerController)
 {
+	AHAFPlayerState* KillerPlayerState = KillerController ? Cast<AHAFPlayerState>(KillerController->PlayerState) : nullptr;
+	AHAFPlayerState* VictimPlayerState = VictimController ? Cast<AHAFPlayerState>(VictimController->PlayerState) : nullptr;
+
+	if (KillerPlayerState && KillerPlayerState != VictimPlayerState)
+	{
+		KillerPlayerState->AddToScore(1.f);
+	}
 	if (EliminatedCharacter)
 	{
 		EliminatedCharacter->Eliminate();

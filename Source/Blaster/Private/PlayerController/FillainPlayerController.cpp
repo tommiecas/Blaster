@@ -41,4 +41,16 @@ void AFillainPlayerController::SetHUDHealth(float Health, float MaxHealth)
 	}
 }
 
+void AFillainPlayerController::SetHUDScore(float Score)
+{
+	FillainHUD = FillainHUD == nullptr ? Cast<AFillainHUD>(GetHUD()) : FillainHUD;
+	bool bIsHUDValid = FillainHUD && FillainHUD->CharacterOverlay && FillainHUD->CharacterOverlay->ScoreAmount;
+	if (bIsHUDValid)
+	{
+		FString ScoreText = FString::Printf(TEXT("%d"), FMath::FloorToInt(Score));
+		FillainHUD->CharacterOverlay->ScoreAmount->SetText(FText::FromString(ScoreText));
+	}
+
+}
+
 
