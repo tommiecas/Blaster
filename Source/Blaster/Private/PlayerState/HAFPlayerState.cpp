@@ -4,21 +4,56 @@
 #include "PlayerState/HAFPlayerState.h"
 #include "Characters/FillainCharacter.h"
 #include "PlayerController/FillainPlayerController.h"
+#include "Net/UnrealNetwork.h"
 
+
+void AHAFPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(AHAFPlayerState, Defeats);
+}
 
 void AHAFPlayerState::AddToScore(float ScoreAmount)
 {
-	Score += ScoreAmount;
+	SetScore(Score + ScoreAmount);
 	Character = Character == nullptr ? Cast<AFillainCharacter>(GetPawn()) : Character;
 	if (Character)
 	{
 		Controller = Controller == nullptr ? Cast<AFillainPlayerController>(Character->Controller) : Controller;
 		if (Controller)
 		{
-			Controller->SetHUDScore(ScoreAmount);
+			Controller->SetHUDScore(GetScore());
 		}
 	}
 }
+
+void AHAFPlayerState::AddToDefeats(float DefeatsAmount)
+{
+	Defeats += DefeatsAmount;
+	Character = Character == nullptr ? Cast<AFillainCharacter>(GetPawn()) : Character;
+	if (Character)
+	{
+		Controller = Controller == nullptr ? Cast<AFillainPlayerController>(Character->Controller) : Controller;
+		if (Controller)
+		{
+			Controller->SetHUDDefeats(Defeats);
+		}
+	}
+}
+
+void AHAFPlayerState::OnRep_Defeats()
+{
+	Character = Character == nullptr ? Cast<AFillainCharacter>(GetPawn()) : Character;
+	if (Character)
+	{
+		Controller = Controller == nullptr ? Cast<AFillainPlayerController>(Character->Controller) : Controller;
+		if (Controller)
+		{
+			Controller->SetHUDDefeats(Defeats);
+		}
+	}
+}
+
 
 void AHAFPlayerState::OnRep_Score()
 {
@@ -30,7 +65,7 @@ void AHAFPlayerState::OnRep_Score()
 		Controller =  Controller == nullptr ? Cast<AFillainPlayerController>(Character->Controller) : Controller;
 		if (Controller)
 		{
-			Controller->SetHUDScore(Score);
+			Controller->SetHUDScore(GetScore());
 		}
 	}
 }

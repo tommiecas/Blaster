@@ -45,8 +45,13 @@ protected:
 	void SetHUDCrosshairs(float DeltaTime);
 
 private:
+	UPROPERTY()
 	class AFillainCharacter* PlayerCharacter;
+	
+	UPROPERTY()
 	class AFillainPlayerController* PlayerController;
+	
+	UPROPERTY()
 	class AFillainHUD* PlayerHUD;
 
 	UPROPERTY(ReplicatedUsing = OnRep_EquippedWeapon)
@@ -71,6 +76,7 @@ private:
 	float CrosshairAimFactor;
 	float CrosshairShootingFactor;
 
+	UPROPERTY()
 	FHUDPackage HUDPackage;
 
 	FVector HitTarget;

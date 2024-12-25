@@ -270,6 +270,7 @@ void AFillainCharacter::PollInit()
 		if (HAFPlayerState)
 		{
 			HAFPlayerState->AddToScore(0.f);
+			HAFPlayerState->AddToDefeats(0);
 		}
 	}
 }

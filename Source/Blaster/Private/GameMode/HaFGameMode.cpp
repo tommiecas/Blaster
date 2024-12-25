@@ -18,6 +18,10 @@ void AHaFGameMode::PlayerEliminated(AFillainCharacter* EliminatedCharacter, AFil
 	{
 		KillerPlayerState->AddToScore(1.f);
 	}
+	if (VictimPlayerState)
+	{
+		VictimPlayerState->AddToDefeats(0.5);
+	}
 	if (EliminatedCharacter)
 	{
 		EliminatedCharacter->Eliminate();

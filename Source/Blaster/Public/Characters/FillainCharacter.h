@@ -185,6 +185,7 @@ private:
 	UFUNCTION()
 	void OnRep_Health();
 
+	UPROPERTY()
 	class AFillainPlayerController* FillainPlayerController;
 
 	bool bIsEliminated = false;
@@ -232,6 +233,7 @@ private:
 	UPROPERTY(EditAnywhere)
 	class USoundCue* EliminationBotSound;
 
+	UPROPERTY()
 	class AHAFPlayerState* HAFPlayerState;
 
 public:
