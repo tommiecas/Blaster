@@ -10,6 +10,7 @@
 #include "Weapons/Casing.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Engine/SkeletalMeshSocket.h"
+#include "PlayerController/FillainPlayerController.h"
 
 AWeapon::AWeapon()
 {
@@ -42,6 +43,8 @@ void AWeapon::DropWeapon()
 	FDetachmentTransformRules DetachRules(EDetachmentRule::KeepWorld, true);
 	WeaponMesh->DetachFromComponent(DetachRules);
 	SetOwner(nullptr);
+	FillainOwnerCharacter = nullptr;
+	FillainOwnerController = nullptr;
 }
 
 void AWeapon::BeginPlay()
@@ -79,6 +82,7 @@ void AWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeP
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(AWeapon, WeaponState);
+	DOREPLIFETIME(AWeapon, Ammo);
 }
 
 void AWeapon::OnSphereOverlap(UPrimitiveComponent* OverlappedCOmponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
@@ -99,6 +103,45 @@ void AWeapon::OnSphereEndOverlap(UPrimitiveComponent* OverlappingCOmponent, AAct
 	}
 }
 
+void AWeapon::SetHUDAmmo()
+{
+	FillainOwnerCharacter = FillainOwnerCharacter == nullptr ? Cast<AFillainCharacter>(GetOwner()) : FillainOwnerCharacter;
+	if (FillainOwnerCharacter)
+	{ 
+		FillainOwnerController = FillainOwnerController == nullptr ? Cast<AFillainPlayerController>(FillainOwnerCharacter->Controller) : FillainOwnerController;
+
+		if (FillainOwnerController)
+		{
+			FillainOwnerController->SetHUDWeaponAmmo();
+		}
+	}
+}
+
+void AWeapon::SpendRoundOfAmmo()
+{
+	--Ammo;
+	SetHUDAmmo();
+}
+
+void AWeapon::OnRep_Ammo()
+{
+	FillainOwnerCharacter = FillainOwnerCharacter == nullptr ? Cast<AFillainCharacter>(GetOwner()) : FillainOwnerCharacter;
+	SetHUDAmmo();
+}
+
+void AWeapon::OnRep_Owner()
+{
+	Super::OnRep_Owner();
+	if (Owner == nullptr)
+	{
+		FillainOwnerCharacter = nullptr;
+		FillainOwnerController = nullptr;
+	}
+	else
+	{
+		SetHUDAmmo();
+	}
+}
 void AWeapon::SetWeaponState(EWeaponState State)
 {
 	WeaponState = State;
@@ -178,5 +221,6 @@ void AWeapon::Fire(const FVector& HitTarget)
 			}
 		}
 	}
+	SpendRoundOfAmmo();
 }
 

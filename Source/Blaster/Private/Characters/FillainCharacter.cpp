@@ -189,6 +189,10 @@ void AFillainCharacter::Eliminate()
 
 void AFillainCharacter::MulticastEliminate_Implementation()
 {
+	if (FillainPlayerController)
+	{
+		FillainPlayerController->SetHUDWeaponAmmo(0);
+	}
 	bIsEliminated = true;
 	PlayEliminatedMontage();
 

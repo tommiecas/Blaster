@@ -64,4 +64,13 @@ void AFillainPlayerController::SetHUDDefeats(int32 Defeats)
 	}
 }
 
-
+void AFillainPlayerController::SetHUDWeaponAmmo(int32 Ammo);
+{
+	FillainHUD = FilainHUD == nullptr ? Cast<AFillainHUD>(GetHUD()) : FillainHUD;
+	bool bIsHUDValid = FillainHUD && FillainHUD->CharacterOverlay && FillainHUD->CharacterOverlay->WeaponAmmoAmount;
+	if (bIsHUDValid)
+	{
+		FString AmmoText = FString::Printf(TEXT("%d"), Ammo);
+		FillainHUD->CharacterOverlay->WeaponAmmoAmount->SetText(FText::FromString(AmmoText));
+	}
+}

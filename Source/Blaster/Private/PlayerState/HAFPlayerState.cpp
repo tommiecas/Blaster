@@ -15,7 +15,7 @@ void AHAFPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
 
 void AHAFPlayerState::AddToScore(float ScoreAmount)
 {
-	SetScore(Score + ScoreAmount);
+	SetScore(GetScore() + ScoreAmount);
 	Character = Character == nullptr ? Cast<AFillainCharacter>(GetPawn()) : Character;
 	if (Character)
 	{
