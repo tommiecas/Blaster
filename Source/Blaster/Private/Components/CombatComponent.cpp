@@ -334,6 +334,21 @@ void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 
 }
 
+void UCombatComponent::Reload()
+{
+	if (CarriedAmmo > 0)
+	{
+		ServerReload();
+	}
+}
+
+void UCombatComponent::ServerReload_Implementation()
+{
+	if (PlayerCharacter == nullptr) return;
+
+	PlayerCharacter->PlayReloadingMontage();
+}
+
 void UCombatComponent::OnRep_EquippedWeapon()
 {
 	if (EquippedWeapon && PlayerCharacter)

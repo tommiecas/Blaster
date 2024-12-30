@@ -39,8 +39,16 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void PostInitializeComponents() override;
 	virtual void OnRep_ReplicatedMovement() override;
+	
+	/*
+	** Play Animation Montages
+	*/
 	void PlayFireMontage(bool bAiming);
+	void PlayHitReactMontage();
+	void PlayEliminatedMontage();
+	void PlayReloadingMontage();
 	void Eliminate();
+	
 	virtual void Destroyed() override;
 
 	UFUNCTION(NetMulticast, Reliable)
@@ -86,6 +94,16 @@ protected:
 	void CrouchButtonPressed();
 
 	/*
+	** Reloading
+	*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+	UInputAction* ReloadAction;
+
+	void ReloadButtonPressed();
+
+
+
+	/*
 	** Aiming the Weapon
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
@@ -107,8 +125,7 @@ protected:
 	void FireButtonPressed();
 	void FireButtonReleased();
 
-	void PlayHitReactMontage();
-	void PlayEliminatedMontage();
+	
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void ShowPlayerName();
@@ -150,6 +167,10 @@ private:
 	ETurningInPlace TurningInPlace;
 	void TurnInPlace(float DeltaTime);
 
+	/*
+	** Animation Montages
+	*/
+
 	UPROPERTY(EditAnywhere, Category = Combat)
 	class UAnimMontage* FireWeaponMontage;
 
@@ -158,6 +179,9 @@ private:
 
 	UPROPERTY(Replicated, EditAnywhere, Category = Combat)
 	class UAnimMontage* EliminatedMontage;
+
+	UPROPERTY(Replicated, EditAnywhere, Category = Combat)
+	class UAnimMontage* ReloadingMontage;
 
 	void HideCharacterIfCameraClose();
 
