@@ -643,6 +643,12 @@ FVector AFillainCharacter::GetHitTarget() const
 	return Combat->HitTarget;;
 }
 
+ECombatState AFillainCharacter::GetCombatState() const
+{
+	if (Combat == nullptr) return ECombatState::ECS_MAX;
+	return Combat->CombatState;
+}
+
 
 
 

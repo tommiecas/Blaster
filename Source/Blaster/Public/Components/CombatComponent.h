@@ -6,6 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "HUD/FillainHUD.h"
 #include "Weapons/WeaponTypes.h"
+#include "Blaster/BlasterTypes/CombatState.h"
 #include "CombatComponent.generated.h"
 
 #define TRACE_LENGTH 80000.f
@@ -22,6 +23,9 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	void EquipWeapon(class AWeapon* WeaponToEquip);
 	void Reload();
+
+	UFUNCTION(BlueprintCallable)
+	void FinishReloading();
 
 protected:
 	virtual void BeginPlay() override;
@@ -48,6 +52,7 @@ protected:
 
 	UFUNCTION(Server, Reliable)
 	void ServerReload();
+	void HandleReload();
 
 private:
 	UPROPERTY()
@@ -126,6 +131,13 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	int32 StartingARAmmo = 30;
+
+	UPROPERTY(ReplicatedUsing = OnRep_CombatState)
+	ECombatState CombatState = ECombatState::ECS_Unoccupied;
+
+	UFUNCTION()
+	void OnRep_CombatState();
+
 public:	
 	
 		
