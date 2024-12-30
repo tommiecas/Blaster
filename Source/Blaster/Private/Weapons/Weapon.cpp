@@ -112,14 +112,14 @@ void AWeapon::SetHUDAmmo()
 
 		if (FillainOwnerController)
 		{
-			FillainOwnerController->SetHUDWeaponAmmo();
+			FillainOwnerController->SetHUDWeaponAmmo(Ammo);
 		}
 	}
 }
 
 void AWeapon::SpendRoundOfAmmo()
 {
-	--Ammo;
+	Ammo = FMath::Clamp(Ammo - 1, 0, MagCapacity);
 	SetHUDAmmo();
 }
 
@@ -164,6 +164,11 @@ void AWeapon::SetWeaponState(EWeaponState State)
 		WeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 		break;
 	}
+}
+
+bool AWeapon::IsEmpty()
+{
+	return Ammo <=0;
 }
 
 void AWeapon::OnRep_WeaponState()

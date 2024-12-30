@@ -228,7 +228,7 @@ void UCombatComponent::FireButtonPressed(bool bPressed)
 
 void UCombatComponent::Fire()
 {
-	if (bCanGunFire && EquippedWeapon)
+	if (CanFire())
 	{
 		bCanGunFire = false;
 		ServerFire(HitTarget);
@@ -261,6 +261,12 @@ void UCombatComponent::FireTimerFinished()
 	}
 }
 
+bool UCombatComponent::CanFire()
+{
+	if (EquippedWeapon == nullptr) return false;
+	return !EquippedWeapon->IsEmpty() || !bCanGunFire;
+}
+
 void UCombatComponent::ServerFire_Implementation(const FVector_NetQuantize& TraceHitTarget)
 {
 	MulticastFire(TraceHitTarget);
@@ -281,7 +287,7 @@ void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 	if (PlayerCharacter == nullptr || WeaponToEquip == nullptr) return;
 	if (EquippedWeapon)
 	{
-		EquipWeapon->DropWeapon();
+		EquippedWeapon->DropWeapon();
 	}
 
 	EquippedWeapon = WeaponToEquip;
@@ -292,7 +298,7 @@ void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 		HandSocket->AttachActor(EquippedWeapon, PlayerCharacter->GetMesh());
 	}
 	EquippedWeapon->SetOwner(PlayerCharacter);
-	EquippedWeapon->SetHUDWeaponAmmo();
+	EquippedWeapon->SetHUDAmmo();
 	PlayerCharacter->GetCharacterMovement()->bOrientRotationToMovement = false;
 	PlayerCharacter->bUseControllerRotationYaw = true;
 
