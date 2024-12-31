@@ -20,6 +20,8 @@ public:
 	void SetHUDDefeats(int32 Defeats);
 	void SetHUDWeaponAmmo(int32 Ammo);
 	void SetHUDCarriedAmmo(int32 Ammo);
+	void SetHUDEliminationText(FString EliminationText);
+	void SetHUDWeaponType(FString WeaponTypeText);
 	virtual void OnPossess(APawn* InPawn) override;
 
 protected:

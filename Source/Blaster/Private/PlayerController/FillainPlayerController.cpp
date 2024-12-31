@@ -85,3 +85,23 @@ void AFillainPlayerController::SetHUDCarriedAmmo(int32 Ammo)
 		FillainHUD->CharacterOverlay->CarriedAmmoAmount->SetText(FText::FromString(AmmoText));
 	}
 }
+
+void AFillainPlayerController::SetHUDEliminationText(FString EliminationText)
+{
+	FillainHUD = FillainHUD == nullptr ? Cast<AFillainHUD>(GetHUD()) : FillainHUD;
+	bool bIsHUDValid = FillainHUD && FillainHUD->CharacterOverlay && FillainHUD->CharacterOverlay->EliminationText;
+	if (bIsHUDValid)
+	{
+		FillainHUD->CharacterOverlay->EliminationText->SetText(FText::FromString(EliminationText));
+	}
+}
+
+void AFillainPlayerController::SetHUDWeaponType(FString WeaponTypeText)
+{
+	FillainHUD = FillainHUD == nullptr ? Cast<AFillainHUD>(GetHUD()) : FillainHUD;
+	bool bIsHUDValid = FillainHUD && FillainHUD->CharacterOverlay && FillainHUD->CharacterOverlay->WeaponType;
+	if (bIsHUDValid)
+	{
+		FillainHUD->CharacterOverlay->WeaponType->SetText(FText::FromString(WeaponTypeText));
+	}
+}

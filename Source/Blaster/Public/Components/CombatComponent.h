@@ -27,6 +27,10 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void FinishReloading();
 
+	FString GetNameOfWeaponType(EWeaponType WeaponType);
+	FString WeaponTypeText;
+
+
 protected:
 	virtual void BeginPlay() override;
 	void SetAiming(bool bIsAiming);

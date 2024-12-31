@@ -243,10 +243,10 @@ void AFillainCharacter::MulticastEliminate_Implementation()
 
 void AFillainCharacter::EliminationTimerFinished()
 {
-	AHaFGameMode* HaFGameMode = GetWorld()->GetAuthGameMode<AHaFGameMode>();
-	if (HaFGameMode)
+	AHAFGameMode* HAFGameMode = GetWorld()->GetAuthGameMode<AHAFGameMode>();
+	if (HAFGameMode)
 	{
-		HaFGameMode->RequestRespawn(this, FillainPlayerController);
+		HAFGameMode->RequestRespawn(this, FillainPlayerController);
 	}	
 }
 
@@ -330,12 +330,12 @@ void AFillainCharacter::ReceiveDamage(AActor* DamagedActor, float Damage, const 
 
 	if (Health == 0.f)
 	{
-		AHaFGameMode* HaFGameMode = GetWorld()->GetAuthGameMode<AHaFGameMode>();
-		if (HaFGameMode)
+		AHAFGameMode* HAFGameMode = GetWorld()->GetAuthGameMode<AHAFGameMode>();
+		if (HAFGameMode)
 		{
 			FillainPlayerController = FillainPlayerController == nullptr ? Cast<AFillainPlayerController>(Controller) : FillainPlayerController;
 			AFillainPlayerController* KillerController = Cast<AFillainPlayerController>(InstigatorController);
-			HaFGameMode->PlayerEliminated(this, FillainPlayerController, KillerController);
+			HAFGameMode->PlayerEliminated(this, FillainPlayerController, KillerController);
 		}
 	}
 }

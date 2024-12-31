@@ -41,6 +41,32 @@ void AHAFPlayerState::AddToDefeats(float DefeatsAmount)
 	}
 }
 
+void AHAFPlayerState::AddEliminatedText(FString EliminationText)
+{
+	Character = Character == nullptr ? Cast<AFillainCharacter>(GetPawn()) : Character;
+	if (Character)
+	{
+		Controller = Controller == nullptr ? Cast<AFillainPlayerController>(Character->Controller) : Controller;
+		if (Controller)
+		{
+			Controller->SetHUDEliminationText(EliminationText);
+		}
+	}
+}
+
+void AHAFPlayerState::AddWeaponTypeText(FString WeaponTypeText)
+{
+	Character = Character == nullptr ? Cast<AFillainCharacter>(GetPawn()) : Character;
+	if (Character)
+	{
+		Controller = Controller == nullptr ? Cast<AFillainPlayerController>(Character->Controller) : Controller;
+		if (Controller)
+		{
+			Controller->SetHUDWeaponType(WeaponTypeText);
+		}
+	}
+}
+
 void AHAFPlayerState::OnRep_Defeats()
 {
 	Character = Character == nullptr ? Cast<AFillainCharacter>(GetPawn()) : Character;

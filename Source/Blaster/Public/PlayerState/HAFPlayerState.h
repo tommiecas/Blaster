@@ -23,6 +23,8 @@ public:
 	*/
 	void AddToScore(float ScoreAmount);
 	void AddToDefeats(float DefeatsAmount);
+	void AddEliminatedText(FString EliminationText);
+	void AddWeaponTypeText(FString WeaponTypeText);
 
 	UFUNCTION()
 	virtual void OnRep_Defeats();

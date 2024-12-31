@@ -338,6 +338,8 @@ void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 	if (PlayerController)
 	{
 		PlayerController->SetHUDCarriedAmmo(CarriedAmmo);
+		WeaponTypeText = GetNameOfWeaponType(EquippedWeapon->GetWeaponType());
+		PlayerController->SetHUDWeaponType(WeaponTypeText);
 	}
 
 	if (EquippedWeapon->EquipSound)
@@ -459,6 +461,18 @@ void UCombatComponent::OnRep_EquippedWeapon()
 		PlayerCharacter->GetCharacterMovement()->bOrientRotationToMovement = false;
 		PlayerCharacter->bUseControllerRotationYaw = true;
 	}
+}
+
+FString UCombatComponent::GetNameOfWeaponType(EWeaponType WeaponType)
+{
+	FString WTText;
+	switch (WeaponType)
+	{
+	case EWeaponType::EWT_AssaultRifle:
+		WTText = "Assault Rifle";
+		GEngine->AddOnScreenDebugMessage(1, 4.f, FColor::Emerald, WTText, false);
+	}
+	return WTText;
 }
 
 

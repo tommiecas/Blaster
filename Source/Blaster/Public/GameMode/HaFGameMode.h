@@ -10,7 +10,7 @@
  * 
  */
 UCLASS()
-class BLASTER_API AHaFGameMode : public AGameMode
+class BLASTER_API AHAFGameMode : public AGameMode
 {
 	GENERATED_BODY()
 
