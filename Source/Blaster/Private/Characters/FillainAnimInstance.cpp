@@ -75,4 +75,6 @@ void UFillainAnimInstance::NativeUpdateAnimation(float DeltaTime)
 	}
 
 	bUseFABRIK = FillainCharacter->GetCombatState() != ECombatState::ECS_Reloading;
+	bUseAimOffsets = FillainCharacter->GetCombatState() != ECombatState::ECS_Reloading;
+	bTransformRightHand = FillainCharacter->GetCombatState() != ECombatState::ECS_Reloading;
 }

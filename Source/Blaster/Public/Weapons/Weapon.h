@@ -33,6 +33,9 @@ public:
 	void ShowPickupWidgets(bool bShowWidget);
 	virtual void Fire(const FVector& HitTarget);
 	void AddAmmo(int32 AmmoToAdd);
+	
+	UPROPERTY(EditAnywhere)
+	class USoundCue* EquipSound;
 
 	/*
 	** Textures for the Weapon Crosshairs
