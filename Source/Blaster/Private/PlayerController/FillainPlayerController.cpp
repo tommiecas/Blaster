@@ -280,6 +280,10 @@ void AFillainPlayerController::OnMatchStateSet(FName State)
 	{
 		HandleMatchHasStarted();
 	}
+	else if (MatchState == MatchState::Cooldown)
+	{
+		HandleCooldown();
+	}
 }
 
 void AFillainPlayerController::HandleMatchHasStarted()
@@ -295,10 +299,27 @@ void AFillainPlayerController::HandleMatchHasStarted()
 	}
 }
 
+void AFillainPlayerController::HandleCooldown()
+{
+	FillainHUD = FillainHUD == nullptr ? Cast<AFillainHUD>(GetHUD()) : FillainHUD;
+	if (FillainHUD)
+	{
+		FillainHUD->CharacterOverlay->RemoveFromParent();
+		if (FillainHUD->Announcement)
+		{
+			FillainHUD->Announcement->SetVisibility(ESlateVisibility::Visible);
+		}
+	}
+}
+
 void AFillainPlayerController::OnRep_MatchState()
 {
 	if (MatchState == MatchState::InProgress)
 	{
 		HandleMatchHasStarted();
+	}
+	else if (MatchState == MatchState::Cooldown)
+	{
+		HandleCooldown();
 	}
 }
