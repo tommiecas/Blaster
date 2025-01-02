@@ -9,12 +9,17 @@
 #include "Characters/FillainCharacter.h"
 #include "Net/UnrealNetwork.h"
 #include "Blaster/Public/GameMode/HAFGameMode.h"
+#include "HUD/Announcement.h"
 
 
 void AFillainPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 	FillainHUD = Cast <AFillainHUD>(GetHUD());
+	if (FillainHUD)
+	{
+		FillainHUD->AddAnnouncement();
+	}
 }
 
 void AFillainPlayerController::Tick(float DeltaTime)
@@ -218,12 +223,26 @@ void AFillainPlayerController::OnMatchStateSet(FName State)
 {
 	MatchState = State;
 
+	if (MatchState == MatchState::WaitingToStart)
+	{
+
+	}
+
 	if (MatchState == MatchState::InProgress)
 	{
-		FillainHUD = FillainHUD == nullptr ? Cast<AFillainHUD>(GetHUD()) : FillainHUD;
-		if (FillainHUD)
+		HandleMatchHasStarted();
+	}
+}
+
+void AFillainPlayerController::HandleMatchHasStarted()
+{
+	FillainHUD = FillainHUD == nullptr ? Cast<AFillainHUD>(GetHUD()) : FillainHUD;
+	if (FillainHUD)
+	{
+		FillainHUD->AddCharacterOverlay();
+		if (FillainHUD->Announcement)
 		{
-			FillainHUD->AddCharacterOverlay();
+			FillainHUD->Announcement->SetVisibility(ESlateVisibility::Hidden);
 		}
 	}
 }
@@ -232,10 +251,6 @@ void AFillainPlayerController::OnRep_MatchState()
 {
 	if (MatchState == MatchState::InProgress)
 	{
-		FillainHUD = FillainHUD == nullptr ? Cast<AFillainHUD>(GetHUD()) : FillainHUD;
-		if (FillainHUD)
-		{
-			FillainHUD->AddCharacterOverlay();
-		}
+		HandleMatchHasStarted();
 	}
 }

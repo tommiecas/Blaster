@@ -30,6 +30,7 @@ public:
 
 
 	void OnMatchStateSet(FName State);
+	void HandleMatchHasStarted();
 	
 	
 protected:
