@@ -9,6 +9,25 @@
 #include "PlayerState/HAFPlayerState.h"
 
 
+AHAFGameMode::AHAFGameMode()
+{
+	bDelayedStart = true;
+}
+
+void AHAFGameMode::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	if (MatchState == MatchState::WaitingToStart)
+	{
+		CountdownTime = WarmupTime - GetWorld()->GetTimeSeconds() + LevelStartingTime;
+		if (CountdownTime <= 0.f)
+		{
+			StartMatch();
+		}
+	}
+}
+
 void AHAFGameMode::PlayerEliminated(AFillainCharacter* EliminatedCharacter, AFillainPlayerController* VictimController, AFillainPlayerController* KillerController)
 {
 	AHAFPlayerState* KillerPlayerState = KillerController ? Cast<AHAFPlayerState>(KillerController->PlayerState) : nullptr;
@@ -48,4 +67,11 @@ void AHAFGameMode::RequestRespawn(ACharacter* EliminatedPlayerCharacter, AFillai
 		int32 Selection = FMath::RandRange(0, PlayerStarts.Num() - 1);
 		RestartPlayerAtPlayerStart(EliminatedPlayerController, PlayerStarts[Selection]);
 	}
+}
+
+void AHAFGameMode::BeginPlay()
+{
+	Super::BeginPlay();
+
+	LevelStartingTime = GetWorld()->GetTimeSeconds();
 }
