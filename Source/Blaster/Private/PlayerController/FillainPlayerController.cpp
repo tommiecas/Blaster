@@ -16,6 +16,16 @@ void AFillainPlayerController::BeginPlay()
 	FillainHUD = Cast <AFillainHUD>(GetHUD());
 }
 
+void AFillainPlayerController::SetHUDTime()
+{
+	uint32 SecondsLeft = FMath::CeilToInt(MatchTime - GetWorld()->GetTimeSeconds());
+	if (CountdownInt != SecondsLeft)
+	{
+		SetHUDMatchCountdown(MatchTime - GetWorld()->GetTimeSeconds());
+	}
+	CountdownInt = SecondsLeft;
+}
+
 void AFillainPlayerController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
@@ -25,6 +35,12 @@ void AFillainPlayerController::OnPossess(APawn* InPawn)
 	{
 		SetHUDHealth(FillainCharacter->GetHealth(), FillainCharacter->GetMaxHealth());
 	}
+}
+
+void AFillainPlayerController::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+	SetHUDTime();
 }
 
 void AFillainPlayerController::SetHUDHealth(float Health, float MaxHealth)
@@ -103,5 +119,18 @@ void AFillainPlayerController::SetHUDWeaponType(FString WeaponTypeText)
 	if (bIsHUDValid)
 	{
 		FillainHUD->CharacterOverlay->WeaponType->SetText(FText::FromString(WeaponTypeText));
+	}
+}
+
+void AFillainPlayerController::SetHUDMatchCountdown(float CountdownTime)
+{
+	FillainHUD = FillainHUD == nullptr ? Cast<AFillainHUD>(GetHUD()) : FillainHUD;
+	bool bIsHUDValid = FillainHUD && FillainHUD->CharacterOverlay && FillainHUD->CharacterOverlay->MatchCountdownText;
+	if (bIsHUDValid)
+	{
+		int32 Minutes = FMath::FloorToInt(CountdownTime / 60.f);
+		int32 Seconds = CountdownTime - Minutes * 60;
+		FString CountdownText = FString::Printf(TEXT("%02d:%02d"), Minutes, Seconds);
+		FillainHUD->CharacterOverlay->MatchCountdownText->SetText(FText::FromString(CountdownText));
 	}
 }

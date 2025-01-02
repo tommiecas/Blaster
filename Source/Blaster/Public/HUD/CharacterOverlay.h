@@ -39,6 +39,9 @@ public:
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* EliminationText;
 
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* MatchCountdownText;;
+
 
 	
 };

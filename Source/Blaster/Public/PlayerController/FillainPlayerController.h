@@ -22,13 +22,19 @@ public:
 	void SetHUDCarriedAmmo(int32 Ammo);
 	void SetHUDEliminationText(FString EliminationText);
 	void SetHUDWeaponType(FString WeaponTypeText);
+	void SetHUDMatchCountdown(float CountdownTime);
 	virtual void OnPossess(APawn* InPawn) override;
+	virtual void Tick(float DeltaTime) override;
 
 protected:
 	virtual void BeginPlay() override;
+	void SetHUDTime();
 
 private:
 	UPROPERTY()
 	class AFillainHUD* FillainHUD;
+
+	float MatchTime = 120.f;
+	uint32 CountdownInt = 0.f;
 	
 };
