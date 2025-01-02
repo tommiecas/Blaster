@@ -53,7 +53,7 @@ void AFillainHUD::DrawHUD()
 void AFillainHUD::BeginPlay()
 {
 	Super::BeginPlay();
-	AddCharacterOverlay();
+
 }
 
 void AFillainHUD::AddCharacterOverlay()

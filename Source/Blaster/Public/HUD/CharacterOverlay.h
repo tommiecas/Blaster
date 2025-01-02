@@ -37,10 +37,9 @@ public:
 	UTextBlock* WeaponType;
 
 	UPROPERTY(meta = (BindWidget))
-	UTextBlock* EliminationText;
+	UTextBlock* MatchCountdownText;
 
-	UPROPERTY(meta = (BindWidget))
-	UTextBlock* MatchCountdownText;;
+
 
 
 	

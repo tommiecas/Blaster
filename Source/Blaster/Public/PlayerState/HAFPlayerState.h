@@ -23,7 +23,6 @@ public:
 	*/
 	void AddToScore(float ScoreAmount);
 	void AddToDefeats(float DefeatsAmount);
-	void AddEliminatedText(FString EliminationText);
 	void AddWeaponTypeText(FString WeaponTypeText);
 
 	UFUNCTION()
@@ -32,10 +31,10 @@ public:
 
 private:
 	UPROPERTY()
-	class AFillainCharacter* Character;
+	class AFillainCharacter* PlayerCharacter;
 	
 	UPROPERTY()
-	class AFillainPlayerController* Controller;
+	class AFillainPlayerController* PlayerController;
 
 	UPROPERTY(ReplicatedUsing = OnRep_Defeats);
 	float Defeats;

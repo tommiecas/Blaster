@@ -20,14 +20,18 @@ public:
 	void SetHUDDefeats(int32 Defeats);
 	void SetHUDWeaponAmmo(int32 Ammo);
 	void SetHUDCarriedAmmo(int32 Ammo);
-	void SetHUDEliminationText(FString EliminationText);
 	void SetHUDWeaponType(FString WeaponTypeText);
 	void SetHUDMatchCountdown(float CountdownTime);
 	virtual void OnPossess(APawn* InPawn) override;
 	virtual void Tick(float DeltaTime) override;
 	virtual float GetServerTime(); //Synced with server world clock
 	virtual void ReceivedPlayer() override; // Synced with server clock as soon as possible
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
+
+	void OnMatchStateSet(FName State);
+	
+	
 protected:
 	virtual void BeginPlay() override;
 	void SetHUDTime();
@@ -52,11 +56,33 @@ protected:
 	float TimeSyncRunningTime = 0.f;
 
 	void CheckTimeSync(float DeltaTime);
+
+	void PollInit();
+
 private:
 	UPROPERTY()
 	class AFillainHUD* FillainHUD;
 
 	float MatchTime = 120.f;
 	uint32 CountdownInt = 0.f;
+
+	UPROPERTY(ReplicatedUsing = OnRep_MatchState)
+	FName MatchState;
+
+	UFUNCTION()
+	void OnRep_MatchState();
+
+	UPROPERTY()
+	class UCharacterOverlay* CharacterOverlay;
+
+	bool bInitializeCharacterOverlay = false;
+	float HUDHealth;
+	float HUDMaxHealth;
+	float HUDScore;
+	int32 HUDDefeats;
+
+
+
+
 	
 };

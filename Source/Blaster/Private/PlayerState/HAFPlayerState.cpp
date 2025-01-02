@@ -16,13 +16,13 @@ void AHAFPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
 void AHAFPlayerState::AddToScore(float ScoreAmount)
 {
 	SetScore(GetScore() + ScoreAmount);
-	Character = Character == nullptr ? Cast<AFillainCharacter>(GetPawn()) : Character;
-	if (Character)
+	PlayerCharacter = PlayerCharacter == nullptr ? Cast<AFillainCharacter>(GetPawn()) : PlayerCharacter;
+	if (PlayerCharacter)
 	{
-		Controller = Controller == nullptr ? Cast<AFillainPlayerController>(Character->Controller) : Controller;
-		if (Controller)
+		PlayerController = PlayerController == nullptr ? Cast<AFillainPlayerController>(PlayerCharacter->Controller) : PlayerController;
+		if (PlayerController)
 		{
-			Controller->SetHUDScore(GetScore());
+			PlayerController->SetHUDScore(GetScore());
 		}
 	}
 }
@@ -30,52 +30,39 @@ void AHAFPlayerState::AddToScore(float ScoreAmount)
 void AHAFPlayerState::AddToDefeats(float DefeatsAmount)
 {
 	Defeats += DefeatsAmount;
-	Character = Character == nullptr ? Cast<AFillainCharacter>(GetPawn()) : Character;
-	if (Character)
+	PlayerCharacter = PlayerCharacter == nullptr ? Cast<AFillainCharacter>(GetPawn()) : PlayerCharacter;
+	if (PlayerCharacter)
 	{
-		Controller = Controller == nullptr ? Cast<AFillainPlayerController>(Character->Controller) : Controller;
-		if (Controller)
+		PlayerController = PlayerController == nullptr ? Cast<AFillainPlayerController>(PlayerCharacter->Controller) : PlayerController;
+		if (PlayerController)
 		{
-			Controller->SetHUDDefeats(Defeats);
-		}
-	}
-}
-
-void AHAFPlayerState::AddEliminatedText(FString EliminationText)
-{
-	Character = Character == nullptr ? Cast<AFillainCharacter>(GetPawn()) : Character;
-	if (Character)
-	{
-		Controller = Controller == nullptr ? Cast<AFillainPlayerController>(Character->Controller) : Controller;
-		if (Controller)
-		{
-			Controller->SetHUDEliminationText(EliminationText);
+			PlayerController->SetHUDDefeats(Defeats);
 		}
 	}
 }
 
 void AHAFPlayerState::AddWeaponTypeText(FString WeaponTypeText)
 {
-	Character = Character == nullptr ? Cast<AFillainCharacter>(GetPawn()) : Character;
-	if (Character)
+	PlayerCharacter = PlayerCharacter == nullptr ? Cast<AFillainCharacter>(GetPawn()) : PlayerCharacter;
+	if (PlayerCharacter)
 	{
-		Controller = Controller == nullptr ? Cast<AFillainPlayerController>(Character->Controller) : Controller;
-		if (Controller)
+		PlayerController = PlayerController == nullptr ? Cast<AFillainPlayerController>(PlayerCharacter->Controller) : PlayerController;
+		if (PlayerController)
 		{
-			Controller->SetHUDWeaponType(WeaponTypeText);
+			PlayerController->SetHUDWeaponType(WeaponTypeText);
 		}
 	}
 }
 
 void AHAFPlayerState::OnRep_Defeats()
 {
-	Character = Character == nullptr ? Cast<AFillainCharacter>(GetPawn()) : Character;
-	if (Character)
+	PlayerCharacter = PlayerCharacter == nullptr ? Cast<AFillainCharacter>(GetPawn()) : PlayerCharacter;
+	if (PlayerCharacter)
 	{
-		Controller = Controller == nullptr ? Cast<AFillainPlayerController>(Character->Controller) : Controller;
-		if (Controller)
+		PlayerController = PlayerController == nullptr ? Cast<AFillainPlayerController>(PlayerCharacter->Controller) : PlayerController;
+		if (PlayerController)
 		{
-			Controller->SetHUDDefeats(Defeats);
+			PlayerController->SetHUDDefeats(Defeats);
 		}
 	}
 }
@@ -85,13 +72,13 @@ void AHAFPlayerState::OnRep_Score()
 {
 	Super::OnRep_Score();
 
-	Character = Character == nullptr ? Cast<AFillainCharacter>(GetPawn()) : Character;
-	if (Character)
+	PlayerCharacter = PlayerCharacter == nullptr ? Cast<AFillainCharacter>(GetPawn()) : PlayerCharacter;
+	if (PlayerCharacter)
 	{
-		Controller =  Controller == nullptr ? Cast<AFillainPlayerController>(Character->Controller) : Controller;
-		if (Controller)
+		PlayerController = PlayerController == nullptr ? Cast<AFillainPlayerController>(PlayerCharacter->Controller) : PlayerController;
+		if (PlayerController)
 		{
-			Controller->SetHUDScore(GetScore());
+			PlayerController->SetHUDScore(GetScore());
 		}
 	}
 }

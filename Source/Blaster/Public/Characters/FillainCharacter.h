@@ -54,7 +54,14 @@ public:
 
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastEliminate();
-	
+
+	UPROPERTY(BlueprintReadWrite)
+	class UCharacterOverlay* CharacterOverlay;
+
+	UPROPERTY()
+	class AFillainHUD* FillainHUD;
+
+
 
 protected:
 	virtual void BeginPlay() override;

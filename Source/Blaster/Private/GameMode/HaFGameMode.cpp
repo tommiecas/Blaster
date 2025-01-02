@@ -40,7 +40,6 @@ void AHAFGameMode::PlayerEliminated(AFillainCharacter* EliminatedCharacter, AFil
 	if (VictimPlayerState)
 	{
 		VictimPlayerState->AddToDefeats(0.5);
-		VictimPlayerState->AddEliminatedText("You Were Eliminated!");
 	}
 	if (EliminatedCharacter)
 	{
@@ -58,10 +57,6 @@ void AHAFGameMode::RequestRespawn(ACharacter* EliminatedPlayerCharacter, AFillai
 	if (EliminatedPlayerController)
 	{
 		AHAFPlayerState* VictimPlayerState = EliminatedPlayerController ? Cast<AHAFPlayerState>(EliminatedPlayerController->PlayerState) : nullptr;
-		if (VictimPlayerState)
-		{
-			VictimPlayerState->AddEliminatedText("");
-		}
 		TArray<AActor*> PlayerStarts;
 		UGameplayStatics::GetAllActorsOfClass(this, APlayerStart::StaticClass(), PlayerStarts);
 		int32 Selection = FMath::RandRange(0, PlayerStarts.Num() - 1);
@@ -74,4 +69,20 @@ void AHAFGameMode::BeginPlay()
 	Super::BeginPlay();
 
 	LevelStartingTime = GetWorld()->GetTimeSeconds();
+}
+
+void AHAFGameMode::OnMatchStateSet()
+{
+	Super::OnMatchStateSet();
+
+	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
+	{
+		AFillainPlayerController* FillainPlayer = Cast<AFillainPlayerController>(*It);
+		if (FillainPlayer)
+		{
+			FillainPlayer->OnMatchStateSet(MatchState);
+		}
+	}
+
+
 }

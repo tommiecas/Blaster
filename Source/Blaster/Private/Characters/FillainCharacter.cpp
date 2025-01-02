@@ -26,6 +26,8 @@
 #include "Particles/ParticleSystemComponent.h"
 #include "PlayerState/HAFPlayerState.h"
 #include "Weapons/WeaponTypes.h"
+#include "HUD/CharacterOverlay.h"
+#include "HUD/FillainHUD.h"
 
 
 AFillainCharacter::AFillainCharacter()
