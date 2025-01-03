@@ -5,8 +5,6 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "HUD/FillainHUD.h"
-#include "Weapons/WeaponTypes.h"
-#include "Blaster/BlasterTypes/CombatState.h"
 #include "CombatComponent.generated.h"
 
 #define TRACE_LENGTH 80000.f
@@ -22,14 +20,6 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	void EquipWeapon(class AWeapon* WeaponToEquip);
-	void Reload();
-
-	UFUNCTION(BlueprintCallable)
-	void FinishReloading();
-
-	FString GetNameOfWeaponType(EWeaponType WeaponType);
-	FString WeaponTypeText;
-
 
 protected:
 	virtual void BeginPlay() override;
@@ -54,19 +44,9 @@ protected:
 
 	void SetHUDCrosshairs(float DeltaTime);
 
-	UFUNCTION(Server, Reliable)
-	void ServerReload();
-	void HandleReload();
-	int32 AmountToReload();
-
 private:
-	UPROPERTY()
 	class AFillainCharacter* PlayerCharacter;
-	
-	UPROPERTY()
 	class AFillainPlayerController* PlayerController;
-	
-	UPROPERTY()
 	class AFillainHUD* PlayerHUD;
 
 	UPROPERTY(ReplicatedUsing = OnRep_EquippedWeapon)
@@ -91,7 +71,6 @@ private:
 	float CrosshairAimFactor;
 	float CrosshairShootingFactor;
 
-	UPROPERTY()
 	FHUDPackage HUDPackage;
 
 	FVector HitTarget;
@@ -120,30 +99,6 @@ private:
 	bool bCanGunFire = true;
 	void StartFireTimer();
 	void FireTimerFinished();
-
-	bool CanFire();
-	
-	//for the currently equipped weapon only
-	UPROPERTY(ReplicatedUsing = OnRep_CarriedAmmo)
-	int32 CarriedAmmo;
-
-	UFUNCTION()
-	void OnRep_CarriedAmmo();
-
-	TMap<EWeaponType, int32> CarriedAmmoMap;
-
-	void InitializeCarriedAmmo();
-
-	UPROPERTY(EditAnywhere)
-	int32 StartingARAmmo = 30;
-
-	UPROPERTY(ReplicatedUsing = OnRep_CombatState)
-	ECombatState CombatState = ECombatState::ECS_Unoccupied;
-
-	UFUNCTION()
-	void OnRep_CombatState();
-
-	void UpdateAmmoValues();
 
 public:	
 	

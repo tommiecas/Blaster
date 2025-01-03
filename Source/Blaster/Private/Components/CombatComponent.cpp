@@ -14,7 +14,6 @@
 #include "Camera/CameraComponent.h"
 #include "HUD/FillainHUD.h"
 #include "TimerManager.h"
-#include "Sound/SoundCue.h"
 
 
 UCombatComponent::UCombatComponent()
@@ -31,8 +30,6 @@ void UCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(UCombatComponent, EquippedWeapon);
 	DOREPLIFETIME(UCombatComponent, bAiming);
-	DOREPLIFETIME_CONDITION(UCombatComponent, CarriedAmmo, COND_OwnerOnly);
-	DOREPLIFETIME(UCombatComponent, CombatState);
 }
 
 void UCombatComponent::BeginPlay()
@@ -48,12 +45,7 @@ void UCombatComponent::BeginPlay()
 			DefaultFOV = PlayerCharacter->GetFollowCamera()->FieldOfView;
 			CurrentFOV = DefaultFOV;
 		}
-		if (PlayerCharacter->HasAuthority())
-		{
-			InitializeCarriedAmmo();
-		}
 	}
-
 }
 
 void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -139,8 +131,6 @@ void UCombatComponent::SetHUDCrosshairs(float DeltaTime)
 		}
 	}
 }
-
-
 
 void UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 {
@@ -238,7 +228,7 @@ void UCombatComponent::FireButtonPressed(bool bPressed)
 
 void UCombatComponent::Fire()
 {
-	if (CanFire())
+	if (bCanGunFire && EquippedWeapon)
 	{
 		bCanGunFire = false;
 		ServerFire(HitTarget);
@@ -269,33 +259,7 @@ void UCombatComponent::FireTimerFinished()
 	{
 		Fire();
 	}
-	if (EquippedWeapon->IsEmpty())
-	{
-		Reload();
-	}
 }
-
-bool UCombatComponent::CanFire()
-{
-	if (EquippedWeapon == nullptr) return false;
-	return !EquippedWeapon->IsEmpty() && bCanGunFire && CombatState == ECombatState::ECS_Unoccupied;
-}
-
-void UCombatComponent::OnRep_CarriedAmmo()
-{
-	PlayerController = PlayerController == nullptr ? Cast<AFillainPlayerController>(PlayerCharacter->Controller) : PlayerController;
-	if (PlayerController)
-	{
-		PlayerController->SetHUDCarriedAmmo(CarriedAmmo);
-	}
-}
-
-void UCombatComponent::InitializeCarriedAmmo()
-{
-	CarriedAmmoMap.Emplace(EWeaponType::EWT_AssaultRifle, StartingARAmmo);
-}
-
-
 
 void UCombatComponent::ServerFire_Implementation(const FVector_NetQuantize& TraceHitTarget)
 {
@@ -305,7 +269,7 @@ void UCombatComponent::ServerFire_Implementation(const FVector_NetQuantize& Trac
 void UCombatComponent::MulticastFire_Implementation(const FVector_NetQuantize& TraceHitTarget)
 {
 	if (EquippedWeapon == nullptr) return;
-	if (PlayerCharacter && CombatState == ECombatState::ECS_Unoccupied)
+	if (PlayerCharacter)
 	{
 		PlayerCharacter->PlayFireMontage(bAiming);
 		EquippedWeapon->Fire(TraceHitTarget);
@@ -315,10 +279,6 @@ void UCombatComponent::MulticastFire_Implementation(const FVector_NetQuantize& T
 void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 {
 	if (PlayerCharacter == nullptr || WeaponToEquip == nullptr) return;
-	if (EquippedWeapon)
-	{
-		EquippedWeapon->DropWeapon();
-	}
 
 	EquippedWeapon = WeaponToEquip;
 	EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
@@ -328,116 +288,9 @@ void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 		HandSocket->AttachActor(EquippedWeapon, PlayerCharacter->GetMesh());
 	}
 	EquippedWeapon->SetOwner(PlayerCharacter);
-	EquippedWeapon->SetHUDAmmo();
-
-	if (CarriedAmmoMap.Contains(EquippedWeapon->GetWeaponType()))
-	{
-		CarriedAmmo = CarriedAmmoMap[EquippedWeapon->GetWeaponType()];
-	}
-	PlayerController = PlayerController == nullptr ? Cast<AFillainPlayerController>(PlayerCharacter->Controller) : PlayerController;
-	if (PlayerController)
-	{
-		PlayerController->SetHUDCarriedAmmo(CarriedAmmo);
-		WeaponTypeText = GetNameOfWeaponType(EquippedWeapon->GetWeaponType());
-		PlayerController->SetHUDWeaponType(WeaponTypeText);
-	}
-
-	if (EquippedWeapon->EquipSound)
-	{
-		UGameplayStatics::PlaySoundAtLocation(
-			this,
-			EquippedWeapon->EquipSound,
-			PlayerCharacter->GetActorLocation()
-		);
-	}
-
-	if (EquippedWeapon->IsEmpty())
-	{
-		Reload();
-	}
-
 	PlayerCharacter->GetCharacterMovement()->bOrientRotationToMovement = false;
 	PlayerCharacter->bUseControllerRotationYaw = true;
 
-}
-
-void UCombatComponent::Reload()
-{
-	if (CarriedAmmo > 0 && CombatState != ECombatState::ECS_Reloading)
-	{
-		ServerReload();
-	}
-}
-
-void UCombatComponent::FinishReloading()
-{
-	if (PlayerCharacter == nullptr) return;
-	if (PlayerCharacter->HasAuthority())
-	{
-		CombatState = ECombatState::ECS_Unoccupied;
-		UpdateAmmoValues();
-	}
-	if (bIsFireButtonPressed)
-	{
-		Fire();
-	}
-}
-
-void UCombatComponent::ServerReload_Implementation()
-{
-	CombatState = ECombatState::ECS_Reloading;
-	HandleReload();
-}
-
-void UCombatComponent::OnRep_CombatState()
-{
-	switch (CombatState)
-	{
-	case ECombatState::ECS_Reloading:
-			HandleReload();
-			break;
-	case ECombatState::ECS_Unoccupied:
-		if (bIsFireButtonPressed)
-		{
-			Fire();
-		}
-	}
-}
-
-void UCombatComponent::UpdateAmmoValues()
-{
-	if (PlayerCharacter == nullptr || EquippedWeapon == nullptr) return;
-	int32 ReloadAmount = AmountToReload();
-	if (CarriedAmmoMap.Contains(EquippedWeapon->GetWeaponType()))
-	{
-		CarriedAmmoMap[EquippedWeapon->GetWeaponType()] -= ReloadAmount;
-		CarriedAmmo = CarriedAmmoMap[EquippedWeapon->GetWeaponType()];
-	}
-	PlayerController = PlayerController == nullptr ? Cast<AFillainPlayerController>(PlayerCharacter->Controller) : PlayerController;
-	if (PlayerController)
-	{
-		PlayerController->SetHUDCarriedAmmo(CarriedAmmo);
-	}
-	EquippedWeapon->AddAmmo(-ReloadAmount);
-}
-
-void UCombatComponent::HandleReload()
-{
-	PlayerCharacter->PlayReloadingMontage();
-}
-
-int32 UCombatComponent::AmountToReload()
-{
-	if (EquippedWeapon == nullptr) return 0;
-	int32 RoomInMag = EquippedWeapon->GetMagCapacity() - EquippedWeapon->GetAmmo();
-
-	if (CarriedAmmoMap.Contains(EquippedWeapon->GetWeaponType()))
-	{
-		int32 AmountCarried = CarriedAmmoMap[EquippedWeapon->GetWeaponType()]; 
-		int32 Least = FMath::Min(RoomInMag, AmountCarried);
-		return FMath::Clamp(RoomInMag, 0, Least);
-	}
-	return 0;
 }
 
 void UCombatComponent::OnRep_EquippedWeapon()
@@ -450,29 +303,9 @@ void UCombatComponent::OnRep_EquippedWeapon()
 		{
 			HandSocket->AttachActor(EquippedWeapon, PlayerCharacter->GetMesh());
 		}
-		if (EquippedWeapon->EquipSound)
-		{
-			UGameplayStatics::PlaySoundAtLocation(
-				this,
-				EquippedWeapon->EquipSound,
-				PlayerCharacter->GetActorLocation()
-			);
-		}
 		PlayerCharacter->GetCharacterMovement()->bOrientRotationToMovement = false;
 		PlayerCharacter->bUseControllerRotationYaw = true;
 	}
-}
-
-FString UCombatComponent::GetNameOfWeaponType(EWeaponType WeaponType)
-{
-	FString WTText;
-	switch (WeaponType)
-	{
-	case EWeaponType::EWT_AssaultRifle:
-		WTText = "Assault Rifle";
-		GEngine->AddOnScreenDebugMessage(1, 4.f, FColor::Emerald, WTText, false);
-	}
-	return WTText;
 }
 
 

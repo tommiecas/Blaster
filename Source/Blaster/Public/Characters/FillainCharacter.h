@@ -9,7 +9,6 @@
 #include "Blaster/BlasterTypes/TurningInPlace.h"
 #include "Interfaces/InteractWithCrosshairsInterface.h"
 #include "Components/TimelineComponent.h"
-#include "Blaster/BlasterTypes/CombatState.h"
 #include "FillainCharacter.generated.h"
 
 class USpringArmComponent;
@@ -40,28 +39,13 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void PostInitializeComponents() override;
 	virtual void OnRep_ReplicatedMovement() override;
-	
-	/*
-	** Play Animation Montages
-	*/
 	void PlayFireMontage(bool bAiming);
-	void PlayHitReactMontage();
-	void PlayEliminatedMontage();
-	void PlayReloadingMontage();
 	void Eliminate();
-	
 	virtual void Destroyed() override;
 
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastEliminate();
-
-	UPROPERTY(BlueprintReadWrite)
-	class UCharacterOverlay* CharacterOverlay;
-
-	UPROPERTY()
-	class AFillainHUD* FillainHUD;
-
-
+	
 
 protected:
 	virtual void BeginPlay() override;
@@ -102,16 +86,6 @@ protected:
 	void CrouchButtonPressed();
 
 	/*
-	** Reloading
-	*/
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
-	UInputAction* ReloadAction;
-
-	void ReloadButtonPressed();
-
-
-
-	/*
 	** Aiming the Weapon
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
@@ -133,7 +107,8 @@ protected:
 	void FireButtonPressed();
 	void FireButtonReleased();
 
-	
+	void PlayHitReactMontage();
+	void PlayEliminatedMontage();
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void ShowPlayerName();
@@ -142,8 +117,6 @@ protected:
 	void ReceiveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, class AController* InstigatorController, AActor* DamageCauser);
 	
 	void UpdateHUDHealth();
-	// Poll for any relevant classes and initialize our HUD
-	void PollInit();
 
 private:	
 	UPROPERTY(VisibleAnywhere, Category = Camera)
@@ -161,7 +134,7 @@ private:
 	UFUNCTION()
 	void OnRep_OverlappingWeapon(AWeapon* LastWeapon);
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere)
 	class UCombatComponent* Combat;
 
 	UFUNCTION(Server, Reliable)
@@ -175,10 +148,6 @@ private:
 	ETurningInPlace TurningInPlace;
 	void TurnInPlace(float DeltaTime);
 
-	/*
-	** Animation Montages
-	*/
-
 	UPROPERTY(EditAnywhere, Category = Combat)
 	class UAnimMontage* FireWeaponMontage;
 
@@ -188,8 +157,8 @@ private:
 	UPROPERTY(Replicated, EditAnywhere, Category = Combat)
 	class UAnimMontage* EliminatedMontage;
 
-	UPROPERTY(Replicated, EditAnywhere, Category = Combat)
-	class UAnimMontage* ReloadingMontage;
+
+	
 
 	void HideCharacterIfCameraClose();
 
@@ -217,7 +186,6 @@ private:
 	UFUNCTION()
 	void OnRep_Health();
 
-	UPROPERTY()
 	class AFillainPlayerController* FillainPlayerController;
 
 	bool bIsEliminated = false;
@@ -265,9 +233,6 @@ private:
 	UPROPERTY(EditAnywhere)
 	class USoundCue* EliminationBotSound;
 
-	UPROPERTY()
-	class AHAFPlayerState* HAFPlayerState;
-
 public:
 	void SetOverlappingWeapon(AWeapon* Weapon);
 	bool IsWeaponEquipped();
@@ -283,6 +248,5 @@ public:
 	FORCEINLINE bool IsEliminated() const { return bIsEliminated; }
 	FORCEINLINE float GetHealth() const { return Health; }
 	FORCEINLINE float GetMaxHealth() const { return MaxHealth; }	
-	ECombatState GetCombatState() const;
 
 };
