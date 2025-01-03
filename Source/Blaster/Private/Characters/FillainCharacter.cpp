@@ -24,11 +24,6 @@
 #include "Kismet/GameplayStatics.h"
 #include "Sound/SoundCue.h"
 #include "Particles/ParticleSystemComponent.h"
-#include "PlayerState/HAFPlayerState.h"
-#include "Weapons/WeaponTypes.h"
-#include "HUD/CharacterOverlay.h"
-#include "HUD/FillainHUD.h"
-
 
 AFillainCharacter::AFillainCharacter()
 {
@@ -128,7 +123,6 @@ void AFillainCharacter::Tick(float DeltaTime)
 		CalculateAO_Pitch();
 		AimOffset(DeltaTime);
 		HideCharacterIfCameraClose();
-		PollInit();
 	}
 }
 
@@ -147,7 +141,6 @@ void AFillainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 		EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Completed, this, &AFillainCharacter::AimButtonReleased);
 		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &AFillainCharacter::FireButtonPressed);
 		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Completed, this, &AFillainCharacter::FireButtonReleased);
-		EnhancedInputComponent->BindAction(ReloadAction, ETriggerEvent::Started, this, &AFillainCharacter::ReloadButtonPressed);
 
 	}
 }
@@ -193,10 +186,6 @@ void AFillainCharacter::Eliminate()
 
 void AFillainCharacter::MulticastEliminate_Implementation()
 {
-	if (FillainPlayerController)
-	{
-		FillainPlayerController->SetHUDWeaponAmmo(0);
-	}
 	bIsEliminated = true;
 	PlayEliminatedMontage();
 
@@ -245,10 +234,10 @@ void AFillainCharacter::MulticastEliminate_Implementation()
 
 void AFillainCharacter::EliminationTimerFinished()
 {
-	AHAFGameMode* HAFGameMode = GetWorld()->GetAuthGameMode<AHAFGameMode>();
-	if (HAFGameMode)
+	AHaFGameMode* HaFGameMode = GetWorld()->GetAuthGameMode<AHaFGameMode>();
+	if (HaFGameMode)
 	{
-		HAFGameMode->RequestRespawn(this, FillainPlayerController);
+		HaFGameMode->RequestRespawn(this, FillainPlayerController);
 	}	
 }
 
@@ -267,19 +256,6 @@ void AFillainCharacter::UpdateHUDHealth()
 	if (FillainPlayerController)
 	{
 		FillainPlayerController->SetHUDHealth(Health, MaxHealth);
-	}
-}
-
-void AFillainCharacter::PollInit()
-{
-	if (HAFPlayerState == nullptr)
-	{
-		HAFPlayerState = GetPlayerState<AHAFPlayerState>();
-		if (HAFPlayerState)
-		{
-			HAFPlayerState->AddToScore(0.f);
-			HAFPlayerState->AddToDefeats(0);
-		}
 	}
 }
 
@@ -305,25 +281,6 @@ void AFillainCharacter::PlayEliminatedMontage()
 	}
 }
 
-void AFillainCharacter::PlayReloadingMontage()
-{
-	if (Combat == nullptr || Combat->EquippedWeapon == nullptr) return;
-
-	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	if (AnimInstance && ReloadingMontage)
-	{
-		AnimInstance->Montage_Play(ReloadingMontage);
-		FName SectionName;
-		switch (Combat->EquippedWeapon->GetWeaponType())
-		{
-		case EWeaponType::EWT_AssaultRifle:
-			SectionName = FName("Rifle");
-			break;
-		}
-		AnimInstance->Montage_JumpToSection(SectionName);
-	}
-}
-
 void AFillainCharacter::ReceiveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatorController, AActor* DamageCauser)
 {
 	Health = FMath::Clamp(Health - Damage, 0.f, MaxHealth);
@@ -332,12 +289,12 @@ void AFillainCharacter::ReceiveDamage(AActor* DamagedActor, float Damage, const 
 
 	if (Health == 0.f)
 	{
-		AHAFGameMode* HAFGameMode = GetWorld()->GetAuthGameMode<AHAFGameMode>();
-		if (HAFGameMode)
+		AHaFGameMode* HaFGameMode = GetWorld()->GetAuthGameMode<AHaFGameMode>();
+		if (HaFGameMode)
 		{
 			FillainPlayerController = FillainPlayerController == nullptr ? Cast<AFillainPlayerController>(Controller) : FillainPlayerController;
 			AFillainPlayerController* KillerController = Cast<AFillainPlayerController>(InstigatorController);
-			HAFGameMode->PlayerEliminated(this, FillainPlayerController, KillerController);
+			HaFGameMode->PlayerEliminated(this, FillainPlayerController, KillerController);
 		}
 	}
 }
@@ -402,14 +359,6 @@ void AFillainCharacter::CrouchButtonPressed()
 	else 
 	{
 		Crouch();
-	}
-}
-
-void AFillainCharacter::ReloadButtonPressed()
-{
-	if (Combat)
-	{
-		Combat->Reload();
 	}
 }
 
@@ -643,12 +592,6 @@ FVector AFillainCharacter::GetHitTarget() const
 {
 	if (Combat == nullptr) return FVector();
 	return Combat->HitTarget;;
-}
-
-ECombatState AFillainCharacter::GetCombatState() const
-{
-	if (Combat == nullptr) return ECombatState::ECS_MAX;
-	return Combat->CombatState;
 }
 
 

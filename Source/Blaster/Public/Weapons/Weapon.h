@@ -6,7 +6,6 @@
 #include "GameFramework/Actor.h"
 #include "Components/SphereComponent.h"
 #include "Animation/AnimationAsset.h"
-#include "Weapons/WeaponTypes.h"
 #include "Weapon.generated.h"
 
 UENUM(BlueprintType)
@@ -28,14 +27,8 @@ public:
 	AWeapon();
 	virtual void Tick(float DeltaTime) override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
-	virtual void OnRep_Owner() override;
-	void SetHUDAmmo();
 	void ShowPickupWidgets(bool bShowWidget);
 	virtual void Fire(const FVector& HitTarget);
-	void AddAmmo(int32 AmmoToAdd);
-	
-	UPROPERTY(EditAnywhere)
-	class USoundCue* EquipSound;
 
 	/*
 	** Textures for the Weapon Crosshairs
@@ -123,25 +116,7 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Weapon Properties")
 	TSubclassOf<class ACasing> CasingClass;
 
-	UPROPERTY(EditAnywhere, ReplicatedUsing = OnRep_Ammo)
-	int32 Ammo;
 
-	UFUNCTION()
-	void OnRep_Ammo();
-
-	void SpendRoundOfAmmo();
-
-	UPROPERTY(EditAnywhere)
-	int32 MagCapacity;
-
-	UPROPERTY()
-	class AFillainCharacter* FillainOwnerCharacter;
-
-	UPROPERTY()
-	class AFillainPlayerController* FillainOwnerController;
-
-	UPROPERTY(EditAnywhere)
-	EWeaponType WeaponType;
 
 
 
@@ -153,8 +128,6 @@ public:
 	FORCEINLINE USkeletalMeshComponent* GetWeaponMesh() const { return WeaponMesh; }
 	FORCEINLINE float GetZoomedFOV() const { return ZoomedFOV; }
 	FORCEINLINE float GetZoomInterpSpeed() const { return ZoomInterpSpeed; }
-	bool IsEmpty();
-	FORCEINLINE EWeaponType GetWeaponType() const { return WeaponType; }
-	FORCEINLINE int32 GetAmmo() const { return Ammo; }
-	FORCEINLINE int32 GetMagCapacity() const { return MagCapacity; }
+
+
 };
