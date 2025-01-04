@@ -153,7 +153,7 @@ void AFillainCharacter::PostInitializeComponents()
 	Super::PostInitializeComponents();
 	if (Combat)
 	{
-		Combat->PlayerCharacter = this;
+		Combat->Character = this;
 	}
 
 }

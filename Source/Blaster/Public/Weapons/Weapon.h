@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "Components/SphereComponent.h"
 #include "Animation/AnimationAsset.h"
+#include "Weapons/WeaponTypes.h"
 #include "Weapon.generated.h"
 
 UENUM(BlueprintType)
@@ -135,11 +136,8 @@ private:
 	UPROPERTY()
 	class AFillainPlayerController* FillainOwnerController;
 
-
-
-
-
-	
+	UPROPERTY(EditAnywhere)
+	EWeaponType WeaponType;
 
 public:	
 	void SetWeaponState(EWeaponState State);
@@ -148,6 +146,6 @@ public:
 	FORCEINLINE float GetZoomedFOV() const { return ZoomedFOV; }
 	FORCEINLINE float GetZoomInterpSpeed() const { return ZoomInterpSpeed; }
 	bool IsWeaponEmpty();
-
+	FORCEINLINE EWeaponType GetWeaponType() const { return WeaponType; }
 
 };

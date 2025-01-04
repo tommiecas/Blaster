@@ -47,10 +47,10 @@ protected:
 
 private:
 	UPROPERTY()
-	class AFillainCharacter* PlayerCharacter;
+	class AFillainCharacter* Character;
 	
 	UPROPERTY()
-	class AFillainPlayerController* PlayerController;
+	class AFillainPlayerController* Controller;
 	
 	UPROPERTY()
 	class AFillainHUD* PlayerHUD;
@@ -117,6 +117,11 @@ private:
 	void OnRep_CarriedAmmo();
 
 	TMap<EWeaponType, int32> CarriedAmmoMap;
+
+	void InitializeCarriedAmmo();
+
+	UPROPERTY(EditAnywhere)
+	int32 StartingARAmmo = 30;
 
 public:	
 	
