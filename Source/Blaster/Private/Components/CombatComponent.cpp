@@ -310,6 +310,12 @@ void UCombatComponent::MulticastFire_Implementation(const FVector_NetQuantize& T
 void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 {
 	if (Character == nullptr || WeaponToEquip == nullptr) return;
+	if (WeaponToEquip)
+	{
+		EquippedWeapon = WeaponToEquip;
+		EquippedWeapon->SetOwner(Character);
+		OnRep_EquippedWeapon();
+	}
 	if (EquippedWeapon)
 	{
 		EquippedWeapon->DropWeapon();
@@ -333,6 +339,7 @@ void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 	if (Controller)
 	{
 		Controller->SetHUDCarriedAmmo(CarriedAmmo);
+		Controller->SetHUDWeaponType(Character);
 	}
 
 	if (EquippedWeapon->EquipSound)
@@ -454,6 +461,11 @@ void UCombatComponent::OnRep_EquippedWeapon()
 				this,
 				EquippedWeapon->EquipSound,
 				Character->GetActorLocation());
+		}
+	
+		if (Controller)
+		{
+			Controller->SetHUDWeaponType(Character);
 		}
 	}
 }

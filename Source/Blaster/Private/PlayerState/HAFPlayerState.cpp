@@ -7,6 +7,7 @@
 #include "Net/UnrealNetwork.h"
 
 
+
 void AHAFPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);

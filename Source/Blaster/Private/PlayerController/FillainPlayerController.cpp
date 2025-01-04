@@ -7,6 +7,10 @@
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
 #include "Characters/FillainCharacter.h"
+#include "Weapons/Weapon.h"
+#include "PlayerState/HAFPlayerState.h"
+#include "Weapons/WeaponTypes.h"
+#include "UObject/EnumProperty.h"
 
 
 
@@ -14,6 +18,14 @@ void AFillainPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 	FillainHUD = Cast <AFillainHUD>(GetHUD());
+}
+
+FString AFillainPlayerController::GetWeaponTypeDisplayName(EWeaponType WeaponType)
+{
+	const UEnum* EnumPtr = FindObject<UEnum>(ANY_PACKAGE, TEXT("EWeaponType"), true);
+	if (!EnumPtr) return FString("Invalid");
+
+	return EnumPtr->GetDisplayNameTextByValue((int64)WeaponType).ToString();
 }
 
 void AFillainPlayerController::OnPossess(APawn* InPawn)
@@ -83,6 +95,19 @@ void AFillainPlayerController::SetHUDCarriedAmmo(int32 CarriedAmmo)
 	{
 		FString CarriedAmmoText = FString::Printf(TEXT("%d"), CarriedAmmo);
 		FillainHUD->CharacterOverlay->CarriedAmmoAmount->SetText(FText::FromString(CarriedAmmoText));
+	}
+}
+
+void AFillainPlayerController::SetHUDWeaponType(APawn* InPawn)
+{
+	FillainHUD = FillainHUD == nullptr ? Cast<AFillainHUD>(GetHUD()) : FillainHUD;
+	AFillainCharacter* FillainCharacter = Cast<AFillainCharacter>(InPawn);
+	EquippedWeapon = EquippedWeapon == nullptr ? Cast<AWeapon>(FillainCharacter->GetEquippedWeapon()) : EquippedWeapon;
+	bool bIsHUDValid = FillainHUD && FillainHUD->CharacterOverlay && FillainHUD->CharacterOverlay->WeaponTypeText;
+	if (bIsHUDValid && FillainCharacter && EquippedWeapon)
+	{
+		FString WeaponTypeName = GetWeaponTypeDisplayName(EquippedWeapon->GetWeaponType());
+		FillainHUD->CharacterOverlay->WeaponTypeText->SetText(FText::FromString(WeaponTypeName));
 	}
 }
 

@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
+#include "Weapons/WeaponTypes.h"
 #include "FillainPlayerController.generated.h"
 
 /**
@@ -20,13 +21,23 @@ public:
 	void SetHUDDefeats(int32 Defeats);
 	void SetHUDWeaponAmmo(int32 WeaponAmmo);
 	void SetHUDCarriedAmmo(int32 CarriedAmmo);
+	void SetHUDWeaponType(APawn* InPawn);
 	virtual void OnPossess(APawn* InPawn) override;
 
 protected:
 	virtual void BeginPlay() override;
 
 private:
+	FString GetWeaponTypeDisplayName(EWeaponType WeaponType);
+
 	UPROPERTY()
 	class AFillainHUD* FillainHUD;
+
+	UPROPERTY()
+	class AWeapon* EquippedWeapon;
+
+
+
+
 	
 };
