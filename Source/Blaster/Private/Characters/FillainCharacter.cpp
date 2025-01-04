@@ -642,11 +642,14 @@ AWeapon* AFillainCharacter::GetEquippedWeapon()
 FVector AFillainCharacter::GetHitTarget() const
 {
 	if (Combat == nullptr) return FVector();
-	return Combat->HitTarget;;
+	return Combat->HitTarget;
 }
 
-
-
+ECombatState AFillainCharacter::GetCombatState() const
+{
+	if (Combat == nullptr) return ECombatState::ECS_MAX;
+	return Combat->CombatState;
+}
 
 void AFillainCharacter::Jump()
 {
