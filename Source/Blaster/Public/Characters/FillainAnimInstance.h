@@ -79,5 +79,11 @@ private:
 	bool bIsEliminated;
 
 	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
-	bool bUseFABRIK;;
+	bool bUseFABRIK;
+
+	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
+	bool bUseAimOffsets;
+
+	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
+	bool bTransformRightHand;
 };
