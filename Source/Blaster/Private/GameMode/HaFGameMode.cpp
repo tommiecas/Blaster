@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "GameMode/HaFGameMode.h"
+#include "GameMode/HAFGameMode.h"
 #include "Characters/FillainCharacter.h"
 #include "PlayerController/FillainPlayerController.h"
 #include "Kismet/GameplayStatics.h"
@@ -9,7 +9,7 @@
 #include "PlayerState/HAFPlayerState.h"
 
 
-void AHaFGameMode::PlayerEliminated(AFillainCharacter* EliminatedCharacter, AFillainPlayerController* VictimController, AFillainPlayerController* KillerController)
+void AHAFGameMode::PlayerEliminated(AFillainCharacter* EliminatedCharacter, AFillainPlayerController* VictimController, AFillainPlayerController* KillerController)
 {
 	AHAFPlayerState* KillerPlayerState = KillerController ? Cast<AHAFPlayerState>(KillerController->PlayerState) : nullptr;
 	AHAFPlayerState* VictimPlayerState = VictimController ? Cast<AHAFPlayerState>(VictimController->PlayerState) : nullptr;
@@ -28,7 +28,7 @@ void AHaFGameMode::PlayerEliminated(AFillainCharacter* EliminatedCharacter, AFil
 	}
 }
 
-void AHaFGameMode::RequestRespawn(ACharacter* EliminatedPlayerCharacter, AFillainPlayerController* EliminatedPlayerController)
+void AHAFGameMode::RequestRespawn(ACharacter* EliminatedPlayerCharacter, AFillainPlayerController* EliminatedPlayerController)
 {
 	if (EliminatedPlayerCharacter)
 	{

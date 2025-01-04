@@ -19,7 +19,7 @@
 #include "Characters/FillainAnimInstance.h"
 #include "Blaster/Blaster.h"
 #include "PlayerController/FillainPlayerController.h"
-#include "GameMode/HaFGameMode.h"
+#include "GameMode/HAFGameMode.h"
 #include "TimerManager.h"
 #include "Kismet/GameplayStatics.h"
 #include "Sound/SoundCue.h"
@@ -140,7 +140,7 @@ void AFillainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &AFillainCharacter::Jump);
 		EnhancedInputComponent->BindAction(EquipAction, ETriggerEvent::Triggered, this, &AFillainCharacter::EquipButtonPressed);
 		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Triggered, this, &AFillainCharacter::CrouchButtonPressed);
-		EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Triggered, this, &AFillainCharacter::AimButtonPressed);
+		EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Started, this, &AFillainCharacter::AimButtonPressed);
 		EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Completed, this, &AFillainCharacter::AimButtonReleased);
 		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &AFillainCharacter::FireButtonPressed);
 		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Completed, this, &AFillainCharacter::FireButtonReleased);
@@ -189,6 +189,10 @@ void AFillainCharacter::Eliminate()
 
 void AFillainCharacter::MulticastEliminate_Implementation()
 {
+	if (FillainPlayerController)
+	{
+		FillainPlayerController->SetHUDWeaponAmmo(0);
+	}
 	bIsEliminated = true;
 	PlayEliminatedMontage();
 
@@ -237,10 +241,10 @@ void AFillainCharacter::MulticastEliminate_Implementation()
 
 void AFillainCharacter::EliminationTimerFinished()
 {
-	AHaFGameMode* HaFGameMode = GetWorld()->GetAuthGameMode<AHaFGameMode>();
-	if (HaFGameMode)
+	AHAFGameMode* HAFGameMode = GetWorld()->GetAuthGameMode<AHAFGameMode>();
+	if (HAFGameMode)
 	{
-		HaFGameMode->RequestRespawn(this, FillainPlayerController);
+		HAFGameMode->RequestRespawn(this, FillainPlayerController);
 	}	
 }
 
@@ -305,12 +309,12 @@ void AFillainCharacter::ReceiveDamage(AActor* DamagedActor, float Damage, const 
 
 	if (Health == 0.f)
 	{
-		AHaFGameMode* HaFGameMode = GetWorld()->GetAuthGameMode<AHaFGameMode>();
-		if (HaFGameMode)
+		AHAFGameMode* HAFGameMode = GetWorld()->GetAuthGameMode<AHAFGameMode>();
+		if (HAFGameMode)
 		{
 			FillainPlayerController = FillainPlayerController == nullptr ? Cast<AFillainPlayerController>(Controller) : FillainPlayerController;
 			AFillainPlayerController* KillerController = Cast<AFillainPlayerController>(InstigatorController);
-			HaFGameMode->PlayerEliminated(this, FillainPlayerController, KillerController);
+			HAFGameMode->PlayerEliminated(this, FillainPlayerController, KillerController);
 		}
 	}
 }
