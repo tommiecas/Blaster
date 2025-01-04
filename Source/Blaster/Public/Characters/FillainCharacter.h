@@ -25,27 +25,25 @@ public:
 	AFillainCharacter();
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
-	/*
-	** Jumping
-	*/ 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
-	UInputAction* JumpAction;
-
-	virtual void Jump() override;
-
 	virtual void OnRep_PlayerState() override;
 	virtual void PossessedBy(AController* NewController) override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void PostInitializeComponents() override;
 	virtual void OnRep_ReplicatedMovement() override;
-	void PlayFireMontage(bool bAiming);
 	void Eliminate();
 	virtual void Destroyed() override;
 
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastEliminate();
 	
+	/****************
+	* PLAY MONTAGES *
+	*****************/
+
+	void PlayFireMontage(bool bAiming);
+	void PlayHitReactMontage();
+	void PlayEliminatedMontage();
+	void PlayReloadingMontage();
 
 protected:
 	virtual void BeginPlay() override;
@@ -68,6 +66,14 @@ protected:
 	UInputAction* LookAction;
 
 	void Look(const FInputActionValue& Value);
+
+	/*
+	** Jumping
+	*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+	UInputAction* JumpAction;
+
+	virtual void Jump() override;
 
 	/*
 	** Equipping Weapons
@@ -107,8 +113,13 @@ protected:
 	void FireButtonPressed();
 	void FireButtonReleased();
 
-	void PlayHitReactMontage();
-	void PlayEliminatedMontage();
+	/*
+	** Reloading the Weapon
+	*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+	UInputAction* ReloadAction;
+
+	void ReloadButtonPressed();
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void ShowPlayerName();
@@ -150,6 +161,10 @@ private:
 	ETurningInPlace TurningInPlace;
 	void TurnInPlace(float DeltaTime);
 
+	/*
+	** Animation Montages
+	*/
+
 	UPROPERTY(EditAnywhere, Category = Combat)
 	class UAnimMontage* FireWeaponMontage;
 
@@ -158,6 +173,9 @@ private:
 
 	UPROPERTY(Replicated, EditAnywhere, Category = Combat)
 	class UAnimMontage* EliminatedMontage;
+
+	UPROPERTY(Replicated, EditAnywhere, Category = Combat)
+	class UAnimMontage* ReloadingMontage;
 
 	void HideCharacterIfCameraClose();
 
