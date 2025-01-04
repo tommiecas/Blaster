@@ -266,6 +266,10 @@ void UCombatComponent::FireTimerFinished()
 	{
 		Fire();
 	}
+	if (EquippedWeapon->IsWeaponEmpty())
+	{
+		Reloading();
+	}
 }
 
 bool UCombatComponent::CanIFire()
@@ -337,6 +341,11 @@ void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 			this, 
 			EquippedWeapon->EquipSound, 
 			Character->GetActorLocation());
+	}
+
+	if (EquippedWeapon->IsWeaponEmpty())
+	{
+		Reloading();
 	}
 	Character->GetCharacterMovement()->bOrientRotationToMovement = false;
 	Character->bUseControllerRotationYaw = true;
