@@ -48,6 +48,12 @@ void AWeapon::DropWeapon()
 	FillainOwnerController = nullptr;
 }
 
+void AWeapon::AddAmmo(int32 AmmoToAdd)
+{
+	Ammo = FMath::Clamp(Ammo - AmmoToAdd, 0, MagCapacity);
+	SetHUDAmmo();
+}
+
 void AWeapon::BeginPlay()
 {
 	Super::BeginPlay();

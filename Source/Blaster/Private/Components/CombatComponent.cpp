@@ -270,7 +270,7 @@ void UCombatComponent::FireTimerFinished()
 bool UCombatComponent::CanIFire()
 {
 	if (EquippedWeapon == nullptr) return false;
-	return !EquippedWeapon->IsWeaponEmpty() && bCanGunFire && CombatState != ECombatState::ECS_Unoccupied;
+	return EquippedWeapon->IsWeaponEmpty() == false && bCanGunFire && CombatState == ECombatState::ECS_Unoccupied;
 }
 
 void UCombatComponent::OnRep_CarriedAmmo()
@@ -348,6 +348,7 @@ void UCombatComponent::FinishReloading()
 	if (Character->HasAuthority())
 	{
 		CombatState = ECombatState::ECS_Unoccupied;
+		UpdateAmmoValues();
 	}
 	if (bIsFireButtonPressed)
 	{
@@ -357,7 +358,8 @@ void UCombatComponent::FinishReloading()
 
 void UCombatComponent::ServerReloading_Implementation()
 {
-	if (Character == nullptr) return;
+	if (Character == nullptr || EquippedWeapon == nullptr) return;
+
 	CombatState = ECombatState::ECS_Reloading;
 	HandleReload();
 }
@@ -365,6 +367,21 @@ void UCombatComponent::ServerReloading_Implementation()
 void UCombatComponent::HandleReload()
 {
 	Character->PlayReloadingMontage();
+}
+
+int32 UCombatComponent::AmountToReload()
+{
+	if (EquippedWeapon == nullptr) return 0;
+	int32 RoomInMag = EquippedWeapon->GetMagCapacity() - EquippedWeapon->GetAmmo();
+
+	if (CarriedAmmoMap.Contains(EquippedWeapon->GetWeaponType()))
+	{
+		int32 AmountCarried = CarriedAmmoMap[EquippedWeapon->GetWeaponType()];
+		int32 Least = FMath::Min(RoomInMag, AmountCarried);
+		return FMath::Clamp(RoomInMag, 0, Least);
+	}
+
+	return 0;
 }
 
 void UCombatComponent::OnRep_CombatState()
@@ -381,6 +398,23 @@ void UCombatComponent::OnRep_CombatState()
 		}
 		break;
 	}
+}
+
+void UCombatComponent::UpdateAmmoValues()
+{
+	if (EquippedWeapon == nullptr) return;
+	int32 ReloadAmount = AmountToReload();
+	if (CarriedAmmoMap.Contains(EquippedWeapon->GetWeaponType()))
+	{
+		CarriedAmmoMap[EquippedWeapon->GetWeaponType()] -= ReloadAmount;
+		CarriedAmmo = CarriedAmmoMap[EquippedWeapon->GetWeaponType()];
+	}
+	Controller = Controller == nullptr ? Cast<AFillainPlayerController>(Character->Controller) : Controller;
+	if (Controller)
+	{
+		Controller->SetHUDCarriedAmmo(CarriedAmmo);
+	}
+	EquippedWeapon->AddAmmo(-ReloadAmount);
 }
 
 void UCombatComponent::OnRep_EquippedWeapon()
