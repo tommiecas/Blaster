@@ -11,6 +11,7 @@
 #include "PlayerState/HAFPlayerState.h"
 #include "Weapons/WeaponTypes.h"
 #include "UObject/EnumProperty.h"
+#include "TimerManager.h"
 
 
 
@@ -18,6 +19,23 @@ void AFillainPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 	FillainHUD = Cast <AFillainHUD>(GetHUD());
+}
+
+void AFillainPlayerController::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+	SetHUDTime();
+}
+
+void AFillainPlayerController::SetHUDTime()
+{
+	uint32 SecondsLeft = FMath::CeilToInt(MatchTime - GetWorld()->GetTimeSeconds());
+	if (CountdownInt != SecondsLeft)
+	{
+		SetHUDMatchCountdown(MatchTime - GetWorld()->GetTimeSeconds());
+	}
+
+	CountdownInt = SecondsLeft;
 }
 
 FString AFillainPlayerController::GetWeaponTypeDisplayName(EWeaponType WeaponType)
@@ -108,6 +126,57 @@ void AFillainPlayerController::SetHUDWeaponType(APawn* InPawn)
 	{
 		FString WeaponTypeName = GetWeaponTypeDisplayName(EquippedWeapon->GetWeaponType());
 		FillainHUD->CharacterOverlay->WeaponTypeText->SetText(FText::FromString(WeaponTypeName));
+	}
+}
+
+void AFillainPlayerController::SetHUDEliminationMessage(AController* KillerController, AController* VictimController)
+{
+	FillainHUD = FillainHUD == nullptr ? Cast<AFillainHUD>(GetHUD()) : FillainHUD;
+	bool bIsHUDValid = FillainHUD && FillainHUD->CharacterOverlay && FillainHUD->CharacterOverlay->EliminationMessageText && FillainHUD->CharacterOverlay->VictimNameText && FillainHUD->CharacterOverlay->KillerNameText;
+	if (bIsHUDValid)
+	{
+		AHAFPlayerState* KillerPlayerState = KillerController ? Cast<AHAFPlayerState>(KillerController->PlayerState) : nullptr;
+		AHAFPlayerState* VictimPlayerState = VictimController ? Cast<AHAFPlayerState>(VictimController->PlayerState) : nullptr;
+
+		FString NameOfVictim = VictimPlayerState->GetPlayerName();
+		FString NameOfKiller = KillerPlayerState->GetPlayerName();
+
+		FString VictimName = FString::Printf(TEXT("%s"), *NameOfVictim);
+		FString EliminationMessage = FString::Printf(TEXT("Was Eliminated By"));
+		FString KillerName = FString::Printf(TEXT("%s"), *NameOfKiller);
+		FillainHUD->CharacterOverlay->VictimNameText->SetText(FText::FromString(VictimName));
+		FillainHUD->CharacterOverlay->EliminationMessageText->SetText(FText::FromString(EliminationMessage));
+		FillainHUD->CharacterOverlay->KillerNameText->SetText(FText::FromString(KillerName));
+		// Set a timer to clear the message after 3 seconds
+		FTimerHandle TimerHandle;
+		GetWorldTimerManager().SetTimer(TimerHandle, [this]() {
+			FillainHUD->CharacterOverlay->VictimNameText->SetText(FText::GetEmpty()); },
+			3.0f,
+			false
+			);
+		GetWorldTimerManager().SetTimer(TimerHandle, [this]() {
+			FillainHUD->CharacterOverlay->EliminationMessageText->SetText(FText::GetEmpty()); },
+			3.0f,
+			false
+			);
+		GetWorldTimerManager().SetTimer(TimerHandle, [this]() {
+			FillainHUD->CharacterOverlay->KillerNameText->SetText(FText::GetEmpty()); },
+			3.0f,
+			false
+			);
+	}
+}
+
+void AFillainPlayerController::SetHUDMatchCountdown(float CountdownTime)
+{
+	FillainHUD = FillainHUD == nullptr ? Cast<AFillainHUD>(GetHUD()) : FillainHUD;
+	bool bIsHUDValid = FillainHUD && FillainHUD->CharacterOverlay && FillainHUD->CharacterOverlay->MatchCountdownText;
+	if (bIsHUDValid)
+	{
+		int32 Minutes = FMath::FloorToInt(CountdownTime / 60.f);
+		int32 Seconds = CountdownTime - Minutes * 60;;
+		FString CountdownText = FString::Printf(TEXT("%02d:%02d"), Minutes, Seconds);
+		FillainHUD->CharacterOverlay->MatchCountdownText->SetText(FText::FromString(CountdownText));
 	}
 }
 

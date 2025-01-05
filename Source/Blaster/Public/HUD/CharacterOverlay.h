@@ -36,4 +36,16 @@ public:
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* WeaponTypeText;
 
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* EliminationMessageText;
+
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* VictimNameText;
+
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* KillerNameText;
+
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* MatchCountdownText;
+
 };

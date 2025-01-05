@@ -22,11 +22,14 @@ public:
 	void SetHUDWeaponAmmo(int32 WeaponAmmo);
 	void SetHUDCarriedAmmo(int32 CarriedAmmo);
 	void SetHUDWeaponType(APawn* InPawn);
+	void SetHUDEliminationMessage(AController* KillerController, AController* VictimController);
+	void SetHUDMatchCountdown(float CountdownTime);
 	virtual void OnPossess(APawn* InPawn) override;
+	virtual void Tick(float DeltaTime) override;
 
 protected:
 	virtual void BeginPlay() override;
-
+	void SetHUDTime();
 private:
 	FString GetWeaponTypeDisplayName(EWeaponType WeaponType);
 
@@ -35,6 +38,9 @@ private:
 
 	UPROPERTY()
 	class AWeapon* EquippedWeapon;
+
+	float MatchTime = 120.f;
+	uint32 CountdownInt;
 
 
 

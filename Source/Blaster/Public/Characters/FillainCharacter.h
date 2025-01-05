@@ -207,6 +207,9 @@ private:
 	UPROPERTY()
 	class AFillainPlayerController* FillainPlayerController;
 
+	UPROPERTY()
+	class AHAFPlayerState* HAFPlayerState;
+
 	bool bIsEliminated = false;
 
 	FTimerHandle EliminationTimer;
@@ -251,9 +254,8 @@ private:
 	
 	UPROPERTY(EditAnywhere)
 	class USoundCue* EliminationBotSound;
-
-	UPROPERTY()
-	class AHAFPlayerState* HAFPlayerState;
+	
+	
 
 public:
 	void SetOverlappingWeapon(AWeapon* Weapon);

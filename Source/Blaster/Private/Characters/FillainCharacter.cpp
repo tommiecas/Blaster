@@ -345,7 +345,14 @@ void AFillainCharacter::ReceiveDamage(AActor* DamagedActor, float Damage, const 
 		{
 			FillainPlayerController = FillainPlayerController == nullptr ? Cast<AFillainPlayerController>(Controller) : FillainPlayerController;
 			AFillainPlayerController* KillerController = Cast<AFillainPlayerController>(InstigatorController);
+			AFillainCharacter* EliminatedCharacter = Cast<AFillainCharacter>(DamagedActor);
 			HAFGameMode->PlayerEliminated(this, FillainPlayerController, KillerController);
+			APlayerState* EliminatedPlayerState = EliminatedCharacter->GetPlayerState();
+			if (FillainPlayerController && KillerController && EliminatedPlayerState != nullptr)
+			{
+				AController* VictimController = EliminatedCharacter->GetController();
+				KillerController->SetHUDEliminationMessage(KillerController, VictimController);
+			}
 		}
 	}
 }
