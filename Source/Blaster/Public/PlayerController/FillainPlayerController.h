@@ -70,6 +70,7 @@ protected:
 	void CheckTimeSync(float DeltaTime);
 
 	void PollInit();
+	void HandleMatchHasStarted();
 
 private:
 	FString GetWeaponTypeDisplayName(EWeaponType WeaponType);

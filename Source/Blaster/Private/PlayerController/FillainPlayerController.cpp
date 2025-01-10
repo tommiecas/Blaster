@@ -30,6 +30,7 @@
 #include "Sound/SoundCue.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "GameMode/LobbyGameMode.h"
+#include "HUD/Announcement.h"
 
 
 
@@ -39,6 +40,10 @@ void AFillainPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 	FillainHUD = Cast <AFillainHUD>(GetHUD());
+	if (FillainHUD)
+	{
+		FillainHUD->AddAnnouncement();
+	}
 }
 
 void AFillainPlayerController::Tick(float DeltaTime)
@@ -128,6 +133,8 @@ void AFillainPlayerController::PollInit()
 		}
 	}
 }
+
+
 
 FString AFillainPlayerController::GetWeaponTypeDisplayName(EWeaponType WeaponType)
 {
@@ -289,22 +296,28 @@ void AFillainPlayerController::OnMatchStateSet(FName NewState)
 
 	if (MatchState == MatchState::InProgress)
 	{
-		FillainHUD = FillainHUD == nullptr ? Cast<AFillainHUD>(GetHUD()) : FillainHUD;
-		if (FillainHUD)
-		{
-			FillainHUD->AddCharacterOverlay();
-		}
+		HandleMatchHasStarted();
 	}
 }
 
 void AFillainPlayerController::OnRep_MatchState()
 {
+	
 	if (MatchState == MatchState::InProgress)
 	{
-		FillainHUD = FillainHUD == nullptr ? Cast<AFillainHUD>(GetHUD()) : FillainHUD;
-		if (FillainHUD)
+		HandleMatchHasStarted();
+	}
+}
+
+void AFillainPlayerController::HandleMatchHasStarted()
+{
+	FillainHUD = FillainHUD == nullptr ? Cast<AFillainHUD>(GetHUD()) : FillainHUD;
+	if (FillainHUD)
+	{
+		FillainHUD->AddCharacterOverlay();
+		if (FillainHUD->Announcement)
 		{
-			FillainHUD->AddCharacterOverlay();
+			FillainHUD->Announcement->SetVisibility(ESlateVisibility::Hidden);
 		}
 	}
 }
