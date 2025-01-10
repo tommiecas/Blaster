@@ -33,6 +33,8 @@
 
 
 
+
+
 void AFillainPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
@@ -50,6 +52,14 @@ void AFillainPlayerController::Tick(float DeltaTime)
 		ServerRequestServerTime(GetWorld()->GetTimeSeconds());
 		TimeSyncRunningTime = 0.f;
 	}
+	PollInit();
+}
+
+void AFillainPlayerController::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AFillainPlayerController, MatchState);
 }
 
 float AFillainPlayerController::GetServerTime()
@@ -102,6 +112,23 @@ void AFillainPlayerController::CheckTimeSync(float DeltaTime)
 	}
 }
 
+void AFillainPlayerController::PollInit()
+{
+	if (CharacterOverlay == nullptr)
+	{
+		if (FillainHUD && FillainHUD->CharacterOverlay)
+		{
+			CharacterOverlay = FillainHUD->CharacterOverlay;
+			if (CharacterOverlay)
+			{
+				SetHUDHealth(HUDHealth, HUDMaxHealth);
+				SetHUDScore(HUDScore);
+				SetHUDDefeats(HUDDefeats);
+			}
+		}
+	}
+}
+
 FString AFillainPlayerController::GetWeaponTypeDisplayName(EWeaponType WeaponType)
 {
 	const UEnum* EnumPtr = FindObject<UEnum>(ANY_PACKAGE, TEXT("EWeaponType"), true);
@@ -109,6 +136,8 @@ FString AFillainPlayerController::GetWeaponTypeDisplayName(EWeaponType WeaponTyp
 
 	return EnumPtr->GetDisplayNameTextByValue((int64)WeaponType).ToString();
 }
+
+
 
 void AFillainPlayerController::OnPossess(APawn* InPawn)
 {
@@ -121,7 +150,9 @@ void AFillainPlayerController::OnPossess(APawn* InPawn)
 	}
 }
 
-	void AFillainPlayerController::SetHUDHealth(float Health, float MaxHealth)
+
+
+void AFillainPlayerController::SetHUDHealth(float Health, float MaxHealth)
 {
 	FillainHUD = FillainHUD == nullptr ? Cast<AFillainHUD>(GetHUD()) : FillainHUD;
 
@@ -132,6 +163,12 @@ void AFillainPlayerController::OnPossess(APawn* InPawn)
 		FillainHUD->CharacterOverlay->HealthBar->SetPercent(HealthPercent);
 		FString HealthText = FString::Printf(TEXT("%d/%d"), FMath::CeilToInt(Health), FMath::CeilToInt(MaxHealth));
 		FillainHUD->CharacterOverlay->HealthText->SetText(FText::FromString(HealthText));
+	}
+	else
+	{
+		bInitializeCharacterOverlay = true;
+		HUDHealth = Health;
+		HUDMaxHealth = MaxHealth;
 	}
 }
 
@@ -144,7 +181,6 @@ void AFillainPlayerController::SetHUDScore(float Score)
 		FString ScoreText = FString::Printf(TEXT("%d"), FMath::FloorToInt(Score));
 		FillainHUD->CharacterOverlay->ScoreAmount->SetText(FText::FromString(ScoreText));
 	}
-
 }
 
 void AFillainPlayerController::SetHUDDefeats(int32 Defeats)
@@ -155,6 +191,11 @@ void AFillainPlayerController::SetHUDDefeats(int32 Defeats)
 	{
 		FString DefeatsText = FString::Printf(TEXT("%d"), Defeats);
 		FillainHUD->CharacterOverlay->DefeatsAmount->SetText(FText::FromString(DefeatsText));
+	}
+	else
+	{
+		bInitializeCharacterOverlay = true;
+		HUDDefeats = Defeats;
 	}
 }
 
@@ -242,4 +283,28 @@ void AFillainPlayerController::SetHUDMatchCountdown(float CountdownTime)
 	}
 }
 
+void AFillainPlayerController::OnMatchStateSet(FName NewState)
+{
+	MatchState = NewState;
 
+	if (MatchState == MatchState::InProgress)
+	{
+		FillainHUD = FillainHUD == nullptr ? Cast<AFillainHUD>(GetHUD()) : FillainHUD;
+		if (FillainHUD)
+		{
+			FillainHUD->AddCharacterOverlay();
+		}
+	}
+}
+
+void AFillainPlayerController::OnRep_MatchState()
+{
+	if (MatchState == MatchState::InProgress)
+	{
+		FillainHUD = FillainHUD == nullptr ? Cast<AFillainHUD>(GetHUD()) : FillainHUD;
+		if (FillainHUD)
+		{
+			FillainHUD->AddCharacterOverlay();
+		}
+	}
+}

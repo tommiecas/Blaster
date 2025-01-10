@@ -19,6 +19,7 @@ class BLASTER_API AFillainPlayerController : public APlayerController
 	GENERATED_BODY()
 
 public:
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	void SetHUDHealth(float Health, float MaxHealth);
 	void SetHUDScore(float Score);
 	void SetHUDDefeats(int32 Defeats);
@@ -37,6 +38,8 @@ public:
 
 	UPROPERTY()
 	AFillainCharacter* KillerCharacter;
+
+	void OnMatchStateSet(FName State);
 
 protected:
 	virtual void BeginPlay() override;
@@ -66,6 +69,8 @@ protected:
 	float TimeSyncRunningTime = 0.f;
 	void CheckTimeSync(float DeltaTime);
 
+	void PollInit();
+
 private:
 	FString GetWeaponTypeDisplayName(EWeaponType WeaponType);
 
@@ -84,8 +89,23 @@ private:
 	float MatchTime = 120.f;
 	uint32 CountdownInt;
 
+	UPROPERTY(ReplicatedUsing = OnRep_MatchState)
+	FName MatchState;
+
+	UFUNCTION()
+	void OnRep_MatchState();
+
 	UPROPERTY()
-	bool bIsMessageSet = true;
+	class UCharacterOverlay* CharacterOverlay;
+	bool bInitializeCharacterOverlay = false;
+
+	float HUDHealth;
+	float HUDMaxHealth;
+	float HUDScore;
+	int32 HUDDefeats;
+
+
+
 
 public:
 	AFillainCharacter* GetFillain() const { return Fillain; }

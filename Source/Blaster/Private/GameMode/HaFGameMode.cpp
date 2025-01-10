@@ -21,6 +21,8 @@ void AHAFGameMode::BeginPlay()
 	LevelStartingTime = GetWorld()->GetTimeSeconds();
 }
 
+
+
 void AHAFGameMode::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -31,6 +33,19 @@ void AHAFGameMode::Tick(float DeltaTime)
 		if (CountdownTime <= 0.f)
 		{
 			StartMatch();
+		}
+	}
+}
+
+void AHAFGameMode::OnMatchStateSet()
+{
+	Super::OnMatchStateSet();
+	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
+	{
+		AFillainPlayerController* FillainPlayer = Cast<AFillainPlayerController>(*It);
+		if (FillainPlayer)
+		{
+			FillainPlayer->OnMatchStateSet(MatchState);
 		}
 	}
 }
