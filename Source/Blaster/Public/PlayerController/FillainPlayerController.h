@@ -28,6 +28,7 @@ public:
 	void SetHUDWeaponType(APawn* InPawn);
 	void SetHUDEliminationMessage(AFillainPlayerController* ConstKillerController, AFillainPlayerController* ConstVictimController);
 	void SetHUDMatchCountdown(float CountdownTime);
+	void SetHUDAnnouncementCountdown(float CountdownTime);
 	virtual void OnPossess(APawn* InPawn) override;
 	virtual void Tick(float DeltaTime) override;
 	virtual float GetServerTime(); // Synced with server World clock
@@ -40,6 +41,7 @@ public:
 	AFillainCharacter* KillerCharacter;
 
 	void OnMatchStateSet(FName State);
+	void HandleCooldown();
 
 protected:
 	virtual void BeginPlay() override;
@@ -72,6 +74,12 @@ protected:
 	void PollInit();
 	void HandleMatchHasStarted();
 
+	UFUNCTION(Server, Reliable)
+	void ServerCheckMatchState();
+
+	UFUNCTION(Client, Reliable)
+	void ClientJoinMidGame(FName StateOfMatch, float Warmup, float Match, float StartingTime);
+
 private:
 	FString GetWeaponTypeDisplayName(EWeaponType WeaponType);
 
@@ -87,7 +95,9 @@ private:
 	UPROPERTY()
 	class AWeapon* EquippedWeapon;
 
-	float MatchTime = 120.f;
+	float MatchTime = 0.f;
+	float WarmupTime = 0.f;
+	float LevelStartingTime = 0.f;
 	uint32 CountdownInt;
 
 	UPROPERTY(ReplicatedUsing = OnRep_MatchState)

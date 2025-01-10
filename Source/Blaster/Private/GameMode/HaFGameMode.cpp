@@ -8,6 +8,11 @@
 #include "GameFramework/PlayerStart.h"
 #include "PlayerState/HAFPlayerState.h"
 
+namespace MatchState
+{
+	const FName Cooldown = FName(TEXT("Cooldown"));
+}
+
 
 AHAFGameMode::AHAFGameMode()
 {
@@ -33,6 +38,14 @@ void AHAFGameMode::Tick(float DeltaTime)
 		if (CountdownTime <= 0.f)
 		{
 			StartMatch();
+		}
+	}
+	else if (MatchState == MatchState::InProgress)
+	{
+		CountdownTime = WarmupTime + MatchTime - GetWorld()->GetTimeSeconds() + LevelStartingTime;
+		if (CountdownTime <= 0.f)
+		{
+			SetMatchState(MatchState::Cooldown);
 		}
 	}
 }

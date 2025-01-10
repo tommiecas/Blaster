@@ -36,14 +36,13 @@
 
 
 
+
+
 void AFillainPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
-	FillainHUD = Cast <AFillainHUD>(GetHUD());
-	if (FillainHUD)
-	{
-		FillainHUD->AddAnnouncement();
-	}
+	FillainHUD = Cast<AFillainHUD>(GetHUD());
+	ServerCheckMatchState();
 }
 
 void AFillainPlayerController::Tick(float DeltaTime)
@@ -84,10 +83,20 @@ void AFillainPlayerController::ReceivedPlayer()
 
 void AFillainPlayerController::SetHUDTime()
 {
-	uint32 SecondsLeft = FMath::CeilToInt(MatchTime - GetServerTime());
+	float TimeLeft = 0.f;
+	if (MatchState == MatchState::WaitingToStart) TimeLeft = WarmupTime - GetServerTime() + LevelStartingTime;
+	else if (MatchState == MatchState::InProgress) TimeLeft = WarmupTime + MatchTime - GetServerTime() + LevelStartingTime; 
+	uint32 SecondsLeft = FMath::CeilToInt(TimeLeft);
 	if (CountdownInt != SecondsLeft)
 	{
-		SetHUDMatchCountdown(MatchTime - GetServerTime());
+		if (MatchState == MatchState::WaitingToStart)
+		{
+			SetHUDAnnouncementCountdown(TimeLeft);
+		}
+		else if (MatchState == MatchState::InProgress)
+		{
+			SetHUDMatchCountdown(TimeLeft);
+		}
 	}
 
 	CountdownInt = SecondsLeft;
@@ -133,8 +142,6 @@ void AFillainPlayerController::PollInit()
 		}
 	}
 }
-
-
 
 FString AFillainPlayerController::GetWeaponTypeDisplayName(EWeaponType WeaponType)
 {
@@ -290,6 +297,20 @@ void AFillainPlayerController::SetHUDMatchCountdown(float CountdownTime)
 	}
 }
 
+void AFillainPlayerController::SetHUDAnnouncementCountdown(float CountdownTime)
+{
+	FillainHUD = FillainHUD == nullptr ? Cast<AFillainHUD>(GetHUD()) : FillainHUD;
+	bool bIsHUDValid = FillainHUD && FillainHUD->Announcement && FillainHUD->Announcement->WarmupTime;
+	if (bIsHUDValid)
+	{
+		int32 Minutes = FMath::FloorToInt(CountdownTime / 60.f);
+		int32 Seconds = CountdownTime - Minutes * 60;;
+		FString CountdownText = FString::Printf(TEXT("%02d:%02d"), Minutes, Seconds);
+		FillainHUD->Announcement->WarmupTime->SetText(FText::FromString(CountdownText));
+	}
+}
+
+
 void AFillainPlayerController::OnMatchStateSet(FName NewState)
 {
 	MatchState = NewState;
@@ -297,6 +318,23 @@ void AFillainPlayerController::OnMatchStateSet(FName NewState)
 	if (MatchState == MatchState::InProgress)
 	{
 		HandleMatchHasStarted();
+	}
+	else if (MatchState == MatchState::Cooldown)
+	{
+		HandleCooldown();
+	}
+}
+
+void AFillainPlayerController::HandleCooldown()
+{
+	FillainHUD = FillainHUD == nullptr ? Cast<AFillainHUD>(GetHUD()) : FillainHUD;
+	if (FillainHUD)
+	{
+		FillainHUD->CharacterOverlay->RemoveFromParent();;
+		if (FillainHUD->Announcement)
+		{
+			FillainHUD->Announcement->SetVisibility(ESlateVisibility::Visible);
+		}
 	}
 }
 
@@ -306,6 +344,10 @@ void AFillainPlayerController::OnRep_MatchState()
 	if (MatchState == MatchState::InProgress)
 	{
 		HandleMatchHasStarted();
+	}
+	else if (MatchState == MatchState::Cooldown)
+	{
+		HandleCooldown();
 	}
 }
 
@@ -319,5 +361,35 @@ void AFillainPlayerController::HandleMatchHasStarted()
 		{
 			FillainHUD->Announcement->SetVisibility(ESlateVisibility::Hidden);
 		}
+	}
+}
+
+void AFillainPlayerController::ServerCheckMatchState_Implementation()
+{
+	AHAFGameMode* GameMode = Cast<AHAFGameMode>(UGameplayStatics::GetGameMode(this));
+	if (GameMode)
+	{
+		WarmupTime = GameMode->WarmupTime;
+		MatchTime = GameMode->MatchTime;
+		LevelStartingTime = GameMode->LevelStartingTime;
+		MatchState = GameMode->GetMatchState();
+		ClientJoinMidGame(MatchState, WarmupTime, MatchTime, LevelStartingTime);
+
+	}
+}
+
+
+
+void AFillainPlayerController::ClientJoinMidGame_Implementation (FName StateOfMatch, float Warmup, float Match, float StartingTime)
+{
+	WarmupTime = Warmup;
+	MatchTime = Match;
+	LevelStartingTime = StartingTime;
+	MatchState = StateOfMatch;
+	OnMatchStateSet(MatchState);
+
+	if (FillainHUD && MatchState == MatchState::WaitingToStart)
+	{
+		FillainHUD->AddAnnouncement();
 	}
 }
