@@ -86,10 +86,20 @@ void AFillainPlayerController::SetHUDTime()
 	float TimeLeft = 0.f;
 	if (MatchState == MatchState::WaitingToStart) TimeLeft = WarmupTime - GetServerTime() + LevelStartingTime;
 	else if (MatchState == MatchState::InProgress) TimeLeft = WarmupTime + MatchTime - GetServerTime() + LevelStartingTime; 
+	else if (MatchState == MatchState::Cooldown) TimeLeft = CooldownTime + WarmupTime + MatchTime - GetServerTime() + LevelStartingTime;
 	uint32 SecondsLeft = FMath::CeilToInt(TimeLeft);
+
+	if (HasAuthority())
+	{
+		Mode = Mode == nullptr ? Cast<AHAFGameMode>(UGameplayStatics::GetGameMode(this)) : Mode;
+		if (Mode)
+		{
+			SecondsLeft = FMath::CeilToInt(Mode->GetCountdownTime() + LevelStartingTime);
+		}
+	}
 	if (CountdownInt != SecondsLeft)
 	{
-		if (MatchState == MatchState::WaitingToStart)
+		if (MatchState == MatchState::WaitingToStart || MatchState == MatchState::Cooldown)
 		{
 			SetHUDAnnouncementCountdown(TimeLeft);
 		}
@@ -290,6 +300,11 @@ void AFillainPlayerController::SetHUDMatchCountdown(float CountdownTime)
 	bool bIsHUDValid = FillainHUD && FillainHUD->CharacterOverlay && FillainHUD->CharacterOverlay->MatchCountdownText;
 	if (bIsHUDValid)
 	{
+		if (CountdownTime < 0.f)
+		{
+			FillainHUD->CharacterOverlay->MatchCountdownText->SetText(FText::FromString(TEXT("")));
+			return;
+		}
 		int32 Minutes = FMath::FloorToInt(CountdownTime / 60.f);
 		int32 Seconds = CountdownTime - Minutes * 60;;
 		FString CountdownText = FString::Printf(TEXT("%02d:%02d"), Minutes, Seconds);
@@ -303,6 +318,7 @@ void AFillainPlayerController::SetHUDAnnouncementCountdown(float CountdownTime)
 	bool bIsHUDValid = FillainHUD && FillainHUD->Announcement && FillainHUD->Announcement->WarmupTime;
 	if (bIsHUDValid)
 	{
+
 		int32 Minutes = FMath::FloorToInt(CountdownTime / 60.f);
 		int32 Seconds = CountdownTime - Minutes * 60;;
 		FString CountdownText = FString::Printf(TEXT("%02d:%02d"), Minutes, Seconds);
@@ -331,9 +347,13 @@ void AFillainPlayerController::HandleCooldown()
 	if (FillainHUD)
 	{
 		FillainHUD->CharacterOverlay->RemoveFromParent();;
-		if (FillainHUD->Announcement)
+		bool bHUDValid = FillainHUD->Announcement && FillainHUD->Announcement->AnnouncementText && FillainHUD->Announcement->InfoText;
+		if (bHUDValid)
 		{
 			FillainHUD->Announcement->SetVisibility(ESlateVisibility::Visible);
+			FString AnnouncementText("New Match Starts In:");
+			FillainHUD->Announcement->AnnouncementText->SetText(FText::FromString(AnnouncementText));
+			FillainHUD->Announcement->InfoText->SetText(FText());
 		}
 	}
 }
@@ -371,19 +391,26 @@ void AFillainPlayerController::ServerCheckMatchState_Implementation()
 	{
 		WarmupTime = GameMode->WarmupTime;
 		MatchTime = GameMode->MatchTime;
+		CooldownTime = GameMode->CooldownTime;
 		LevelStartingTime = GameMode->LevelStartingTime;
 		MatchState = GameMode->GetMatchState();
-		ClientJoinMidGame(MatchState, WarmupTime, MatchTime, LevelStartingTime);
+		ClientJoinMidGame(MatchState, WarmupTime, MatchTime, CooldownTime, LevelStartingTime);
+
+		if (FillainHUD && MatchState == MatchState::Cooldown)
+		{
+			HandleCooldown();
+		}
 
 	}
 }
 
 
 
-void AFillainPlayerController::ClientJoinMidGame_Implementation (FName StateOfMatch, float Warmup, float Match, float StartingTime)
+void AFillainPlayerController::ClientJoinMidGame_Implementation (FName StateOfMatch, float Warmup, float Match, float Cooldown, float StartingTime)
 {
 	WarmupTime = Warmup;
 	MatchTime = Match;
+	CooldownTime = Cooldown;
 	LevelStartingTime = StartingTime;
 	MatchState = StateOfMatch;
 	OnMatchStateSet(MatchState);

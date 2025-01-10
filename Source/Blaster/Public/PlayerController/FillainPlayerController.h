@@ -78,7 +78,7 @@ protected:
 	void ServerCheckMatchState();
 
 	UFUNCTION(Client, Reliable)
-	void ClientJoinMidGame(FName StateOfMatch, float Warmup, float Match, float StartingTime);
+	void ClientJoinMidGame(FName StateOfMatch, float Warmup, float Match, float Cooldown, float StartingTime);
 
 private:
 	FString GetWeaponTypeDisplayName(EWeaponType WeaponType);
@@ -92,12 +92,16 @@ private:
     UPROPERTY(meta = (AllowPrivateAccess = "true"))
     class AHAFPlayerState* State;
 
+	UPROPERTY(meta = (AllowPrivateAccess = "true"))
+	class AHAFGameMode* Mode;
+
 	UPROPERTY()
 	class AWeapon* EquippedWeapon;
 
 	float MatchTime = 0.f;
 	float WarmupTime = 0.f;
 	float LevelStartingTime = 0.f;
+	float CooldownTime = 0.f;
 	uint32 CountdownInt;
 
 	UPROPERTY(ReplicatedUsing = OnRep_MatchState)

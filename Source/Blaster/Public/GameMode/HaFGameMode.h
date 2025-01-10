@@ -49,5 +49,6 @@ private:
 
 public:
 	class AFillainCharacter* GetCharacter() const { return Character; }
+	FORCEINLINE float GetCountdownTime() const { return CountdownTime; }
 
 };
