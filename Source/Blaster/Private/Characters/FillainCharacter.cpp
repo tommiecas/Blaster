@@ -26,6 +26,7 @@
 #include "Particles/ParticleSystemComponent.h"
 #include "PlayerState/HAFPlayerState.h"
 #include "Weapons/WeaponTypes.h"
+#include "GameMode/LobbyGameMode.h"
 
 
 AFillainCharacter::AFillainCharacter()
@@ -89,44 +90,30 @@ void AFillainCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
+	if (AFillainPlayerController* FillainController = Cast<AFillainPlayerController>(Controller))
 	{
-		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
+		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(FillainController->GetLocalPlayer()))
 		{
-			Subsystem->AddMappingContext(FillainMappingContext, 0);
+			Subsystem->AddMappingContext(HAFMappingContext, 0);
 		}
 	}
-
-	if (HasAuthority() && IsLocallyControlled())
+	/*if (FillainPlayerController == nullptr)
 	{
-		ShowPlayerName();
+		FillainPlayerController = Cast<AFillainPlayerController>(GetController());
 	}
+	if (FillainPlayerController)
+	{
+		// Set the player state or any other necessary properties here
+		FillainPlayerController->InitPlayerState();
+		HAFPlayerState = FillainPlayerController->GetPlayerState<AHAFPlayerState>();
 
+		// Log the player controller name for debugging
+		UE_LOG(LogTemp, Log, TEXT("FillainPlayerController initialized: %s"), *FillainPlayerController->GetName());
+	}*/
 	UpdateHUDHealth();
 	if (HasAuthority())
 	{
 		OnTakeAnyDamage.AddDynamic(this, &AFillainCharacter::ReceiveDamage);
-	}
-}
-
-void AFillainCharacter::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-	if (GetLocalRole() > ENetRole::ROLE_SimulatedProxy && IsLocallyControlled())
-	{
-		AimOffset(DeltaTime);
-	}
-	else
-	{
-		TimeSinceLastMovementReplication += DeltaTime;
-		if (TimeSinceLastMovementReplication > 0.25f)
-		{
-			OnRep_ReplicatedMovement();
-		}
-		CalculateAO_Pitch();
-		AimOffset(DeltaTime);
-		HideCharacterIfCameraClose();
-		PollInit();
 	}
 }
 
@@ -145,10 +132,36 @@ void AFillainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 		EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Completed, this, &AFillainCharacter::AimButtonReleased);
 		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &AFillainCharacter::FireButtonPressed);
 		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Completed, this, &AFillainCharacter::FireButtonReleased);
-		EnhancedInputComponent->BindAction(ReloadAction, ETriggerEvent::Started, this, &AFillainCharacter::ReloadButtonPressed);
-
+		EnhancedInputComponent->BindAction(ReloadAction, ETriggerEvent::Triggered, this, &AFillainCharacter::ReloadButtonPressed);
 	}
 }
+
+void AFillainCharacter::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+	if (GetLocalRole() > ENetRole::ROLE_SimulatedProxy && IsLocallyControlled())
+	{
+		AimOffset(DeltaTime);
+	}
+	else
+	{
+		TimeSinceLastMovementReplication += DeltaTime;
+		if (TimeSinceLastMovementReplication > 0.25f)
+		{
+			OnRep_ReplicatedMovement();
+		}
+		CalculateAO_Pitch();
+	}
+	HideCharacterIfCameraClose();
+	PollInit();
+}
+
+void AFillainCharacter::Restart()
+{
+	Super::Restart();
+}
+
+
 
 void AFillainCharacter::PostInitializeComponents()
 {
@@ -191,9 +204,9 @@ void AFillainCharacter::Eliminate()
 
 void AFillainCharacter::MulticastEliminate_Implementation()
 {
-	if (FillainPlayerController)
+	if (VictimController)
 	{
-		FillainPlayerController->SetHUDWeaponAmmo(0);
+		VictimController->SetHUDWeaponAmmo(0);
 	}
 	bIsEliminated = true;
 	PlayEliminatedMontage();
@@ -211,15 +224,14 @@ void AFillainCharacter::MulticastEliminate_Implementation()
 	// Disable Character Movement
 	GetCharacterMovement()->DisableMovement();
 	GetCharacterMovement()->StopMovementImmediately();
-	if (FillainPlayerController)
+	if (VictimController)
 	{
-		DisableInput(FillainPlayerController);
+		DisableInput(VictimController);
 	}
 
 	// Disable Collision
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	
 	//Spawn Elimination-Bot
 	if (EliminationBotEffect)
 	{
@@ -246,8 +258,9 @@ void AFillainCharacter::EliminationTimerFinished()
 	AHAFGameMode* HAFGameMode = GetWorld()->GetAuthGameMode<AHAFGameMode>();
 	if (HAFGameMode)
 	{
-		HAFGameMode->RequestRespawn(this, FillainPlayerController);
-	}	
+			HAFGameMode->RequestRespawn(this, Controller);
+	
+	}
 }
 
 void AFillainCharacter::Destroyed()
@@ -262,6 +275,7 @@ void AFillainCharacter::Destroyed()
 void AFillainCharacter::UpdateHUDHealth()
 {
 	FillainPlayerController = FillainPlayerController == nullptr ? Cast<AFillainPlayerController>(Controller) : FillainPlayerController;
+
 	if (FillainPlayerController)
 	{
 		FillainPlayerController->SetHUDHealth(Health, MaxHealth);
@@ -332,7 +346,7 @@ void AFillainCharacter::PlayReloadingMontage()
 	}
 }
 
-void AFillainCharacter::ReceiveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatorController, AActor* DamageCauser)
+void AFillainCharacter::ReceiveDamage(AActor* DamagedPawn, float Damage, const UDamageType* DamageType, AController* InstigatorController, AActor* DamageCauser)
 {
 	Health = FMath::Clamp(Health - Damage, 0.f, MaxHealth);
 	UpdateHUDHealth();
@@ -341,21 +355,18 @@ void AFillainCharacter::ReceiveDamage(AActor* DamagedActor, float Damage, const 
 	if (Health == 0.f)
 	{
 		AHAFGameMode* HAFGameMode = GetWorld()->GetAuthGameMode<AHAFGameMode>();
-		if (HAFGameMode)
+		VictimCharacter = Cast<AFillainCharacter>(DamagedPawn);
+		VictimController = Cast<AFillainPlayerController>(VictimCharacter->GetController());
+		AFillainPlayerController* KillerController = Cast<AFillainPlayerController>(InstigatorController);
+		if (VictimCharacter && HAFGameMode && VictimController && KillerController)
 		{
-			FillainPlayerController = FillainPlayerController == nullptr ? Cast<AFillainPlayerController>(Controller) : FillainPlayerController;
-			AFillainPlayerController* KillerController = Cast<AFillainPlayerController>(InstigatorController);
-			AFillainCharacter* EliminatedCharacter = Cast<AFillainCharacter>(DamagedActor);
-			HAFGameMode->PlayerEliminated(this, FillainPlayerController, KillerController);
-			APlayerState* EliminatedPlayerState = EliminatedCharacter->GetPlayerState();
-			if (FillainPlayerController && KillerController && EliminatedPlayerState != nullptr)
-			{
-				AController* VictimController = EliminatedCharacter->GetController();
-				KillerController->SetHUDEliminationMessage(KillerController, VictimController);
-			}
+			HAFGameMode->PlayerEliminated(this, VictimController, KillerController);
+			VictimController->SetHUDEliminationMessage(KillerController, VictimController);
+			KillerController->SetHUDEliminationMessage(KillerController, VictimController);
 		}
-	}
+	}		
 }
+
 
 void AFillainCharacter::OnRep_Health()
 {
@@ -640,6 +651,13 @@ bool AFillainCharacter::IsAiming()
 	return (Combat && Combat->bAiming);
 }
 
+AWeapon* AFillainCharacter::GetOverlappingWeapon()
+{
+	AFillainCharacter* FillainCharacter = Cast<AFillainCharacter>(this);
+	if (FillainCharacter == nullptr) return nullptr;
+	return FillainCharacter->OverlappingWeapon;
+}
+
 AWeapon* AFillainCharacter::GetEquippedWeapon()
 {
 	if (Combat == nullptr) return nullptr;
@@ -657,6 +675,28 @@ ECombatState AFillainCharacter::GetCombatState() const
 	if (Combat == nullptr) return ECombatState::ECS_MAX;
 	return Combat->CombatState;
 }
+
+UCombatComponent* AFillainCharacter::GetCombatComponent() const
+{
+	return Combat;
+}
+
+AFillainPlayerController* AFillainCharacter::GetFillainPlayerController() 
+{
+	AFillainCharacter* Char = Cast<AFillainCharacter>(this);
+	if (Char)
+	{
+		AHAFPlayerState* HAFState = Char->GetPlayerState<AHAFPlayerState>();
+		if (HAFState)
+		{
+			AFillainPlayerController* FillainController = Cast<AFillainPlayerController>(HAFState->GetFillainPlayerController());
+			return FillainController;
+		}
+		else return nullptr;
+	}
+	else return nullptr;
+}
+
 
 void AFillainCharacter::Jump()
 {
@@ -679,7 +719,24 @@ void AFillainCharacter::OnRep_PlayerState()
 void AFillainCharacter::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
-	ShowPlayerName();
+	// Ensure FillainPlayerController is initialized
+
+	if (AFillainPlayerController* NewFillainController = Cast<AFillainPlayerController>(NewController))
+	{
+		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(NewFillainController->GetLocalPlayer()))
+		{
+			Subsystem->AddMappingContext(HAFMappingContext, 0);
+		}
+		if (NewFillainController)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Successfully initialized FillainPlayerController"));
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Failed to initialize FillainPlayerController"));
+		}
+		ShowPlayerName();
+	}
 }
 
 

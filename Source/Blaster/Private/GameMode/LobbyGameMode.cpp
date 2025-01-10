@@ -4,10 +4,14 @@
 #include "GameMode/LobbyGameMode.h"
 #include "GameFramework/GameStateBase.h"
 #include "GameFramework/PlayerState.h"
+#include "PlayerController/FillainPlayerController.h"
+#include "PlayerState/HAFPlayerState.h"
+#include "Characters/FillainCharacter.h"
 
 void ALobbyGameMode::PostLogin(APlayerController* NewPlayer)
 {
 	Super::PostLogin(NewPlayer);
+
 	// Add player to lobby
 	// LobbyPlayers.Add(NewPlayer);
 	int32 NumberOfPlayers = GameState.Get()->PlayerArray.Num();
@@ -20,5 +24,6 @@ void ALobbyGameMode::PostLogin(APlayerController* NewPlayer)
 			World->ServerTravel(FString("/Game/Maps/HAFBattleMap?listen"));
 		}
 	}
+	
 }
 

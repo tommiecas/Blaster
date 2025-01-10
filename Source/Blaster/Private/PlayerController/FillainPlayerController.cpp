@@ -12,6 +12,24 @@
 #include "Weapons/WeaponTypes.h"
 #include "UObject/EnumProperty.h"
 #include "TimerManager.h"
+#include "Net/UnrealNetwork.h"
+#include "Components/InputComponent.h"
+#include "EnhancedInputSubsystems.h"
+#include "EnhancedInputComponent.h"
+#include "Components/CombatComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "Components/WidgetComponent.h"
+#include "GameFramework/PlayerState.h"
+#include "HUD/OverheadWidget.h"
+#include "Components/CapsuleComponent.h"
+#include "Kismet/KismetMathLibrary.h"
+#include "Characters/FillainAnimInstance.h"
+#include "Blaster/Blaster.h"
+#include "GameMode/HAFGameMode.h"
+#include "Kismet/GameplayStatics.h"
+#include "Sound/SoundCue.h"
+#include "Particles/ParticleSystemComponent.h"
+#include "GameMode/LobbyGameMode.h"
 
 
 
@@ -60,6 +78,7 @@ void AFillainPlayerController::SetHUDTime()
 	CountdownInt = SecondsLeft;
 }
 
+
 void AFillainPlayerController::ServerRequestServerTime_Implementation(float TimeOfClientRequest)
 {
 	float ServerTimeOfReceipt = GetWorld()->GetTimeSeconds();
@@ -95,14 +114,14 @@ void AFillainPlayerController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
 
-	AFillainCharacter* FillainCharacter = Cast<AFillainCharacter>(InPawn);
-	if (FillainCharacter)
+	AFillainCharacter* PlayerCharacter = Cast<AFillainCharacter>(InPawn);
+	if (PlayerCharacter)
 	{
-		SetHUDHealth(FillainCharacter->GetHealth(), FillainCharacter->GetMaxHealth());
+		SetHUDHealth(PlayerCharacter->GetHealth(), PlayerCharacter->GetMaxHealth());
 	}
 }
 
-void AFillainPlayerController::SetHUDHealth(float Health, float MaxHealth)
+	void AFillainPlayerController::SetHUDHealth(float Health, float MaxHealth)
 {
 	FillainHUD = FillainHUD == nullptr ? Cast<AFillainHUD>(GetHUD()) : FillainHUD;
 
@@ -164,54 +183,52 @@ void AFillainPlayerController::SetHUDCarriedAmmo(int32 CarriedAmmo)
 void AFillainPlayerController::SetHUDWeaponType(APawn* InPawn)
 {
 	FillainHUD = FillainHUD == nullptr ? Cast<AFillainHUD>(GetHUD()) : FillainHUD;
-	AFillainCharacter* FillainCharacter = Cast<AFillainCharacter>(InPawn);
-	EquippedWeapon = EquippedWeapon == nullptr ? Cast<AWeapon>(FillainCharacter->GetEquippedWeapon()) : EquippedWeapon;
+	AFillainCharacter* FCharacter = Cast<AFillainCharacter>(InPawn);
+	EquippedWeapon = EquippedWeapon == nullptr ? Cast<AWeapon>(FCharacter->GetEquippedWeapon()) : EquippedWeapon;
 	bool bIsHUDValid = FillainHUD && FillainHUD->CharacterOverlay && FillainHUD->CharacterOverlay->WeaponTypeText;
-	if (bIsHUDValid && FillainCharacter && EquippedWeapon)
+	if (bIsHUDValid && FCharacter && EquippedWeapon)
 	{
 		FString WeaponTypeName = GetWeaponTypeDisplayName(EquippedWeapon->GetWeaponType());
 		FillainHUD->CharacterOverlay->WeaponTypeText->SetText(FText::FromString(WeaponTypeName));
 	}
 }
 
-void AFillainPlayerController::SetHUDEliminationMessage(AController* KillerController, AController* VictimController)
+void AFillainPlayerController::SetHUDEliminationMessage(AFillainPlayerController* KillerController, AFillainPlayerController* VictimController)
 {
 	FillainHUD = FillainHUD == nullptr ? Cast<AFillainHUD>(GetHUD()) : FillainHUD;
 	bool bIsHUDValid = FillainHUD && FillainHUD->CharacterOverlay && FillainHUD->CharacterOverlay->EliminationMessageText && FillainHUD->CharacterOverlay->VictimNameText && FillainHUD->CharacterOverlay->KillerNameText;
-	if (bIsHUDValid)
+
+	if (FillainHUD && bIsHUDValid && VictimController && KillerController)
 	{
-		AHAFPlayerState* KillerPlayerState = KillerController ? Cast<AHAFPlayerState>(KillerController->PlayerState) : nullptr;
-		AHAFPlayerState* VictimPlayerState = VictimController ? Cast<AHAFPlayerState>(VictimController->PlayerState) : nullptr;
-
-		FString NameOfVictim = VictimPlayerState->GetPlayerName();
-		FString NameOfKiller = KillerPlayerState->GetPlayerName();
-
-		FString VictimName = FString::Printf(TEXT("%s"), *NameOfVictim);
+		FString NameOfVictim = VictimController->PlayerState->GetPlayerName();
+		FString NameOfKiller = KillerController->PlayerState->GetPlayerName();
 		FString EliminationMessage = FString::Printf(TEXT("Was Eliminated By"));
+		FString VictimName = FString::Printf(TEXT("%s"), *NameOfVictim);
 		FString KillerName = FString::Printf(TEXT("%s"), *NameOfKiller);
 		FillainHUD->CharacterOverlay->VictimNameText->SetText(FText::FromString(VictimName));
-		FillainHUD->CharacterOverlay->EliminationMessageText->SetText(FText::FromString(EliminationMessage));
 		FillainHUD->CharacterOverlay->KillerNameText->SetText(FText::FromString(KillerName));
-		// Set a timer to clear the message after 3 seconds
-		FTimerHandle TimerHandle;
-		GetWorldTimerManager().SetTimer(TimerHandle, [this]() {
+		FillainHUD->CharacterOverlay->EliminationMessageText->SetText(FText::FromString(EliminationMessage));
+		FTimerHandle TimerHandleVictim;
+		FTimerHandle TimerHandleKiller;
+		FTimerHandle TimerHandleElimination;
+		GetWorldTimerManager().SetTimer(TimerHandleVictim, [this]() {
 			FillainHUD->CharacterOverlay->VictimNameText->SetText(FText::GetEmpty()); },
 			3.0f,
 			false
 			);
-		GetWorldTimerManager().SetTimer(TimerHandle, [this]() {
-			FillainHUD->CharacterOverlay->EliminationMessageText->SetText(FText::GetEmpty()); },
+		GetWorldTimerManager().SetTimer(TimerHandleKiller, [this]() {
+			FillainHUD->CharacterOverlay->KillerNameText->SetText(FText::GetEmpty()); },
 			3.0f,
 			false
 			);
-		GetWorldTimerManager().SetTimer(TimerHandle, [this]() {
-			FillainHUD->CharacterOverlay->KillerNameText->SetText(FText::GetEmpty()); },
+		GetWorldTimerManager().SetTimer(TimerHandleElimination, [this]() {
+			FillainHUD->CharacterOverlay->EliminationMessageText->SetText(FText::GetEmpty()); },
 			3.0f,
 			false
 			);
 	}
 }
-
+	
 void AFillainPlayerController::SetHUDMatchCountdown(float CountdownTime)
 {
 	FillainHUD = FillainHUD == nullptr ? Cast<AFillainHUD>(GetHUD()) : FillainHUD;

@@ -14,6 +14,13 @@ AHAFGameMode::AHAFGameMode()
 	bDelayedStart = true;
 }
 
+void AHAFGameMode::BeginPlay()
+{
+	Super::BeginPlay();
+
+	LevelStartingTime = GetWorld()->GetTimeSeconds();
+}
+
 void AHAFGameMode::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -28,10 +35,12 @@ void AHAFGameMode::Tick(float DeltaTime)
 	}
 }
 
-void AHAFGameMode::PlayerEliminated(AFillainCharacter* EliminatedCharacter, AFillainPlayerController* VictimController, AFillainPlayerController* KillerController)
+void AHAFGameMode::PlayerEliminated(class AFillainCharacter* VictimCharacter, class AFillainPlayerController* VictimController, AFillainPlayerController* KillerController)
 {
+	if (KillerController == nullptr || KillerController->PlayerState == nullptr) return;
+	if (VictimController == nullptr || VictimController->PlayerState == nullptr) return;
 	AHAFPlayerState* KillerPlayerState = KillerController ? Cast<AHAFPlayerState>(KillerController->PlayerState) : nullptr;
-	AHAFPlayerState* VictimPlayerState = VictimController ? Cast<AHAFPlayerState>(VictimController->PlayerState) : nullptr;
+	AHAFPlayerState* VictimPlayerState = VictimController ? Cast<AHAFPlayerState>(VictimController->PlayerState) : nullptr;	
 
 	if (KillerPlayerState && KillerPlayerState != VictimPlayerState)
 	{
@@ -39,33 +48,29 @@ void AHAFGameMode::PlayerEliminated(AFillainCharacter* EliminatedCharacter, AFil
 	}
 	if (VictimPlayerState)
 	{
-		VictimPlayerState->AddToDefeats(0.5);
+		VictimPlayerState->AddToDefeats(1);
 	}
-	if (EliminatedCharacter)
+	if (VictimCharacter)
 	{
-		EliminatedCharacter->Eliminate();
+		VictimCharacter->Eliminate();
 	}
 }
 
-void AHAFGameMode::RequestRespawn(ACharacter* EliminatedPlayerCharacter, AFillainPlayerController* EliminatedPlayerController)
+void AHAFGameMode::RequestRespawn(ACharacter* VictimCharacter, AController* VictimController)
 {
-	if (EliminatedPlayerCharacter)
+	if (VictimCharacter)
 	{
-		EliminatedPlayerCharacter->Reset();
-		EliminatedPlayerCharacter->Destroy();
+		VictimCharacter->Reset();
+		VictimCharacter->Destroy();
 	}
-	if (EliminatedPlayerController)
+	if (VictimController)
 	{
 		TArray<AActor*> PlayerStarts;
 		UGameplayStatics::GetAllActorsOfClass(this, APlayerStart::StaticClass(), PlayerStarts);
 		int32 Selection = FMath::RandRange(0, PlayerStarts.Num() - 1);
-		RestartPlayerAtPlayerStart(EliminatedPlayerController, PlayerStarts[Selection]);
+		RestartPlayerAtPlayerStart(VictimController, PlayerStarts[Selection]);
 	}
 }
 
-void AHAFGameMode::BeginPlay()
-{
-	Super::BeginPlay();
 
-	LevelStartingTime = GetWorld()->GetTimeSeconds();
-}
+

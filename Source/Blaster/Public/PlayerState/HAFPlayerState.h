@@ -27,15 +27,22 @@ public:
 	UFUNCTION()
 	virtual void OnRep_Defeats();
 
+protected:
 
 private:
-	UPROPERTY()
+	UPROPERTY(meta = (AllowPrvateAccess = "true"))
 	class AFillainCharacter* Character;
 	
-	UPROPERTY()
+	UPROPERTY(meta = (AllowPrivateAccess = "true"))
 	class AFillainPlayerController* Controller;
 
 	UPROPERTY(ReplicatedUsing = OnRep_Defeats);
-	float Defeats;
+	int32 Defeats;
+
+public:
+	AFillainCharacter* GetFillainPlayerCharacter() const { return Character; }
+	AFillainPlayerController* GetFillainPlayerController() const { return Controller; }
+	float GetScore(float InScore) const { return Score; }
+	int32 GetDefeats(int32 InDefeats) const { return Defeats; }
 
 };

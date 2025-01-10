@@ -10,12 +10,26 @@
 #include "Interfaces/InteractWithCrosshairsInterface.h"
 #include "Components/TimelineComponent.h"
 #include "Blaster/BlasterTypes/CombatState.h"
+#include "GameMode/LobbyGameMode.h"
 #include "FillainCharacter.generated.h"
 
 class USpringArmComponent;
 class UCameraComponent;
 class UInputMappingContext;
 class UInputAction;
+struct FInputActionValue;
+class UWidgetComponent;
+class UCombatComponent;
+class UAnimMontage;
+class UCurveFloat;
+class UTimelineComponent;
+class UCurveFloat;
+class UCurveLinearColor;
+class UCurveVector;
+class UDamageType;
+class AFillainPlayerController;
+class AHAFPlayerState;
+class ALobbyGameMode;
 
 UCLASS()
 class BLASTER_API AFillainCharacter : public ACharacter, public IInteractWithCrosshairsInterface
@@ -24,7 +38,9 @@ class BLASTER_API AFillainCharacter : public ACharacter, public IInteractWithCro
 
 public:
 	AFillainCharacter();
+	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
+	virtual void Restart() override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void OnRep_PlayerState() override;
 	virtual void PossessedBy(AController* NewController) override;
@@ -32,25 +48,45 @@ public:
 	virtual void PostInitializeComponents() override;
 	virtual void OnRep_ReplicatedMovement() override;
 	void Eliminate();
+	void FinishElimination();
 	virtual void Destroyed() override;
+
+	UPROPERTY()
+	class AFillainPlayerController* FillainPlayerController;
+
+	UPROPERTY()
+	class AFillainPlayerController* VictimController;
+
+	UPROPERTY()
+	class AHAFPlayerState* HAFPlayerState;
+
+	UPROPERTY()
+	AFillainCharacter* VictimCharacter = nullptr;
 
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastEliminate();
 	
+
+	/**********
+	* Jumping *
+	***********/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+	UInputAction* JumpAction;
+
+	virtual void Jump() override;
+
+
 	/****************
 	* PLAY MONTAGES *
 	*****************/
-
 	void PlayFireMontage(bool bAiming);
 	void PlayHitReactMontage();
 	void PlayEliminatedMontage();
 	void PlayReloadingMontage();
 
 protected:
-	virtual void BeginPlay() override;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
-	UInputMappingContext* FillainMappingContext;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	class UInputMappingContext* HAFMappingContext;
 
 	/* 
 	** Moving Around
@@ -67,14 +103,6 @@ protected:
 	UInputAction* LookAction;
 
 	void Look(const FInputActionValue& Value);
-
-	/*
-	** Jumping
-	*/
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
-	UInputAction* JumpAction;
-
-	virtual void Jump() override;
 
 	/*
 	** Equipping Weapons
@@ -126,11 +154,13 @@ protected:
 	void ShowPlayerName();
 
 	UFUNCTION()
-	void ReceiveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, class AController* InstigatorController, AActor* DamageCauser);
+	void ReceiveDamage(AActor* DamagedPawn, float Damage, const UDamageType* DamageType, class AController* InstigatorController, AActor* DamageCauser);
 	
 	void UpdateHUDHealth();
 	// Poll for any relevant classes and initialize our HUD
 	void PollInit();
+
+	
 
 private:	
 	UPROPERTY(VisibleAnywhere, Category = Camera)
@@ -204,11 +234,7 @@ private:
 	UFUNCTION()
 	void OnRep_Health();
 
-	UPROPERTY()
-	class AFillainPlayerController* FillainPlayerController;
 
-	UPROPERTY()
-	class AHAFPlayerState* HAFPlayerState;
 
 	bool bIsEliminated = false;
 
@@ -217,7 +243,7 @@ private:
 	void EliminationTimerFinished();
 
 	UPROPERTY(EditDefaultsOnly)
-	float EliminationDelay = 12.f;
+	float EliminationDelay = 3.f;
 
 	/*
 	** Dissolve Effect
@@ -262,8 +288,10 @@ public:
 	bool IsWeaponEquipped();
 	bool IsAiming();
 
+	FORCEINLINE USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	FORCEINLINE float GetAO_Yaw() const { return AO_Yaw; }
 	FORCEINLINE float GetAO_Pitch() const { return AO_Pitch; }
+	AWeapon* GetOverlappingWeapon();
 	AWeapon* GetEquippedWeapon();
 	FORCEINLINE ETurningInPlace GetTurningInPlace() const { return TurningInPlace; }
 	FVector GetHitTarget() const;
@@ -273,4 +301,10 @@ public:
 	FORCEINLINE float GetHealth() const { return Health; }
 	FORCEINLINE float GetMaxHealth() const { return MaxHealth; }	
 	ECombatState GetCombatState() const;
+	UCombatComponent* GetCombatComponent() const;
+	AHAFPlayerState* GetHAFPlayerState() const { return HAFPlayerState; }
+	AFillainPlayerController* GetFillainPlayerController();
+	
+	
+	
 };

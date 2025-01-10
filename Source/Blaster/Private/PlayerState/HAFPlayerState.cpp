@@ -23,7 +23,7 @@ void AHAFPlayerState::AddToScore(float ScoreAmount)
 		Controller = Controller == nullptr ? Cast<AFillainPlayerController>(Character->Controller) : Controller;
 		if (Controller)
 		{
-			Controller->SetHUDScore(GetScore());
+			Controller->SetHUDScore(GetScore(Score));
 		}
 	}
 }
@@ -55,7 +55,6 @@ void AHAFPlayerState::OnRep_Defeats()
 	}
 }
 
-
 void AHAFPlayerState::OnRep_Score()
 {
 	Super::OnRep_Score();
@@ -66,8 +65,10 @@ void AHAFPlayerState::OnRep_Score()
 		Controller =  Controller == nullptr ? Cast<AFillainPlayerController>(Character->Controller) : Controller;
 		if (Controller)
 		{
-			Controller->SetHUDScore(GetScore());
+			Controller->SetHUDScore(GetScore(Score));
 		}
 	}
 }
+
+
 

@@ -7,6 +7,9 @@
 #include "Weapons/WeaponTypes.h"
 #include "FillainPlayerController.generated.h"
 
+struct FInputActionValue;
+class AFillainCharacter;
+
 /**
  * 
  */
@@ -22,16 +25,25 @@ public:
 	void SetHUDWeaponAmmo(int32 WeaponAmmo);
 	void SetHUDCarriedAmmo(int32 CarriedAmmo);
 	void SetHUDWeaponType(APawn* InPawn);
-	void SetHUDEliminationMessage(AController* KillerController, AController* VictimController);
+	void SetHUDEliminationMessage(AFillainPlayerController* ConstKillerController, AFillainPlayerController* ConstVictimController);
 	void SetHUDMatchCountdown(float CountdownTime);
 	virtual void OnPossess(APawn* InPawn) override;
 	virtual void Tick(float DeltaTime) override;
 	virtual float GetServerTime(); // Synced with server World clock
 	virtual void ReceivedPlayer() override;
 
+	UPROPERTY()
+	AFillainCharacter* VictimCharacter;
+
+	UPROPERTY()
+	AFillainCharacter* KillerCharacter;
+
 protected:
 	virtual void BeginPlay() override;
 	void SetHUDTime();
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+	class UInputMappingContext* FillainMappingContext;
 
 	/**************************************
 	* Sync Time Between Clinet And Server *
@@ -53,11 +65,18 @@ protected:
 
 	float TimeSyncRunningTime = 0.f;
 	void CheckTimeSync(float DeltaTime);
+
 private:
 	FString GetWeaponTypeDisplayName(EWeaponType WeaponType);
 
 	UPROPERTY()
 	class AFillainHUD* FillainHUD;
+
+    UPROPERTY(meta = (AllowPrivateAccess = "true"))
+    class AFillainCharacter* Fillain;
+
+    UPROPERTY(meta = (AllowPrivateAccess = "true"))
+    class AHAFPlayerState* State;
 
 	UPROPERTY()
 	class AWeapon* EquippedWeapon;
@@ -65,6 +84,14 @@ private:
 	float MatchTime = 120.f;
 	uint32 CountdownInt;
 
+	UPROPERTY()
+	bool bIsMessageSet = true;
+
+public:
+	AFillainCharacter* GetFillain() const { return Fillain; }
+	AHAFPlayerState* GetHAFPlayerState() const { return State; }
+
+	
 
 
 
