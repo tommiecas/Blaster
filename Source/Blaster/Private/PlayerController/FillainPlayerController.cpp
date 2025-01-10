@@ -302,7 +302,7 @@ void AFillainPlayerController::SetHUDMatchCountdown(float CountdownTime)
 	{
 		if (CountdownTime < 0.f)
 		{
-			FillainHUD->CharacterOverlay->MatchCountdownText->SetText(FText::FromString(TEXT("")));
+			FillainHUD->CharacterOverlay->MatchCountdownText->SetText(FText());
 			return;
 		}
 		int32 Minutes = FMath::FloorToInt(CountdownTime / 60.f);
@@ -318,7 +318,11 @@ void AFillainPlayerController::SetHUDAnnouncementCountdown(float CountdownTime)
 	bool bIsHUDValid = FillainHUD && FillainHUD->Announcement && FillainHUD->Announcement->WarmupTime;
 	if (bIsHUDValid)
 	{
-
+		if (CountdownTime < 0.f)
+		{
+			FillainHUD->Announcement->WarmupTime->SetText(FText());
+			return;
+		}
 		int32 Minutes = FMath::FloorToInt(CountdownTime / 60.f);
 		int32 Seconds = CountdownTime - Minutes * 60;;
 		FString CountdownText = FString::Printf(TEXT("%02d:%02d"), Minutes, Seconds);
@@ -355,6 +359,12 @@ void AFillainPlayerController::HandleCooldown()
 			FillainHUD->Announcement->AnnouncementText->SetText(FText::FromString(AnnouncementText));
 			FillainHUD->Announcement->InfoText->SetText(FText());
 		}
+	}
+	AFillainCharacter* FillainCharacter = Cast<AFillainCharacter>(GetPawn());
+	if (FillainCharacter && FillainCharacter->GetCombatComponent())
+	{
+		FillainCharacter->bDisableGameplay = true;
+		FillainCharacter->GetCombatComponent()->FireButtonPressed(false);
 	}
 }
 

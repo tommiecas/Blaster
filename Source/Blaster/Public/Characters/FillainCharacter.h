@@ -66,6 +66,8 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastEliminate();
 	
+	UPROPERTY(Replicated)
+	bool bDisableGameplay = false;
 
 	/**********
 	* Jumping *
@@ -159,6 +161,8 @@ protected:
 	void UpdateHUDHealth();
 	// Poll for any relevant classes and initialize our HUD
 	void PollInit();
+
+	void RotateInPlace(float DeltaTime);
 
 	
 
@@ -301,9 +305,10 @@ public:
 	FORCEINLINE float GetHealth() const { return Health; }
 	FORCEINLINE float GetMaxHealth() const { return MaxHealth; }	
 	ECombatState GetCombatState() const;
-	UCombatComponent* GetCombatComponent() const;
+	FORCEINLINE UCombatComponent* GetCombatComponent() const { return Combat; }
 	AHAFPlayerState* GetHAFPlayerState() const { return HAFPlayerState; }
 	AFillainPlayerController* GetFillainPlayerController();
+	FORCEINLINE bool GetDisableGameplay() const { return bDisableGameplay; }
 	
 	
 	

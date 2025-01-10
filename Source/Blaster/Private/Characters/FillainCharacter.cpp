@@ -76,6 +76,7 @@ void AFillainCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 	DOREPLIFETIME_CONDITION(AFillainCharacter, OverlappingWeapon, COND_OwnerOnly);
 	DOREPLIFETIME(AFillainCharacter, HitReactMontage);
 	DOREPLIFETIME(AFillainCharacter, Health);
+	DOREPLIFETIME(AFillainCharacter, bDisableGameplay);
 }
 
 
@@ -139,21 +140,7 @@ void AFillainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 void AFillainCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	if (GetLocalRole() > ENetRole::ROLE_SimulatedProxy && IsLocallyControlled())
-	{
-		AimOffset(DeltaTime);
-	}
-	else
-	{
-		TimeSinceLastMovementReplication += DeltaTime;
-		if (TimeSinceLastMovementReplication > 0.25f)
-		{
-			OnRep_ReplicatedMovement();
-		}
-		CalculateAO_Pitch();
-	}
-	HideCharacterIfCameraClose();
-	PollInit();
+	RotateInPlace(DeltaTime);
 }
 
 void AFillainCharacter::Restart()
@@ -222,13 +209,7 @@ void AFillainCharacter::MulticastEliminate_Implementation()
 	StartDissolve();
 
 	// Disable Character Movement
-	GetCharacterMovement()->DisableMovement();
-	GetCharacterMovement()->StopMovementImmediately();
-	if (VictimController)
-	{
-		DisableInput(VictimController);
-	}
-
+	bDisableGameplay = true;
 	// Disable Collision
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -270,6 +251,10 @@ void AFillainCharacter::Destroyed()
 	{
 		EliminationBotComponent->DestroyComponent();
 	}
+	if (Combat && Combat->EquippedWeapon)
+	{
+		Combat->EquippedWeapon->Destroy();
+	}
 }
 
 void AFillainCharacter::UpdateHUDHealth()
@@ -295,8 +280,33 @@ void AFillainCharacter::PollInit()
 	}
 }
 
+void AFillainCharacter::RotateInPlace(float DeltaTime)
+{
+	if (bDisableGameplay)
+	{
+		bUseControllerRotationYaw = false;
+		TurningInPlace = ETurningInPlace::ETIP_NotTurning;
+		return;
+	}
+	if (GetLocalRole() > ENetRole::ROLE_SimulatedProxy && IsLocallyControlled())
+	{
+		AimOffset(DeltaTime);
+	}
+	else
+	{
+		TimeSinceLastMovementReplication += DeltaTime;
+		if (TimeSinceLastMovementReplication > 0.25f)
+		{
+			OnRep_ReplicatedMovement();
+		}
+		CalculateAO_Pitch();
+	}
+}
+
 void AFillainCharacter::ReloadButtonPressed()
 {
+	if (bDisableGameplay) return;
+
 	if (Combat)
 	{
 		Combat->Reloading();
@@ -376,6 +386,7 @@ void AFillainCharacter::OnRep_Health()
 
 void AFillainCharacter::Move(const FInputActionValue& Value)
 {
+	if (bDisableGameplay) return;
 	const FVector2D MovementVector = Value.Get<FVector2D>();
 
 	const FRotator Rotation = Controller->GetControlRotation();
@@ -398,6 +409,8 @@ void AFillainCharacter::Look(const FInputActionValue& Value)
 
 void AFillainCharacter::EquipButtonPressed()
 {
+	if (bDisableGameplay) return;
+
 	if (Combat)
 	{
 		if (HasAuthority())
@@ -421,6 +434,8 @@ void AFillainCharacter::ServerEquipButtonPressed_Implementation()
 
 void AFillainCharacter::CrouchButtonPressed()
 {
+	if (bDisableGameplay) return;
+
 	if (bIsCrouched)
 	{
 		UnCrouch();
@@ -433,6 +448,8 @@ void AFillainCharacter::CrouchButtonPressed()
 
 void AFillainCharacter::AimButtonPressed()
 {
+	if (bDisableGameplay) return;
+
 	if (Combat)
 	{
 		Combat->SetAiming(true);
@@ -441,6 +458,8 @@ void AFillainCharacter::AimButtonPressed()
 
 void AFillainCharacter::AimButtonReleased()
 {
+	if (bDisableGameplay) return;
+
 	if (Combat)
 	{
 		Combat->SetAiming(false);
@@ -528,6 +547,8 @@ void AFillainCharacter::SimProxiesTurn()
 
 void AFillainCharacter::FireButtonPressed()
 {
+	if (bDisableGameplay) return;
+
 	if (Combat)
 	{
 		Combat->FireButtonPressed(true);
@@ -536,6 +557,8 @@ void AFillainCharacter::FireButtonPressed()
 
 void AFillainCharacter::FireButtonReleased()
 {
+	if (bDisableGameplay) return;
+
 	if (Combat)
 	{
 		Combat->FireButtonPressed(false);
@@ -676,11 +699,6 @@ ECombatState AFillainCharacter::GetCombatState() const
 	return Combat->CombatState;
 }
 
-UCombatComponent* AFillainCharacter::GetCombatComponent() const
-{
-	return Combat;
-}
-
 AFillainPlayerController* AFillainCharacter::GetFillainPlayerController() 
 {
 	AFillainCharacter* Char = Cast<AFillainCharacter>(this);
@@ -700,6 +718,7 @@ AFillainPlayerController* AFillainCharacter::GetFillainPlayerController()
 
 void AFillainCharacter::Jump()
 {
+	if (bDisableGameplay) return;
 	if (bIsCrouched)
 	{
 		UnCrouch();
