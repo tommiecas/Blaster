@@ -31,6 +31,7 @@
 #include "Particles/ParticleSystemComponent.h"
 #include "GameMode/LobbyGameMode.h"
 #include "HUD/Announcement.h"
+#include "GameStates/HAFGameState.h"
 
 
 
@@ -357,7 +358,45 @@ void AFillainPlayerController::HandleCooldown()
 			FillainHUD->Announcement->SetVisibility(ESlateVisibility::Visible);
 			FString AnnouncementText("New Match Starts In:");
 			FillainHUD->Announcement->AnnouncementText->SetText(FText::FromString(AnnouncementText));
-			FillainHUD->Announcement->InfoText->SetText(FText());
+			
+			AHAFGameState* HAFGameState = Cast<AHAFGameState>(UGameplayStatics::GetGameState(this));
+			AHAFPlayerState* HAFPlayerState = GetPlayerState<AHAFPlayerState>();
+			if (HAFGameState && HAFPlayerState)
+			{
+				TArray<AHAFPlayerState*> TopPlayers = HAFGameState->TopScoringPlayers;
+				FString InfoTextString;
+				if (TopPlayers.Num() == 0)
+				{
+					InfoTextString = FString("Nobody Won!");
+
+				}
+				else if (TopPlayers.Num() == 1 && TopPlayers[0] == HAFPlayerState)
+				{
+					InfoTextString = FString("YOU are the Winner!!!");
+				}
+				else if (TopPlayers.Num() == 1)
+				{
+					InfoTextString = FString::Printf(TEXT("The Winner Is: \n%s"), *TopPlayers[0]->GetPlayerName());
+				}
+				else if (TopPlayers.Num() > 1)
+				{
+					InfoTextString = FString("The Winners Who Tied For the Win Are: \n");
+					for (auto TiedPlayer : TopPlayers)
+					{
+						InfoTextString.Append(FString::Printf(TEXT("%s\n"), *TiedPlayer->GetPlayerName()));
+					}
+				}
+				else if (TopPlayers.Num() > 1 && TopPlayers.Contains(HAFPlayerState))
+				{
+					InfoTextString = FString("YOU Tied for the Win, Alongside: \n");
+					TopPlayers.Remove(HAFPlayerState);
+					for (auto TiedPlayer : TopPlayers)
+					{
+						InfoTextString.Append(FString::Printf(TEXT("%s\n"), *TiedPlayer->GetPlayerName()));
+					}
+				}
+				FillainHUD->Announcement->InfoText->SetText(FText::FromString(InfoTextString));
+			}
 		}
 	}
 	AFillainCharacter* FillainCharacter = Cast<AFillainCharacter>(GetPawn());

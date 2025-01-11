@@ -210,6 +210,10 @@ void AFillainCharacter::MulticastEliminate_Implementation()
 
 	// Disable Character Movement
 	bDisableGameplay = true;
+	if (Combat)
+	{
+		Combat->FireButtonPressed(false);
+	}
 	// Disable Collision
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -251,7 +255,10 @@ void AFillainCharacter::Destroyed()
 	{
 		EliminationBotComponent->DestroyComponent();
 	}
-	if (Combat && Combat->EquippedWeapon)
+
+	AHAFGameMode* HAFGameMode = Cast<AHAFGameMode>(UGameplayStatics::GetGameMode(this));
+	bool bIsMatchNotInProgress = HAFGameMode && HAFGameMode->GetMatchState() != MatchState::InProgress;
+	if (Combat && Combat->EquippedWeapon && bIsMatchNotInProgress)
 	{
 		Combat->EquippedWeapon->Destroy();
 	}

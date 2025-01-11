@@ -16,19 +16,19 @@ void AHAFPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
 
 void AHAFPlayerState::AddToScore(float ScoreAmount)
 {
-	SetScore(Score + ScoreAmount);
+	SetScore(GetScore() + ScoreAmount);
 	Character = Character == nullptr ? Cast<AFillainCharacter>(GetPawn()) : Character;
 	if (Character)
 	{
 		Controller = Controller == nullptr ? Cast<AFillainPlayerController>(Character->Controller) : Controller;
 		if (Controller)
 		{
-			Controller->SetHUDScore(GetScore(Score));
+			Controller->SetHUDScore(GetScore());
 		}
 	}
 }
 
-void AHAFPlayerState::AddToDefeats(float DefeatsAmount)
+void AHAFPlayerState::AddToDefeats(int32 DefeatsAmount)
 {
 	Defeats += DefeatsAmount;
 	Character = Character == nullptr ? Cast<AFillainCharacter>(GetPawn()) : Character;
@@ -65,7 +65,7 @@ void AHAFPlayerState::OnRep_Score()
 		Controller =  Controller == nullptr ? Cast<AFillainPlayerController>(Character->Controller) : Controller;
 		if (Controller)
 		{
-			Controller->SetHUDScore(GetScore(Score));
+			Controller->SetHUDScore(GetScore());
 		}
 	}
 }

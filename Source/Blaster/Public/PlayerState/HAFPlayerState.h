@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerState.h"
+#include "Characters/FillainCharacter.h"
+#include "PlayerController/FillainPlayerController.h"
 #include "HAFPlayerState.generated.h"
 
 /**
@@ -22,7 +24,7 @@ public:
 	** Replication Notifies
 	*/
 	void AddToScore(float ScoreAmount);
-	void AddToDefeats(float DefeatsAmount);
+	void AddToDefeats(int32 DefeatsAmount);
 
 	UFUNCTION()
 	virtual void OnRep_Defeats();
@@ -40,9 +42,7 @@ private:
 	int32 Defeats;
 
 public:
-	AFillainCharacter* GetFillainPlayerCharacter() const { return Character; }
-	AFillainPlayerController* GetFillainPlayerController() const { return Controller; }
-	float GetScore(float InScore) const { return Score; }
-	int32 GetDefeats(int32 InDefeats) const { return Defeats; }
+	FORCEINLINE AFillainCharacter* GetFillainPlayerCharacter() const { return Character; }
+	FORCEINLINE AFillainPlayerController* GetFillainPlayerController() const { return Controller; }
 
 };

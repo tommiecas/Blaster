@@ -7,6 +7,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/PlayerStart.h"
 #include "PlayerState/HAFPlayerState.h"
+#include "GameStates/HAFGameState.h"
 
 namespace MatchState
 {
@@ -78,9 +79,11 @@ void AHAFGameMode::PlayerEliminated(class AFillainCharacter* VictimCharacter, cl
 	AHAFPlayerState* KillerPlayerState = KillerController ? Cast<AHAFPlayerState>(KillerController->PlayerState) : nullptr;
 	AHAFPlayerState* VictimPlayerState = VictimController ? Cast<AHAFPlayerState>(VictimController->PlayerState) : nullptr;	
 
-	if (KillerPlayerState && KillerPlayerState != VictimPlayerState)
+	AHAFGameState* HAFGameState = GetGameState<AHAFGameState>();
+	if (KillerPlayerState && KillerPlayerState != VictimPlayerState && HAFGameState)
 	{
 		KillerPlayerState->AddToScore(1.f);
+		HAFGameState->UpdateTopScore(KillerPlayerState);
 	}
 	if (VictimPlayerState)
 	{
