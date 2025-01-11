@@ -19,6 +19,7 @@ class BLASTER_API AFillainPlayerController : public APlayerController
 	GENERATED_BODY()
 
 public:
+	AFillainPlayerController();
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	void SetHUDHealth(float Health, float MaxHealth);
 	void SetHUDScore(float Score);
@@ -33,6 +34,14 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	virtual float GetServerTime(); // Synced with server World clock
 	virtual void ReceivedPlayer() override;
+
+	float MatchTimeElapsedTime = 0.f;
+	bool bIsMatchCountdownVisible = true;
+	FLinearColor MatchCountdownColor;
+	FLinearColor MatchCountdownBlinkingColor;
+
+	void UpdateMatchCountdownColor();
+	void ToggleMatchCountdownVisibility();
 
 	UPROPERTY()
 	AFillainCharacter* VictimCharacter;
@@ -102,7 +111,7 @@ private:
 	float WarmupTime = 0.f;
 	float LevelStartingTime = 0.f;
 	float CooldownTime = 0.f;
-	uint32 CountdownInt;
+	int32 CountdownInt;
 
 	UPROPERTY(ReplicatedUsing = OnRep_MatchState)
 	FName MatchState;
@@ -119,12 +128,12 @@ private:
 	float HUDScore;
 	int32 HUDDefeats;
 
-
-
+	int32 ThirtySecondsOnTheClock = 30;
 
 public:
-	AFillainCharacter* GetFillain() const { return Fillain; }
-	AHAFPlayerState* GetHAFPlayerState() const { return State; }
+	FORCEINLINE AFillainCharacter* GetFillain() const { return Fillain; }
+	FORCEINLINE AHAFPlayerState* GetHAFPlayerState() const { return State; }
+	FORCEINLINE float GetMatchTime() const { return MatchTime; }
 
 	
 

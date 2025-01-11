@@ -33,11 +33,17 @@
 #include "HUD/Announcement.h"
 #include "GameStates/HAFGameState.h"
 
+AFillainPlayerController::AFillainPlayerController()
+{
+	PrimaryActorTick.bCanEverTick = true;
 
+	MatchTimeElapsedTime = 0.f;
 
-
-
-
+	MatchCountdownColor = FLinearColor(0.10033f, 8.602301f, 10.0f, 10.0f);
+	MatchCountdownBlinkingColor = FLinearColor(10.0f, 0.0f, 0.491076f, 10.0f);
+	
+	bIsMatchCountdownVisible = true;
+}
 
 void AFillainPlayerController::BeginPlay()
 {
@@ -58,6 +64,30 @@ void AFillainPlayerController::Tick(float DeltaTime)
 		TimeSyncRunningTime = 0.f;
 	}
 	PollInit();
+
+	MatchTimeElapsedTime += DeltaTime;
+	if (static_cast<int32>(ThirtySecondsOnTheClock) >= static_cast<int32>(CountdownInt) && CountdownInt >= 0)
+
+	{
+		if (MatchState == MatchState::InProgress)
+		{
+			UpdateMatchCountdownColor();
+		}
+		if (FMath::Frac(MatchTimeElapsedTime) >= 0.5f && MatchState == MatchState::InProgress)
+		{
+			ToggleMatchCountdownVisibility();
+		}
+		else if (MatchTimeElapsedTime >= MatchTime)
+		{
+			FillainHUD = FillainHUD == nullptr ? Cast<AFillainHUD>(GetHUD()) : FillainHUD;
+			bool bIsHUDValid = FillainHUD && FillainHUD->CharacterOverlay && FillainHUD->CharacterOverlay->MatchCountdownText;
+			const FString TimesUpText = TEXT("TIME'S UP!!");
+			if (bIsHUDValid)
+			{
+				FillainHUD->CharacterOverlay->MatchCountdownText->SetText(FText::FromString(TimesUpText));
+			}
+		}
+	}
 }
 
 void AFillainPlayerController::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -82,11 +112,48 @@ void AFillainPlayerController::ReceivedPlayer()
 	}
 }
 
+void AFillainPlayerController::UpdateMatchCountdownColor()
+{
+	FillainHUD = FillainHUD == nullptr ? Cast<AFillainHUD>(GetHUD()) : FillainHUD;
+	bool bIsHUDValid = FillainHUD && FillainHUD->CharacterOverlay && FillainHUD->CharacterOverlay->MatchCountdownText;
+	if (bIsHUDValid)
+	{
+		if (MatchTimeElapsedTime >= (MatchTime - ThirtySecondsOnTheClock) && MatchTimeElapsedTime < MatchTime)
+		{
+			if (FillainHUD->CharacterOverlay->MatchCountdownText)
+			{
+				FillainHUD->CharacterOverlay->MatchCountdownText->SetColorAndOpacity(MatchCountdownBlinkingColor);
+			}
+		}
+		else if (MatchTimeElapsedTime < (MatchTime - ThirtySecondsOnTheClock))
+		{
+			if (FillainHUD->CharacterOverlay->MatchCountdownText)
+			{
+				FillainHUD->CharacterOverlay->MatchCountdownText->SetColorAndOpacity(MatchCountdownColor);
+			}
+		}
+	}
+}
+
+
+void AFillainPlayerController::ToggleMatchCountdownVisibility()
+{
+	FillainHUD = FillainHUD == nullptr ? Cast<AFillainHUD>(GetHUD()) : FillainHUD;
+	bool bIsHUDValid = FillainHUD && FillainHUD->CharacterOverlay && FillainHUD->CharacterOverlay->MatchCountdownText;
+	if (bIsHUDValid) 
+	{
+		FTimerHandle MatchCountdownTimer;
+		GetWorldTimerManager().SetTimer(MatchCountdownTimer, [&]()
+			{FillainHUD->CharacterOverlay->MatchCountdownText->SetVisibility(ESlateVisibility::Hidden); }, .5f, false);
+		FillainHUD->CharacterOverlay->MatchCountdownText->SetVisibility(ESlateVisibility::Visible);
+	}
+}
+
 void AFillainPlayerController::SetHUDTime()
 {
 	float TimeLeft = 0.f;
 	if (MatchState == MatchState::WaitingToStart) TimeLeft = WarmupTime - GetServerTime() + LevelStartingTime;
-	else if (MatchState == MatchState::InProgress) TimeLeft = WarmupTime + MatchTime - GetServerTime() + LevelStartingTime; 
+	else if (MatchState == MatchState::InProgress) TimeLeft = WarmupTime + MatchTime - GetServerTime() + LevelStartingTime;
 	else if (MatchState == MatchState::Cooldown) TimeLeft = CooldownTime + WarmupTime + MatchTime - GetServerTime() + LevelStartingTime;
 	uint32 SecondsLeft = FMath::CeilToInt(TimeLeft);
 
@@ -111,8 +178,9 @@ void AFillainPlayerController::SetHUDTime()
 	}
 
 	CountdownInt = SecondsLeft;
-}
 
+	
+}
 
 void AFillainPlayerController::ServerRequestServerTime_Implementation(float TimeOfClientRequest)
 {
@@ -162,8 +230,6 @@ FString AFillainPlayerController::GetWeaponTypeDisplayName(EWeaponType WeaponTyp
 	return EnumPtr->GetDisplayNameTextByValue((int64)WeaponType).ToString();
 }
 
-
-
 void AFillainPlayerController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
@@ -174,8 +240,6 @@ void AFillainPlayerController::OnPossess(APawn* InPawn)
 		SetHUDHealth(PlayerCharacter->GetHealth(), PlayerCharacter->GetMaxHealth());
 	}
 }
-
-
 
 void AFillainPlayerController::SetHUDHealth(float Health, float MaxHealth)
 {
