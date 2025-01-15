@@ -3,7 +3,6 @@
 
 #include "Weapons/Projectile.h"
 #include "Components/BoxComponent.h"
-#include "GameFramework/ProjectileMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "Particles/ParticleSystem.h"
@@ -40,20 +39,16 @@ AProjectile::AProjectile()
 	AmmoMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	AmmoMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 	AmmoMesh->SetupAttachment(CollisionBox);
-
-	ProjectileMovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovementComponent"));
-	ProjectileMovementComponent->bRotationFollowsVelocity = true;
-
 }
 
 void AProjectile::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (Tracer)
+	if (CascadeTracer && TracerCascadeComponent)
 	{
-		TracerComponent = UGameplayStatics::SpawnEmitterAttached(
-			Tracer,
+		TracerCascadeComponent = UGameplayStatics::SpawnEmitterAttached(
+			CascadeTracer,
 			CollisionBox,
 			FName(),
 			GetActorLocation(),
@@ -61,6 +56,22 @@ void AProjectile::BeginPlay()
 			EAttachLocation::KeepWorldPosition
 		);
 	}	
+	else if (NiagaraTracer && TracerNiagaraComponent)
+	{
+        TracerNiagaraComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(
+            NiagaraTracer,
+            CollisionBox,
+            FName(),
+            GetActorLocation(),
+            GetActorRotation(),
+            FVector(1.f),
+            EAttachLocation::KeepWorldPosition,
+            false,
+            ENCPoolMethod::None,
+            true,
+            true
+        );
+	}
 
 	if (HasAuthority())
 	{

@@ -18,8 +18,11 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void Destroyed() override;
 
+	UFUNCTION()
+	virtual void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
+
 	UPROPERTY(EditAnywhere)
-	UParticleSystem* ImpactParticles;
+	class UParticleSystem* ImpactParticles;
 
 	UPROPERTY(EditAnywhere)
 	class UNiagaraSystem* ImpactNiagaraParticles;
@@ -33,12 +36,14 @@ public:
 	UPROPERTY(EditAnywhere)
 	class USoundCue* ImpactPlayerCharacterSound;
 
+	UPROPERTY(EditAnywhere)
+	class UBoxComponent* CollisionBox;
+
+	UPROPERTY(VisibleAnywhere)
+	USkeletalMeshComponent* AmmoMesh;
 
 protected:
 	virtual void BeginPlay() override;
-
-	UFUNCTION()
-	virtual void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastDestroy();
@@ -49,22 +54,18 @@ protected:
 	UPROPERTY(EditAnywhere)
 	float Damage = 20.f;
 
-
 private:	
-	UPROPERTY(VisibleAnywhere)
-	USkeletalMeshComponent* AmmoMesh;
-
 	UPROPERTY(EditAnywhere)
-	class UBoxComponent* CollisionBox;
-
-	UPROPERTY(VisibleAnywhere)
-	class UProjectileMovementComponent* ProjectileMovementComponent;
-
-	UPROPERTY(EditAnywhere)
-	class UParticleSystem* Tracer;
+	class UParticleSystem* CascadeTracer;
 
 	UPROPERTY()
-	class UParticleSystemComponent* TracerComponent;
+	class UParticleSystemComponent* TracerCascadeComponent;
+
+	UPROPERTY(EditAnywhere)
+	class UNiagaraSystem* NiagaraTracer;
+
+	UPROPERTY()
+	class UNiagaraComponent* TracerNiagaraComponent;
 
 	UPROPERTY()
 	EWeaponType WeaponType;;

@@ -14,8 +14,13 @@ class BLASTER_API AProjectileBullet : public AProjectile
 {
 	GENERATED_BODY()
 
+public:
+	AProjectileBullet();
+
 protected:
 	virtual void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherCOmp, FVector NormalImpulse, const FHitResult& Hit) override;
-
+	
+	UPROPERTY(VisibleAnywhere)
+	class UProjectileMovementComponent* ProjectileMovementComponent;
 	
 };

@@ -7,27 +7,78 @@
 #include "Sound/SoundCue.h"
 #include "Niagara/Public/NiagaraComponent.h"
 #include "Niagara/Public/NiagaraFunctionLibrary.h"
+#include "Niagara/Public/NiagaraSystemInstance.h"
 #include "GameFramework/Character.h"
 #include "Weapons/Weapon.h"
 #include "Characters/FillainCharacter.h"
+#include "Components/BoxComponent.h"
+#include "Components/AudioComponent.h"
+#include "Weapons/RocketMovementComponent.h"
+#include "Components/CombatComponent.h"
 
 
 
 AProjectileRocket::AProjectileRocket()
 {
-	RocketMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Rocket Mesh"));
-	RocketMesh->SetupAttachment(RootComponent);
-	RocketMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	RocketMovementComponent = CreateDefaultSubobject<URocketMovementComponent>(TEXT("RocketMovementComponent"));
+	RocketMovementComponent->bRotationFollowsVelocity = true;
+	RocketMovementComponent->SetIsReplicated(true);
+}
+
+void AProjectileRocket::BeginPlay()
+{
+	Super::BeginPlay();
+
+	if (!HasAuthority())
+	{
+		CollisionBox->OnComponentHit.AddDynamic(this, &AProjectile::OnHit);
+	}
+	if (TrailSystem)
+	{
+		TrailSystemComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(
+			TrailSystem,
+			GetRootComponent(),
+			FName(),
+			GetActorLocation(),
+			GetActorRotation(),
+			EAttachLocation::KeepWorldPosition,
+			false
+		);
+	}
+	if (ProjectileLoop && LoopingSoundAttenuation)
+	{
+		ProjectileLoopComponent = UGameplayStatics::SpawnSoundAttached(
+			ProjectileLoop,
+			GetRootComponent(),
+			FName(),
+			GetActorLocation(),
+			EAttachLocation::KeepWorldPosition,
+			false,
+			1.f,
+			1.f,
+			0.f,
+			LoopingSoundAttenuation,
+			(USoundConcurrency*)nullptr,
+			false
+		);
+	}
+}
+
+void AProjectileRocket::DestroyTimerFinished()
+{
 }
 
 void AProjectileRocket::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
 	APawn* RocketFiringPawn = GetInstigator();
-	if (RocketFiringPawn)
+	if (RocketFiringPawn && HasAuthority())
 	{
 		AController* RocketFiringController = RocketFiringPawn->GetController();
 		if (RocketFiringController)
 		{
+			TArray<AActor*> IgnoreActors;
+			IgnoreActors.Add(GetOwner());
+
 			UGameplayStatics::ApplyRadialDamageWithFalloff(
 				this, //WorldContextObject
 				Damage, //BaseDamage
@@ -37,22 +88,22 @@ void AProjectileRocket::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, 
 				600.f, //DamageOuterRadius
 				1.f, // DamageFalloff
 				UDamageType::StaticClass(), //DamageType
-				TArray<AActor*>(), //IgnoreActors
+				IgnoreActors, //IgnoreActors
 				this, //DamageCauser
 				RocketFiringController //InstigatedBy
 			);
 		}
 	}
-
-	Super::OnHit(HitComp, OtherActor, OtherComp, NormalImpulse, Hit);
-}
-
-void AProjectileRocket::Destroyed()
-{
-	Super::Destroyed();
+	GetWorldTimerManager().SetTimer(
+		DestroyTimer,
+		this,
+		&AProjectileRocket::DestroyTimerFinished,
+		DestroyTime
+	);
 	APawn* FiringPawn = GetInstigator();
 	AFillainCharacter* FiringFillain = Cast<AFillainCharacter>(FiringPawn);
-	AWeapon* FiredWeapon = FiringFillain->GetEquippedWeapon();
+	if (FiringFillain == nullptr) return; // Add this check
+	AWeapon* FiredWeapon = FiringFillain->GetCombatComponent()->EquippedWeapon;
 
 	if (bHitPlayerCharacter == true)
 	{
@@ -95,7 +146,7 @@ void AProjectileRocket::Destroyed()
 			}
 		}
 	}
-	else if (bHitPlayerCharacter == false)
+	else if (bHitPlayerCharacter != true)
 	{
 		if (FiringFillain && FiredWeapon && FiredWeapon->GetWeaponType() == EWeaponType::EWT_RocketLauncher) // Fix the assignment operator to comparison operator
 		{
@@ -124,4 +175,29 @@ void AProjectileRocket::Destroyed()
 			}
 		}
 	}
+	if (AmmoMesh)
+	{
+		AmmoMesh->SetVisibility(false);
+	}
+	if (CollisionBox)
+	{
+		CollisionBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
+
+	if (TrailSystemComponent && TrailSystemComponent->GetSystemInstance())
+	{
+		TrailSystemComponent->GetSystemInstance()->Deactivate();;
+	}
+
+	if (ProjectileLoopComponent && ProjectileLoopComponent->IsPlaying())
+	{
+		ProjectileLoopComponent->Stop();
+	}
 }
+
+void AProjectileRocket::Destroyed()
+{
+	
+}
+
+
