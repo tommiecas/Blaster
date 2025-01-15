@@ -489,7 +489,7 @@ void AFillainPlayerController::HandleMatchHasStarted()
 	FillainHUD = FillainHUD == nullptr ? Cast<AFillainHUD>(GetHUD()) : FillainHUD;
 	if (FillainHUD)
 	{
-		FillainHUD->AddCharacterOverlay();
+		if (FillainHUD->CharacterOverlay == nullptr) FillainHUD->AddCharacterOverlay();
 		if (FillainHUD->Announcement)
 		{
 			FillainHUD->Announcement->SetVisibility(ESlateVisibility::Hidden);

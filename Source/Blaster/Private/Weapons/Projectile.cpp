@@ -13,6 +13,11 @@
 #include "Blaster/Blaster.h"
 #include "Interfaces/InteractWithCrosshairsInterface.h"
 #include "Net/UnrealNetwork.h"
+#include "Niagara/Public/NiagaraComponent.h"
+#include "Niagara/Public/NiagaraFunctionLibrary.h"
+#include "Weapons/Weapon.h" // Add this include to resolve the incomplete type error
+#include "Weapons/WeaponTypes.h"
+#include "Components/CombatComponent.h" // Add this include to resolve the incomplete type error
 
 AProjectile::AProjectile()
 {
@@ -32,8 +37,8 @@ AProjectile::AProjectile()
 
 	AmmoMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("AmmoMesh"));
 	AmmoMesh->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
-	AmmoMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-	AmmoMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
+	AmmoMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	AmmoMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 	AmmoMesh->SetupAttachment(CollisionBox);
 
 	ProjectileMovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovementComponent"));
@@ -80,26 +85,88 @@ void AProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimi
 		MulticastDestroy();
 }
 
+void AProjectile::MulticastDestroy_Implementation()
+{
+	Destroy();
+}
+
 void AProjectile::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
 }
 
+
+
+
+
 void AProjectile::Destroyed()
 {
 	Super::Destroyed();
-	if (bHitPlayerCharacter == true)
+	APawn* FiringPawn = GetInstigator();
+	AFillainCharacter* FiringFillain = Cast<AFillainCharacter>(FiringPawn);
+	if (FiringFillain == nullptr) return; // Add this check
+	AWeapon* FiredWeapon = FiringFillain->GetCombatComponent()->EquippedWeapon;
+
+	if (FiredWeapon && bHitPlayerCharacter == true)
 	{
-		if (ImpactPlayerCharacterParticles)
+		if (FiringFillain && FiredWeapon && FiredWeapon->GetWeaponType() == EWeaponType::EWT_RocketLauncher) // Fix the assignment operator to comparison operator
 		{
-			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactPlayerCharacterParticles, GetActorTransform());
+			if (ImpactPlayerCharacterParticles)
+			{
+				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactPlayerCharacterParticles, GetActorTransform());
+			}
+			if (ImpactPlayerCharacterSound)
+			{
+				UGameplayStatics::PlaySoundAtLocation(this, ImpactPlayerCharacterSound, GetActorLocation());
+			}
+			if (ImpactParticles)
+			{
+				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticles, GetActorTransform());
+			}
+			if (ImpactNiagaraParticles)
+			{
+				UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ImpactNiagaraParticles, GetActorLocation(), GetActorRotation());
+			}
+			if (ImpactSound)
+			{
+				UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation());
+			}
 		}
-		if (ImpactPlayerCharacterSound)
+		else if ((FiredWeapon && FiredWeapon->GetWeaponType() != EWeaponType::EWT_RocketLauncher))
 		{
-			UGameplayStatics::PlaySoundAtLocation(this, ImpactPlayerCharacterSound, GetActorLocation());
+			if (ImpactPlayerCharacterParticles)
+			{
+				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactPlayerCharacterParticles, GetActorTransform());
+			}
+			if (ImpactPlayerCharacterSound)
+			{
+				UGameplayStatics::PlaySoundAtLocation(this, ImpactPlayerCharacterSound, GetActorLocation());
+			}
+			if (ImpactParticles)
+			{
+				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticles, GetActorTransform());
+			}
 		}
-		else if (bHitPlayerCharacter == false)
+	}
+	if (bHitPlayerCharacter != true)
+	{
+		if (FiringFillain && FiredWeapon && FiredWeapon->GetWeaponType() == EWeaponType::EWT_RocketLauncher) // Fix the assignment operator to comparison operator
+		{
+			if (ImpactParticles)
+			{
+				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticles, GetActorTransform());
+			}
+			if (ImpactNiagaraParticles)
+			{
+				UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ImpactNiagaraParticles, GetActorLocation(), GetActorRotation());
+			}
+			if (ImpactSound)
+			{
+				UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation());
+			}
+		}
+		else if ((FiredWeapon && FiredWeapon->GetWeaponType() != EWeaponType::EWT_RocketLauncher))
 		{
 			if (ImpactParticles)
 			{
@@ -112,9 +179,3 @@ void AProjectile::Destroyed()
 		}
 	}
 }
-
-	void AProjectile::MulticastDestroy_Implementation()
-	{
-		Destroy();
-	}
-

@@ -210,6 +210,7 @@ void AFillainCharacter::MulticastEliminate_Implementation()
 
 	// Disable Character Movement
 	bDisableGameplay = true;
+	GetCharacterMovement()->DisableMovement();
 	if (Combat)
 	{
 		Combat->FireButtonPressed(false);
@@ -690,8 +691,9 @@ AWeapon* AFillainCharacter::GetOverlappingWeapon()
 
 AWeapon* AFillainCharacter::GetEquippedWeapon()
 {
-	if (Combat == nullptr) return nullptr;
-	return Combat->EquippedWeapon;
+	AFillainCharacter* FillainCharacter = Cast<AFillainCharacter>(this);
+	if (FillainCharacter == nullptr) return nullptr;
+	return FillainCharacter->Combat->EquippedWeapon;
 }
 
 FVector AFillainCharacter::GetHitTarget() const

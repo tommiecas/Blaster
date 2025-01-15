@@ -17,7 +17,7 @@ namespace MatchState
 
 AHAFGameMode::AHAFGameMode()
 {
-	bDelayedStart = true;
+	bDelayedStart = false;
 }
 
 void AHAFGameMode::BeginPlay()

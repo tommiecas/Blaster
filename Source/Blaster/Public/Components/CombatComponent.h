@@ -33,6 +33,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void FinishReloading();
 
+	UPROPERTY(ReplicatedUsing = OnRep_EquippedWeapon)
+	AWeapon* EquippedWeapon;
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -68,8 +71,7 @@ private:
 	UPROPERTY()
 	class AFillainHUD* PlayerHUD;
 
-	UPROPERTY(ReplicatedUsing = OnRep_EquippedWeapon)
-	AWeapon* EquippedWeapon;
+	
 
 	UPROPERTY(Replicated)
 	bool bAiming;
@@ -135,6 +137,9 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	int32 StartingARAmmo = 30;
+
+	UPROPERTY(EditAnywhere)
+	int32 StartingRocketAmmo = 0;
 
 	UPROPERTY(ReplicatedUsing = OnRep_CombatState)
 	ECombatState CombatState = ECombatState::ECS_Unoccupied;

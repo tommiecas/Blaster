@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Weapons/WeaponTypes.h"
 #include "Projectile.generated.h"
 
 UCLASS()
@@ -16,6 +17,21 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void Destroyed() override;
+
+	UPROPERTY(EditAnywhere)
+	UParticleSystem* ImpactParticles;
+
+	UPROPERTY(EditAnywhere)
+	class UNiagaraSystem* ImpactNiagaraParticles;
+
+	UPROPERTY(EditAnywhere)
+	class USoundCue* ImpactSound;
+
+	UPROPERTY(EditAnywhere)
+	UParticleSystem* ImpactPlayerCharacterParticles;
+
+	UPROPERTY(EditAnywhere)
+	class USoundCue* ImpactPlayerCharacterSound;
 
 
 protected:
@@ -33,6 +49,7 @@ protected:
 	UPROPERTY(EditAnywhere)
 	float Damage = 20.f;
 
+
 private:	
 	UPROPERTY(VisibleAnywhere)
 	USkeletalMeshComponent* AmmoMesh;
@@ -49,18 +66,12 @@ private:
 	UPROPERTY()
 	class UParticleSystemComponent* TracerComponent;
 
-	UPROPERTY(EditAnywhere)
-	UParticleSystem* ImpactParticles;
+	UPROPERTY()
+	EWeaponType WeaponType;;
 
-	UPROPERTY(EditAnywhere)
-	class USoundCue* ImpactSound;
-
-	UPROPERTY(EditAnywhere)
-	UParticleSystem* ImpactPlayerCharacterParticles;
-
-	UPROPERTY(EditAnywhere)
-	class USoundCue* ImpactPlayerCharacterSound;
-
+public:
+	FORCEINLINE EWeaponType GetWeaponType() const{ return WeaponType; }
+	
 	
 
 };

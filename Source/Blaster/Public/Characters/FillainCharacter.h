@@ -308,8 +308,7 @@ public:
 	FORCEINLINE UCombatComponent* GetCombatComponent() const { return Combat; }
 	AHAFPlayerState* GetHAFPlayerState() const { return HAFPlayerState; }
 	AFillainPlayerController* GetFillainPlayerController();
-	FORCEINLINE bool GetDisableGameplay() const { return bDisableGameplay; }
-	
+	FORCEINLINE bool GetDisableGameplay() const { return bDisableGameplay; }	
 	
 	
 };

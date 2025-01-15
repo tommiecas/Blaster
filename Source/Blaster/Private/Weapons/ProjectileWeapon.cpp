@@ -4,6 +4,8 @@
 #include "Weapons/ProjectileWeapon.h"
 #include "Engine/SkeletalMeshSocket.h"
 #include "Weapons/Projectile.h"
+#include "Kismet/GameplayStatics.h"
+#include "Sound/SoundCue.h"
 
 void AProjectileWeapon::Fire(const FVector& HitTarget)
 {
