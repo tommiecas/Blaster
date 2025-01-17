@@ -50,6 +50,8 @@ public:
 	void Eliminate();
 	void FinishElimination();
 	virtual void Destroyed() override;
+	void OnFillainDying(AFillainCharacter* InstigatorFillain, AFillainCharacter* DyingFillain, AController* InstigatorController);
+	void ResetCachedDamageParameters();
 
 	UPROPERTY()
 	class AFillainPlayerController* FillainPlayerController;
@@ -68,6 +70,12 @@ public:
 	
 	UPROPERTY(Replicated)
 	bool bDisableGameplay = false;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	class UCombatComponent* Combat;
+
+	void CacheDamageParameters(AActor* DamagedPawn, float Damage, const UDamageType* DamageType, AController* InstigatorController, AActor* DamageCauser);
+	void ResetCacheDamageParameters();
 
 	/**********
 	* Jumping *
@@ -182,9 +190,6 @@ private:
 	UFUNCTION()
 	void OnRep_OverlappingWeapon(AWeapon* LastWeapon);
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	class UCombatComponent* Combat;
-
 	UFUNCTION(Server, Reliable)
 	void ServerEquipButtonPressed();
 
@@ -285,7 +290,11 @@ private:
 	UPROPERTY(EditAnywhere)
 	class USoundCue* EliminationBotSound;
 	
-	
+	AActor* CachedDamagedPawn;
+	float CachedDamage;
+	const UDamageType* CachedDamageType;
+	AController* CachedInstigatorController;
+	AActor* CachedDamageCauser;
 
 public:
 	void SetOverlappingWeapon(AWeapon* Weapon);
@@ -309,6 +318,7 @@ public:
 	AHAFPlayerState* GetHAFPlayerState() const { return HAFPlayerState; }
 	AFillainPlayerController* GetFillainPlayerController();
 	FORCEINLINE bool GetDisableGameplay() const { return bDisableGameplay; }	
+
 	
 	
 };

@@ -42,6 +42,18 @@ public:
 	UPROPERTY(VisibleAnywhere)
 	USkeletalMeshComponent* AmmoMesh;
 
+	bool bDeadByRocketLauncher = false;
+
+	void HandleRocketKilledOrMissedFillainSFX(AFillainCharacter* KillerFillain, AFillainCharacter* VictimFillain, AController* InstigatorController);
+	void HandleOtherProjectileKilledOrMissedFillainSFX(AFillainCharacter* KillerFillain, AFillainCharacter* VictimFillain, AController* InstigatorController);
+
+	UPROPERTY()
+	AFillainCharacter* DamagedPawn;
+
+	UPROPERTY()
+	AFillainCharacter* InstigatorFillainCharacter;
+
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -69,6 +81,9 @@ private:
 
 	UPROPERTY()
 	EWeaponType WeaponType;;
+
+	UFUNCTION()
+	bool DidRocketLauncherKillFillain(AFillainCharacter* MurderingPaawn, AFillainCharacter* DeadPawn);
 
 public:
 	FORCEINLINE EWeaponType GetWeaponType() const{ return WeaponType; }

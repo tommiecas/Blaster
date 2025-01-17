@@ -27,6 +27,7 @@
 #include "PlayerState/HAFPlayerState.h"
 #include "Weapons/WeaponTypes.h"
 #include "GameMode/LobbyGameMode.h"
+#include "Weapons/Projectile.h"
 
 
 AFillainCharacter::AFillainCharacter()
@@ -147,8 +148,6 @@ void AFillainCharacter::Restart()
 {
 	Super::Restart();
 }
-
-
 
 void AFillainCharacter::PostInitializeComponents()
 {
@@ -332,6 +331,7 @@ void AFillainCharacter::PlayHitReactMontage()
 		FName SectionName("FromFront");
 		AnimInstance->Montage_JumpToSection(SectionName);
 	}
+	ReceiveDamage(CachedDamagedPawn, CachedDamage, CachedDamageType, CachedInstigatorController, CachedDamageCauser);
 }
 
 void AFillainCharacter::PlayEliminatedMontage()
@@ -363,6 +363,8 @@ void AFillainCharacter::PlayReloadingMontage()
 		case EWeaponType::EWT_Pistol:
 			SectionName = FName("Pistol");
 			break;
+		case EWeaponType::EWT_SubmachineGun:
+			SectionName = FName("SubmachineGun");
 		}
 
 		AnimInstance->Montage_JumpToSection(SectionName);
@@ -371,14 +373,43 @@ void AFillainCharacter::PlayReloadingMontage()
 
 void AFillainCharacter::ReceiveDamage(AActor* DamagedPawn, float Damage, const UDamageType* DamageType, AController* InstigatorController, AActor* DamageCauser)
 {
+	CacheDamageParameters(DamagedPawn, Damage, DamageType, InstigatorController, DamageCauser);
+
 	Health = FMath::Clamp(Health - Damage, 0.f, MaxHealth);
 	UpdateHUDHealth();
 	PlayHitReactMontage();
 
 	if (Health == 0.f)
 	{
+		AFillainCharacter* InstigatorFillain = Cast<AFillainCharacter>(InstigatorController->GetPawn());
+		AFillainCharacter* KilledFillain = Cast<AFillainCharacter>(DamagedPawn);
+		AController* InstigatorController = InstigatorFillain->GetController();
+		OnFillainDying(InstigatorFillain, KilledFillain, InstigatorController);
+	}
+
+	ResetCachedDamageParameters();
+}
+
+	void AFillainCharacter::OnFillainDying(AFillainCharacter* InstigatorFillain, AFillainCharacter* DyingFillain, AController* InstigatorController)
+	{
+		AProjectile* Projectile = Cast<AProjectile>(DyingFillain);
+		if (InstigatorFillain && InstigatorFillain->Combat->EquippedWeapon->GetWeaponType() == EWeaponType::EWT_RocketLauncher)
+		{
+			Projectile->HandleRocketKilledOrMissedFillainSFX(InstigatorFillain, DyingFillain, InstigatorController);
+		}
+		else if (InstigatorFillain && InstigatorFillain->Combat->EquippedWeapon->GetWeaponType() != EWeaponType::EWT_RocketLauncher)
+		{
+			Projectile->HandleOtherProjectileKilledOrMissedFillainSFX(InstigatorFillain, DyingFillain, InstigatorController);
+		}
+		
+		AFillainPlayerController* FillainVillain = Cast<AFillainPlayerController>(InstigatorController);
+		if (FillainVillain && FillainVillain->GetFillain()->GetCombatComponent()->EquippedWeapon->GetWeaponType() == EWeaponType::EWT_RocketLauncher)
+		{
+			FillainVillain->GetFillain()->GetCombatComponent()->EquippedWeapon->DropWeapon();
+		}
+		
 		AHAFGameMode* HAFGameMode = GetWorld()->GetAuthGameMode<AHAFGameMode>();
-		VictimCharacter = Cast<AFillainCharacter>(DamagedPawn);
+		VictimCharacter = Cast<AFillainCharacter>(DyingFillain);
 		VictimController = Cast<AFillainPlayerController>(VictimCharacter->GetController());
 		AFillainPlayerController* KillerController = Cast<AFillainPlayerController>(InstigatorController);
 		if (VictimCharacter && HAFGameMode && VictimController && KillerController)
@@ -388,7 +419,6 @@ void AFillainCharacter::ReceiveDamage(AActor* DamagedPawn, float Damage, const U
 			KillerController->SetHUDEliminationMessage(KillerController, VictimController);
 		}
 	}		
-}
 
 
 void AFillainCharacter::OnRep_Health()
@@ -729,6 +759,27 @@ AFillainPlayerController* AFillainCharacter::GetFillainPlayerController()
 	else return nullptr;
 }
 
+
+void AFillainCharacter::CacheDamageParameters(AActor* DamagedPawn, float Damage, const UDamageType* DamageType, AController* InstigatorController, AActor* DamageCauser)
+{
+	if (CachedDamagedPawn == nullptr && CachedDamage == 0.0f && CachedDamageType == nullptr && CachedInstigatorController == nullptr && CachedDamageCauser == nullptr)
+	{
+		CachedDamagedPawn = DamagedPawn;
+		CachedDamage = Damage;
+		CachedDamageType = DamageType;
+		CachedInstigatorController = InstigatorController;
+		CachedDamageCauser = DamageCauser;
+	}
+}
+
+void AFillainCharacter::ResetCachedDamageParameters()
+{
+	CachedDamagedPawn = nullptr;
+	CachedDamage = 0.0f;
+	CachedDamageType = nullptr;
+	CachedInstigatorController = nullptr;
+	CachedDamageCauser = nullptr;
+}
 
 void AFillainCharacter::Jump()
 {

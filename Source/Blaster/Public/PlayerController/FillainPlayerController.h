@@ -52,6 +52,9 @@ public:
 	void OnMatchStateSet(FName State);
 	void HandleCooldown();
 
+	UPROPERTY()
+	class AWeapon* EquippedWeapon;
+
 protected:
 	virtual void BeginPlay() override;
 	void SetHUDTime();
@@ -104,8 +107,7 @@ private:
 	UPROPERTY(meta = (AllowPrivateAccess = "true"))
 	class AHAFGameMode* Mode;
 
-	UPROPERTY()
-	class AWeapon* EquippedWeapon;
+
 
 	float MatchTime = 0.f;
 	float WarmupTime = 0.f;
