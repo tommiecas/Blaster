@@ -368,6 +368,11 @@ void AFillainCharacter::PlayReloadingMontage()
 			break;
 		case EWeaponType::EWT_Shotgun:
 			SectionName = FName("Shotgun");
+			break;
+		case EWeaponType::EWT_SniperRifle:
+			SectionName = FName("SniperRifle");
+			break;
+
 		}
 
 		AnimInstance->Montage_JumpToSection(SectionName);
