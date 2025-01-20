@@ -365,6 +365,9 @@ void AFillainCharacter::PlayReloadingMontage()
 			break;
 		case EWeaponType::EWT_SubmachineGun:
 			SectionName = FName("SubmachineGun");
+			break;
+		case EWeaponType::EWT_Shotgun:
+			SectionName = FName("Shotgun");
 		}
 
 		AnimInstance->Montage_JumpToSection(SectionName);
@@ -381,35 +384,19 @@ void AFillainCharacter::ReceiveDamage(AActor* DamagedPawn, float Damage, const U
 
 	if (Health == 0.f)
 	{
-		AFillainCharacter* InstigatorFillain = Cast<AFillainCharacter>(InstigatorController->GetPawn());
-		AFillainCharacter* KilledFillain = Cast<AFillainCharacter>(DamagedPawn);
-		AController* InstigatorController = InstigatorFillain->GetController();
-		OnFillainDying(InstigatorFillain, KilledFillain, InstigatorController);
+		AFillainCharacter* KillerFillain = Cast<AFillainCharacter>(InstigatorController->GetPawn());
+		AFillainCharacter* VictimFillain = Cast<AFillainCharacter>(DamagedPawn);
+		AFillainPlayerController* KillerController = Cast<AFillainPlayerController>(GetInstigatorController());
+		OnFillainDying(KillerFillain, VictimFillain, KillerController);
 	}
 
 	ResetCachedDamageParameters();
 }
 
-	void AFillainCharacter::OnFillainDying(AFillainCharacter* InstigatorFillain, AFillainCharacter* DyingFillain, AController* InstigatorController)
-	{
-		AProjectile* Projectile = Cast<AProjectile>(DyingFillain);
-		if (InstigatorFillain && InstigatorFillain->Combat->EquippedWeapon->GetWeaponType() == EWeaponType::EWT_RocketLauncher)
-		{
-			Projectile->HandleRocketKilledOrMissedFillainSFX(InstigatorFillain, DyingFillain, InstigatorController);
-		}
-		else if (InstigatorFillain && InstigatorFillain->Combat->EquippedWeapon->GetWeaponType() != EWeaponType::EWT_RocketLauncher)
-		{
-			Projectile->HandleOtherProjectileKilledOrMissedFillainSFX(InstigatorFillain, DyingFillain, InstigatorController);
-		}
-		
-		AFillainPlayerController* FillainVillain = Cast<AFillainPlayerController>(InstigatorController);
-		if (FillainVillain && FillainVillain->GetFillain()->GetCombatComponent()->EquippedWeapon->GetWeaponType() == EWeaponType::EWT_RocketLauncher)
-		{
-			FillainVillain->GetFillain()->GetCombatComponent()->EquippedWeapon->DropWeapon();
-		}
-		
+	void AFillainCharacter::OnFillainDying(AFillainCharacter* KillerFillain, AFillainCharacter* VictimFillain, AFillainPlayerController* InstigatorController)
+	{		
 		AHAFGameMode* HAFGameMode = GetWorld()->GetAuthGameMode<AHAFGameMode>();
-		VictimCharacter = Cast<AFillainCharacter>(DyingFillain);
+		VictimCharacter = Cast<AFillainCharacter>(VictimFillain);
 		VictimController = Cast<AFillainPlayerController>(VictimCharacter->GetController());
 		AFillainPlayerController* KillerController = Cast<AFillainPlayerController>(InstigatorController);
 		if (VictimCharacter && HAFGameMode && VictimController && KillerController)
@@ -745,18 +732,8 @@ ECombatState AFillainCharacter::GetCombatState() const
 
 AFillainPlayerController* AFillainCharacter::GetFillainPlayerController() 
 {
-	AFillainCharacter* Char = Cast<AFillainCharacter>(this);
-	if (Char)
-	{
-		AHAFPlayerState* HAFState = Char->GetPlayerState<AHAFPlayerState>();
-		if (HAFState)
-		{
-			AFillainPlayerController* FillainController = Cast<AFillainPlayerController>(HAFState->GetFillainPlayerController());
-			return FillainController;
-		}
-		else return nullptr;
-	}
-	else return nullptr;
+	AFillainPlayerController* FillainController = Cast<AFillainPlayerController>(GetController());
+	return FillainController;
 }
 
 

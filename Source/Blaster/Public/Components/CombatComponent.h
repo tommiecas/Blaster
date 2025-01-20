@@ -36,6 +36,9 @@ public:
 	UPROPERTY(ReplicatedUsing = OnRep_EquippedWeapon)
 	AWeapon* EquippedWeapon;
 
+    UPROPERTY()
+    EWeaponType WeaponType;
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -147,6 +150,9 @@ private:
 	UPROPERTY(EditAnywhere)
 	int32 StartingSMGAmmo = 0;
 
+	UPROPERTY(EditAnywhere)
+	int32 StartingShotgunAmmo = 0;
+
 	UPROPERTY(ReplicatedUsing = OnRep_CombatState)
 	ECombatState CombatState = ECombatState::ECS_Unoccupied;
 
@@ -156,6 +162,7 @@ private:
 
 public:	
 	FORCEINLINE bool IsAiming() const { return bAiming; }
+	FORCEINLINE EWeaponType GetWeaponType() const { return WeaponType; }
 	
 		
 };

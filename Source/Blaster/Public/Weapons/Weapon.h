@@ -147,8 +147,6 @@ private:
 	UPROPERTY(EditAnywhere)
 	EWeaponType WeaponType;
 
-
-
 public:	
 	void SetWeaponState(EWeaponState State);
 	FORCEINLINE USphereComponent* GetAreaSphere() const { return AreaSphere; }

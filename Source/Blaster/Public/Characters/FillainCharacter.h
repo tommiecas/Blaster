@@ -30,6 +30,7 @@ class UDamageType;
 class AFillainPlayerController;
 class AHAFPlayerState;
 class ALobbyGameMode;
+class AProjectile;
 
 UCLASS()
 class BLASTER_API AFillainCharacter : public ACharacter, public IInteractWithCrosshairsInterface
@@ -50,7 +51,7 @@ public:
 	void Eliminate();
 	void FinishElimination();
 	virtual void Destroyed() override;
-	void OnFillainDying(AFillainCharacter* InstigatorFillain, AFillainCharacter* DyingFillain, AController* InstigatorController);
+	void OnFillainDying(AFillainCharacter* InstigatorFillain, AFillainCharacter* DyingFillain, class AFillainPlayerController* InstigatorController);
 	void ResetCachedDamageParameters();
 
 	UPROPERTY()
@@ -93,6 +94,12 @@ public:
 	void PlayHitReactMontage();
 	void PlayEliminatedMontage();
 	void PlayReloadingMontage();
+
+	UPROPERTY()
+	AProjectile* Projectile;
+
+	UFUNCTION()
+	void ReceiveDamage(AActor* DamagedPawn, float Damage, const UDamageType* DamageType, class AController* InstigatorController, AActor* DamageCauser);
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
@@ -162,9 +169,6 @@ protected:
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void ShowPlayerName();
-
-	UFUNCTION()
-	void ReceiveDamage(AActor* DamagedPawn, float Damage, const UDamageType* DamageType, class AController* InstigatorController, AActor* DamageCauser);
 	
 	void UpdateHUDHealth();
 	// Poll for any relevant classes and initialize our HUD
@@ -317,7 +321,8 @@ public:
 	FORCEINLINE UCombatComponent* GetCombatComponent() const { return Combat; }
 	AHAFPlayerState* GetHAFPlayerState() const { return HAFPlayerState; }
 	AFillainPlayerController* GetFillainPlayerController();
-	FORCEINLINE bool GetDisableGameplay() const { return bDisableGameplay; }	
+	FORCEINLINE AProjectile* GetProjectile() const { return Projectile; }
+	FORCEINLINE bool GetDisableGameplay() const { return bDisableGameplay; }
 
 	
 	

@@ -107,74 +107,13 @@ void AProjectileRocket::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, 
 
 	if (bHitPlayerCharacter == true)
 	{
-		if (FiringFillain && FiredWeapon && FiredWeapon->GetWeaponType() == EWeaponType::EWT_RocketLauncher) // Fix the assignment operator to comparison operator
-		{
-			if (ImpactPlayerCharacterParticles)
-			{
-				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactPlayerCharacterParticles, GetActorTransform());
-			}
-			if (ImpactPlayerCharacterSound)
-			{
-				UGameplayStatics::PlaySoundAtLocation(this, ImpactPlayerCharacterSound, GetActorLocation());
-			}
-			if (ImpactParticles)
-			{
-				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticles, GetActorTransform());
-			}
-			if (ImpactNiagaraParticles)
-			{
-				UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ImpactNiagaraParticles, GetActorLocation(), GetActorRotation());
-			}
-			if (ImpactSound)
-			{
-				UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation());
-			}
-		}
-		else if ((FiredWeapon && FiredWeapon->GetWeaponType() != EWeaponType::EWT_RocketLauncher))
-		{
-			if (ImpactPlayerCharacterParticles)
-			{
-				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactPlayerCharacterParticles, GetActorTransform());
-			}
-			if (ImpactPlayerCharacterSound)
-			{
-				UGameplayStatics::PlaySoundAtLocation(this, ImpactPlayerCharacterSound, GetActorLocation());
-			}
-			if (ImpactParticles)
-			{
-				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticles, GetActorTransform());
-			}
-		}
+		HandlePostHitSFXDamagingPlayer();
 	}
-	else if (bHitPlayerCharacter != true)
+	else 
 	{
-		if (FiringFillain && FiredWeapon && FiredWeapon->GetWeaponType() == EWeaponType::EWT_RocketLauncher) // Fix the assignment operator to comparison operator
-		{
-			if (ImpactParticles)
-			{
-				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticles, GetActorTransform());
-			}
-			if (ImpactNiagaraParticles)
-			{
-				UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ImpactNiagaraParticles, GetActorLocation(), GetActorRotation());
-			}
-			if (ImpactSound)
-			{
-				UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation());
-			}
-		}
-		else if ((FiredWeapon && FiredWeapon->GetWeaponType() != EWeaponType::EWT_RocketLauncher))
-		{
-			if (ImpactParticles)
-			{
-				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticles, GetActorTransform());
-			}
-			if (ImpactSound)
-			{
-				UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation());
-			}
-		}
+		HandlePostHitSFXDamagingPlayer();
 	}
+	
 	if (AmmoMesh)
 	{
 		AmmoMesh->SetVisibility(false);

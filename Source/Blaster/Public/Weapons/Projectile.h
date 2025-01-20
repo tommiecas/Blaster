@@ -17,6 +17,8 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void Destroyed() override;
+	void HandlePostHitSFXDamagingPlayer();
+	void HandlePostHitSFXDamagingEnvironment();
 
 	UFUNCTION()
 	virtual void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
@@ -42,17 +44,17 @@ public:
 	UPROPERTY(VisibleAnywhere)
 	USkeletalMeshComponent* AmmoMesh;
 
-	bool bDeadByRocketLauncher = false;
-
-	void HandleRocketKilledOrMissedFillainSFX(AFillainCharacter* KillerFillain, AFillainCharacter* VictimFillain, AController* InstigatorController);
-	void HandleOtherProjectileKilledOrMissedFillainSFX(AFillainCharacter* KillerFillain, AFillainCharacter* VictimFillain, AController* InstigatorController);
+	bool bHitByRocketLauncher = false;
+	bool bMissedByRocketLauncher = true;
 
 	UPROPERTY()
-	AFillainCharacter* DamagedPawn;
+	class AFillainCharacter* DamagedPawn;
 
 	UPROPERTY()
 	AFillainCharacter* InstigatorFillainCharacter;
 
+	UPROPERTY(EditAnywhere)
+	float Damage = 0.f;
 
 protected:
 	virtual void BeginPlay() override;
@@ -63,8 +65,7 @@ protected:
 	UPROPERTY(Replicated)
 	bool bHitPlayerCharacter = false;
 
-	UPROPERTY(EditAnywhere)
-	float Damage = 20.f;
+
 
 private:	
 	UPROPERTY(EditAnywhere)
@@ -82,11 +83,9 @@ private:
 	UPROPERTY()
 	EWeaponType WeaponType;;
 
-	UFUNCTION()
-	bool DidRocketLauncherKillFillain(AFillainCharacter* MurderingPaawn, AFillainCharacter* DeadPawn);
-
 public:
 	FORCEINLINE EWeaponType GetWeaponType() const{ return WeaponType; }
+	FORCEINLINE float GetDamage() const { return Damage; }
 	
 	
 
