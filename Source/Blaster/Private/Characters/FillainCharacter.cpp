@@ -377,6 +377,9 @@ void AFillainCharacter::PlayReloadingMontage()
 		case EWeaponType::EWT_SniperRifle:
 			SectionName = FName("SniperRifle");
 			break;
+		case EWeaponType::EWT_GrenadeLauncher:
+			SectionName = FName("GrenadeLauncher");
+			break;
 
 		}
 
