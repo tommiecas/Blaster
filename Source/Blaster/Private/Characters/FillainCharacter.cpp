@@ -236,6 +236,11 @@ void AFillainCharacter::MulticastEliminate_Implementation()
 			GetActorLocation()
 		);
 	}
+	bool bHideSniperSscope = IsLocallyControlled() && Combat && Combat->bAiming && Combat->EquippedWeapon && Combat->EquippedWeapon->GetWeaponType() == EWeaponType::EWT_SniperRifle;
+	if (bHideSniperSscope)
+	{
+		ShowSniperScopeWidget(false);
+	}
 }
 
 void AFillainCharacter::EliminationTimerFinished()
