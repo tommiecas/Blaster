@@ -5,9 +5,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Weapons/Projectile.h"
 #include "Sound/SoundCue.h"
-#include "Niagara/Public/NiagaraComponent.h"
-#include "Niagara/Public/NiagaraFunctionLibrary.h"
-#include "Niagara/Public/NiagaraSystemInstance.h"
+
 #include "GameFramework/Character.h"
 #include "Weapons/Weapon.h"
 #include "Characters/FillainCharacter.h"
@@ -15,6 +13,9 @@
 #include "Components/AudioComponent.h"
 #include "Weapons/RocketMovementComponent.h"
 #include "Components/CombatComponent.h"
+#include "Niagara/Public/NiagaraComponent.h"
+#include "Niagara/Public/NiagaraFunctionLibrary.h"
+#include "Niagara/Public/NiagaraSystemInstance.h"
 
 
 
@@ -35,15 +36,7 @@ void AProjectileRocket::BeginPlay()
 	}
 	if (TrailSystem)
 	{
-		TrailSystemComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(
-			TrailSystem,
-			GetRootComponent(),
-			FName(),
-			GetActorLocation(),
-			GetActorRotation(),
-			EAttachLocation::KeepWorldPosition,
-			false
-		);
+	SpawnTrailSystem();
 	}
 	if (ProjectileLoop && LoopingSoundAttenuation)
 	{
@@ -64,42 +57,15 @@ void AProjectileRocket::BeginPlay()
 	}
 }
 
-void AProjectileRocket::DestroyTimerFinished()
-{
-}
-
 void AProjectileRocket::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-	APawn* RocketFiringPawn = GetInstigator();
-	if (RocketFiringPawn && HasAuthority())
+	if (OtherActor == GetOwner())
 	{
-		AController* RocketFiringController = RocketFiringPawn->GetController();
-		if (RocketFiringController)
-		{
-			TArray<AActor*> IgnoreActors;
-			IgnoreActors.Add(GetOwner());
-
-			UGameplayStatics::ApplyRadialDamageWithFalloff(
-				this, //WorldContextObject
-				Damage, //BaseDamage
-				10.f, //Minimum Damage
-				GetActorLocation(), // Origin
-				300.f, //DamageInnerRadius
-				600.f, //DamageOuterRadius
-				1.f, // DamageFalloff
-				UDamageType::StaticClass(), //DamageType
-				IgnoreActors, //IgnoreActors
-				this, //DamageCauser
-				RocketFiringController //InstigatedBy
-			);
-		}
+		return;
 	}
-	GetWorldTimerManager().SetTimer(
-		DestroyTimer,
-		this,
-		&AProjectileRocket::DestroyTimerFinished,
-		DestroyTime
-	);
+	ExplodeDamage();
+	StartDestroyTimer();
+
 	APawn* FiringPawn = GetInstigator();
 	AFillainCharacter* FiringFillain = Cast<AFillainCharacter>(FiringPawn);
 	if (FiringFillain == nullptr) return; // Add this check
@@ -113,7 +79,10 @@ void AProjectileRocket::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, 
 	{
 		HandlePostHitSFXDamagingPlayer();
 	}
-	
+	if (ProjectileMesh)
+	{
+		ProjectileMesh->SetVisibility(false);
+	}
 	if (AmmoMesh)
 	{
 		AmmoMesh->SetVisibility(false);

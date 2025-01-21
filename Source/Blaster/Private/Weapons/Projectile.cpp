@@ -79,6 +79,65 @@ void AProjectile::BeginPlay()
 	}
 }
 
+void AProjectile::SpawnTrailSystem()
+{
+	if (TrailSystem && TrailSystemComponent)
+	{
+		TrailSystemComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(
+			TrailSystem,
+			GetRootComponent(),
+			FName(),
+			GetActorLocation(),
+			GetActorRotation(),
+			EAttachLocation::KeepWorldPosition,
+			false
+		);
+	}
+}
+
+void AProjectile::StartDestroyTimer()
+{
+	GetWorldTimerManager().SetTimer(
+		DestroyTimer,
+		this,
+		&AProjectile::DestroyTimerFinished,
+		DestroyTime
+	);
+}
+
+void AProjectile::DestroyTimerFinished()
+{
+	Destroy();
+}
+
+void AProjectile::ExplodeDamage()
+{
+	APawn* RocketFiringPawn = GetInstigator();
+	if (RocketFiringPawn && HasAuthority())
+	{
+		AController* RocketFiringController = RocketFiringPawn->GetController();
+		if (RocketFiringController)
+		{
+			TArray<AActor*> IgnoreActors;
+			IgnoreActors.Add(GetOwner());
+
+			UGameplayStatics::ApplyRadialDamageWithFalloff(
+				this, //WorldContextObject
+				Damage, //BaseDamage
+				10.f, //Minimum Damage
+				GetActorLocation(), // Origin
+				DamageInnerRadius, //DamageInnerRadius
+				DamageOuterRadius, //DamageOuterRadius
+				1.f, // DamageFalloff
+				UDamageType::StaticClass(), //DamageType
+				IgnoreActors, //IgnoreActors
+				this, //DamageCauser
+				RocketFiringController //InstigatedBy
+			);
+		}
+	}
+}
+
 void AProjectile::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
@@ -127,6 +186,15 @@ void AProjectile::Tick(float DeltaTime)
 void AProjectile::Destroyed()
 {
 	Super::Destroyed();
+
+	if (ImpactParticles)
+	{
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticles, GetActorTransform());
+	}
+	if (ImpactSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation());
+	}
 }
 
 void AProjectile::HandlePostHitSFXDamagingPlayer()

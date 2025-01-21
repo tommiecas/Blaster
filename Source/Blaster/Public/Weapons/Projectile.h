@@ -65,9 +65,42 @@ protected:
 	UPROPERTY(Replicated)
 	bool bHitPlayerCharacter = false;
 
+	UPROPERTY(EditAnywhere)
+	class UNiagaraSystem* TrailSystem;
 
+
+
+	UPROPERTY()
+	class UNiagaraComponent* TrailSystemComponent;
+
+	void SpawnTrailSystem();
+
+	FTimerHandle DestroyTimer;
+
+	UPROPERTY(EditAnywhere)
+	float DestroyTime = 3.f;
+
+	void StartDestroyTimer();
+
+	void DestroyTimerFinished();
+
+	UPROPERTY(VisibleAnywhere)
+	class UProjectileMovementComponent* ProjectileMovementComponent;
+
+	UPROPERTY(VisibleAnywhere)
+	UStaticMeshComponent* ProjectileMesh;
+
+	void ExplodeDamage();
+
+	UPROPERTY(EditAnywhere)
+	float DamageInnerRadius = 300.f;
+
+	UPROPERTY(EditAnywhere)
+	float DamageOuterRadius = 600.f;
 
 private:	
+	
+
 	UPROPERTY(EditAnywhere)
 	class UParticleSystem* CascadeTracer;
 
