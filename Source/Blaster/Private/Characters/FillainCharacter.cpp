@@ -369,7 +369,7 @@ void AFillainCharacter::PlayReloadingMontage()
 			SectionName = FName("Pistol");
 			break;
 		case EWeaponType::EWT_SubmachineGun:
-			SectionName = FName("SubmachineGun");
+			SectionName = FName("Pistol");
 			break;
 		case EWeaponType::EWT_Shotgun:
 			SectionName = FName("Shotgun");
