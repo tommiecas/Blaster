@@ -12,6 +12,7 @@
 #include "Engine/SkeletalMeshSocket.h"
 #include "Characters/FillainCharacter.h"
 #include "PlayerController/FillainPlayerController.h"
+#include "Components/CombatComponent.h"
 
 AWeapon::AWeapon()
 {
@@ -131,6 +132,11 @@ void AWeapon::FireSingleRoundOfAmmo()
 
 void AWeapon::OnRep_Ammo()
 {
+	FillainOwnerCharacter = FillainOwnerCharacter == nullptr ? Cast<AFillainCharacter>(GetOwner()) : FillainOwnerCharacter;
+	if (FillainOwnerCharacter && FillainOwnerCharacter->GetCombatComponent() && IsWeaponFull())
+	{
+		FillainOwnerCharacter->GetCombatComponent()->JumpToShotgunEnd();
+	}
 	SetHUDAmmo();
 }
 
@@ -185,6 +191,11 @@ void AWeapon::SetWeaponState(EWeaponState State)
 bool AWeapon::IsWeaponEmpty()
 {
 	return Ammo <= 0;
+}
+
+bool AWeapon::IsWeaponFull()
+{
+	return Ammo == MagCapacity;
 }
 
 void AWeapon::OnRep_WeaponState()

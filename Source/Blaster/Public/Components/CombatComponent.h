@@ -39,6 +39,11 @@ public:
     UPROPERTY()
     EWeaponType WeaponType;
 
+	UFUNCTION(BlueprintCallable)
+	void ShotgunShellReload();
+
+	void JumpToShotgunEnd();
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -165,6 +170,7 @@ private:
 	UFUNCTION()
 	void OnRep_CombatState();
 	void UpdateAmmoValues();
+	void UpdateShotgunAmmoValues();
 
 public:	
 	FORCEINLINE bool IsAiming() const { return bAiming; }
