@@ -315,6 +315,12 @@ private:
 	AController* CachedInstigatorController;
 	AActor* CachedDamageCauser;
 
+	/************
+	** Grenade **
+	************/
+	UPROPERTY(VisibleAnywhere) 
+	UStaticMeshComponent* AttachedGrenade;
+
 public:
 	void SetOverlappingWeapon(AWeapon* Weapon);
 	bool IsWeaponEquipped();
