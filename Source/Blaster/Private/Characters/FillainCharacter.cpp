@@ -135,6 +135,7 @@ void AFillainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &AFillainCharacter::FireButtonPressed);
 		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Completed, this, &AFillainCharacter::FireButtonReleased);
 		EnhancedInputComponent->BindAction(ReloadAction, ETriggerEvent::Triggered, this, &AFillainCharacter::ReloadButtonPressed);
+		EnhancedInputComponent->BindAction(ThrowAction, ETriggerEvent::Triggered, this, & AFillainCharacter::GrenadeButtonPressed);
 	}
 }
 
@@ -269,6 +270,14 @@ void AFillainCharacter::Destroyed()
 	}
 }
 
+void AFillainCharacter::GrenadeButtonPressed()
+{
+	if (Combat)
+	{
+		Combat->ThrowGrenade();
+	}
+}
+
 void AFillainCharacter::UpdateHUDHealth()
 {
 	FillainPlayerController = FillainPlayerController == nullptr ? Cast<AFillainPlayerController>(Controller) : FillainPlayerController;
@@ -384,6 +393,15 @@ void AFillainCharacter::PlayReloadingMontage()
 		}
 
 		AnimInstance->Montage_JumpToSection(SectionName);
+	}
+}
+
+void AFillainCharacter::PlayThrowGrenadeMontage()
+{
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && ThrowGrenadeMontage)
+	{
+		AnimInstance->Montage_Play(ThrowGrenadeMontage);
 	}
 }
 

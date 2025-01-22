@@ -81,6 +81,9 @@ public:
 	UPROPERTY()
 	class AProjectile* Projectile;
 
+	void EnableCustomDepth(bool bEnable);
+
+
 protected:
 	virtual void BeginPlay() override;
 

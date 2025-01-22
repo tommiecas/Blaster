@@ -78,22 +78,23 @@ public:
 	void CacheDamageParameters(AActor* DamagedPawn, float Damage, const UDamageType* DamageType, AController* InstigatorController, AActor* DamageCauser);
 	void ResetCacheDamageParameters();
 
-	/**********
-	* Jumping *
-	***********/
+	/************
+	** Jumping **
+	************/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	UInputAction* JumpAction;
 
 	virtual void Jump() override;
 
 
-	/****************
-	* PLAY MONTAGES *
-	*****************/
+	/******************
+	** PLAY MONTAGES **
+	******************/
 	void PlayFireMontage(bool bAiming);
 	void PlayHitReactMontage();
 	void PlayEliminatedMontage();
 	void PlayReloadingMontage();
+	void PlayThrowGrenadeMontage();
 
 	UPROPERTY()
 	AProjectile* Projectile;
@@ -108,41 +109,41 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	class UInputMappingContext* HAFMappingContext;
 
-	/* 
-	** Moving Around
-	*/ 
+	/****************** 
+	** Moving Around **
+	******************/ 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	UInputAction* MoveAction;
 
 	void Move(const FInputActionValue& Value);
 
-	/*
-	** Looking Around
-	*/ 
+	/*******************
+	** Looking Around **
+	*******************/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	UInputAction* LookAction;
 
 	void Look(const FInputActionValue& Value);
 
-	/*
-	** Equipping Weapons
-	*/
+	/**********************
+	** Equipping Weapons **
+	**********************/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	UInputAction* EquipAction;
 
 	void EquipButtonPressed();
 
-	/*
-	** Crouching
-	*/
+	/**************
+	** Crouching **
+	**************/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	UInputAction* CrouchAction;
 
 	void CrouchButtonPressed();
 
-	/*
-	** Aiming the Weapon
-	*/
+	/**********************
+	** Aiming the Weapon **
+	**********************/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	UInputAction* AimAction;
 
@@ -152,9 +153,9 @@ protected:
 	void CalculateAO_Pitch();
 	void SimProxiesTurn();
 
-	/*
-	** Firing the Weapon
-	*/
+	/**********************
+	** Firing the Weapon **
+	**********************/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	UInputAction* FireAction;
 
@@ -162,13 +163,21 @@ protected:
 	void FireButtonPressed();
 	void FireButtonReleased();
 
-	/*
-	** Reloading the Weapon
-	*/
+	/*************************
+	** Reloading the Weapon **
+	*************************/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	UInputAction* ReloadAction;
 
 	void ReloadButtonPressed();
+
+	/*************************
+	** Throwing the Grenade **
+	*************************/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+	UInputAction* ThrowAction;
+
+	void GrenadeButtonPressed();
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void ShowPlayerName();
@@ -208,9 +217,9 @@ private:
 	ETurningInPlace TurningInPlace;
 	void TurnInPlace(float DeltaTime);
 
-	/*
-	** Animation Montages
-	*/
+	/***********************
+	** Animation Montages **
+	***********************/
 
 	UPROPERTY(EditAnywhere, Category = Combat)
 	class UAnimMontage* FireWeaponMontage;
@@ -223,6 +232,9 @@ private:
 
 	UPROPERTY(Replicated, EditAnywhere, Category = Combat)
 	class UAnimMontage* ReloadingMontage;
+
+	UPROPERTY(Replicated, EditAnywhere, Category = Combat)
+	class UAnimMontage* ThrowGrenadeMontage;
 
 	void HideCharacterIfCameraClose();
 
@@ -237,9 +249,9 @@ private:
 	float TimeSinceLastMovementReplication;
 	float CalculateSpeed();
 
-	/*
-	** Player Health
-	*/
+	/******************
+	** Player Health **
+	******************/
 
 	UPROPERTY(ReplicatedUsing = OnRep_Health, VisibleAnywhere, Category = "Player Stats")
 	float Health = 100.f;
@@ -261,9 +273,9 @@ private:
 	UPROPERTY(EditDefaultsOnly)
 	float EliminationDelay = 3.f;
 
-	/*
-	** Dissolve Effect
-	*/
+	/********************
+	** Dissolve Effect **
+	********************/
 
 	UPROPERTY(VisibleAnywhere)
 	UTimelineComponent* DissolveTimeline;
@@ -284,9 +296,9 @@ private:
 	UPROPERTY(EditAnywhere, Category = Eliminations)
 	UMaterialInstance* DissolveMaterialInstance;
 
-	/*
-	** Elimination-Bot
-	*/
+	/********************
+	** Elimination-Bot **
+	********************/
 
 	UPROPERTY(EditAnywhere)
 	UParticleSystem* EliminationBotEffect;
