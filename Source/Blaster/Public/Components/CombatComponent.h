@@ -47,6 +47,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void ThrowGrenadeFinished();
 
+	UFUNCTION(BlueprintCallable)
+	void LaunchGrenade();
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -77,6 +80,9 @@ protected:
 	UFUNCTION(Server, Reliable)
 	void ServerThrowGrenade();
 
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class AProjectile> GrenadeClass;
+
 	void DropEquippedWeapon();
 
 	void AttachActorToRightHand(class AActor* ActorToAttach);
@@ -87,6 +93,8 @@ protected:
 	void PlayWeaponEquipSound();
 
 	void ReloadEmptyWeapon();
+
+	void ShowAttachedGrenade(bool bShowGrenade);
 
 private:
 	UPROPERTY()

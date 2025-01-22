@@ -345,7 +345,7 @@ public:
 	FORCEINLINE AProjectile* GetProjectile() const { return Projectile; }
 	FORCEINLINE bool GetDisableGameplay() const { return bDisableGameplay; }
 	FORCEINLINE UAnimMontage* GetReloadingMontage() const { return ReloadingMontage; }
-
+	FORCEINLINE UStaticMeshComponent* GetAttachedGrenade() const { return AttachedGrenade; }
 	
 	
 };

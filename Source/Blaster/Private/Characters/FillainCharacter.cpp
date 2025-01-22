@@ -121,6 +121,10 @@ void AFillainCharacter::BeginPlay()
 	{
 		OnTakeAnyDamage.AddDynamic(this, &AFillainCharacter::ReceiveDamage);
 	}
+	if (AttachedGrenade)
+	{
+		AttachedGrenade->SetVisibility(false);
+	}
 }
 
 void AFillainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
