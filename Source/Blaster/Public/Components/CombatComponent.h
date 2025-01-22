@@ -77,6 +77,17 @@ protected:
 	UFUNCTION(Server, Reliable)
 	void ServerThrowGrenade();
 
+	void DropEquippedWeapon();
+
+	void AttachActorToRightHand(class AActor* ActorToAttach);
+	void AttachActorToLeftHand(class AActor* ActorToAttach);
+
+	void UpdateCarriedAmmo();
+
+	void PlayWeaponEquipSound();
+
+	void ReloadEmptyWeapon();
+
 private:
 	UPROPERTY()
 	class AFillainCharacter* Character;
