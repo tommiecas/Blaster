@@ -415,6 +415,7 @@ void AFillainCharacter::PlayThrowGrenadeMontage()
 
 void AFillainCharacter::ReceiveDamage(AActor* DamagedPawn, float Damage, const UDamageType* DamageType, AController* InstigatorController, AActor* DamageCauser)
 {
+	if (bIsEliminated) return;
 	CacheDamageParameters(DamagedPawn, Damage, DamageType, InstigatorController, DamageCauser);
 
 	Health = FMath::Clamp(Health - Damage, 0.f, MaxHealth);

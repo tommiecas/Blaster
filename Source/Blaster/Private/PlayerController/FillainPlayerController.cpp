@@ -217,6 +217,13 @@ void AFillainPlayerController::PollInit()
 				SetHUDHealth(HUDHealth, HUDMaxHealth);
 				SetHUDScore(HUDScore);
 				SetHUDDefeats(HUDDefeats);
+
+				AFillainCharacter* FillainCharacter = Cast<AFillainCharacter>(GetPawn());
+				if (FillainCharacter && FillainCharacter->Combat)
+				{
+					SetHUDGrenades(FillainCharacter->GetCombatComponent()->GetGrenades());
+
+				}
 			}
 		}
 	}
@@ -392,6 +399,21 @@ void AFillainPlayerController::SetHUDAnnouncementCountdown(float CountdownTime)
 		int32 Seconds = CountdownTime - Minutes * 60;;
 		FString CountdownText = FString::Printf(TEXT("%02d:%02d"), Minutes, Seconds);
 		FillainHUD->Announcement->WarmupTime->SetText(FText::FromString(CountdownText));
+	}
+}
+
+void AFillainPlayerController::SetHUDGrenades(int32 Grenades)
+{
+	FillainHUD = FillainHUD == nullptr ? Cast<AFillainHUD>(GetHUD()) : FillainHUD;
+	bool bIsHUDValid = FillainHUD && FillainHUD->CharacterOverlay && FillainHUD->CharacterOverlay->GrenadesText;
+	if (bIsHUDValid)
+	{
+		FString GrenadesText = FString::Printf(TEXT("%d"), Grenades);
+		FillainHUD->CharacterOverlay->GrenadesText->SetText(FText::FromString(GrenadesText));
+	}
+	else
+	{
+		HUDGrenades = Grenades;
 	}
 }
 

@@ -30,6 +30,7 @@ public:
 	void SetHUDEliminationMessage(AFillainPlayerController* ConstKillerController, AFillainPlayerController* ConstVictimController);
 	void SetHUDMatchCountdown(float CountdownTime);
 	void SetHUDAnnouncementCountdown(float CountdownTime);
+	void SetHUDGrenades(int32 Grenades);
 	virtual void OnPossess(APawn* InPawn) override;
 	virtual void Tick(float DeltaTime) override;
 	virtual float GetServerTime(); // Synced with server World clock
@@ -129,6 +130,7 @@ private:
 	float HUDMaxHealth;
 	float HUDScore;
 	int32 HUDDefeats;
+	int32 HUDGrenades;
 
 	int32 ThirtySecondsOnTheClock = 30;
 

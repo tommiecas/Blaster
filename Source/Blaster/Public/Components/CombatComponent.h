@@ -97,7 +97,9 @@ protected:
 
 	void ReloadEmptyWeapon();
 
-	void ShowAttachedGrenade(bool bShowGrenade);
+	void ShowAttachedGrenade(bool bShowGrenade); 
+
+	void UpdateHUDGrenades();
 
 private:
 	UPROPERTY()
@@ -202,9 +204,19 @@ private:
 	void UpdateAmmoValues();
 	void UpdateShotgunAmmoValues();
 
+	UPROPERTY(ReplicatedUsing = OnRep_Grenades)
+	int32 Grenades = 4;
+
+	UFUNCTION()
+	void OnRep_Grenades();
+
+	UPROPERTY(EditAnywhere)
+	int32 MaxGrenades = 4;
+
 public:	
 	FORCEINLINE bool IsAiming() const { return bAiming; }
 	FORCEINLINE EWeaponType GetWeaponType() const { return WeaponType; }
+	FORCEINLINE int32 GetGrenades() const { return Grenades; }	
 	
 		
 };
