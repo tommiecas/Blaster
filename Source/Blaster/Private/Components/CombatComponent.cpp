@@ -46,6 +46,20 @@ void UCombatComponent::ShotgunShellReload()
 	}
 }
 
+void UCombatComponent::PickupAmmo(EWeaponType TypeOfWeapon, int32 AmmoAmount)
+{
+	if (CarriedAmmoMap.Contains(TypeOfWeapon))
+	{
+		CarriedAmmoMap[TypeOfWeapon] = FMath::Clamp(CarriedAmmoMap[TypeOfWeapon] + AmmoAmount, 0, MaxCarriedAmmo);
+		
+		UpdateCarriedAmmo();
+	}
+	if (EquippedWeapon && EquippedWeapon->IsWeaponEmpty() && EquippedWeapon->GetWeaponType() == TypeOfWeapon)
+	{
+		Reloading();
+	}
+}
+
 void UCombatComponent::BeginPlay()
 {
 	Super::BeginPlay();
