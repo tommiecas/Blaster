@@ -14,6 +14,7 @@
 #include "Net/UnrealNetwork.h"
 #include "Weapons/Weapon.h"
 #include "Components/CombatComponent.h"
+#include "Components/BuffComponent.h"
 #include "Components/CapsuleComponent.h"
 #include <Kismet/KismetMathLibrary.h>
 #include "Characters/FillainAnimInstance.h"
@@ -52,6 +53,9 @@ AFillainCharacter::AFillainCharacter()
 
 	Combat = CreateDefaultSubobject<UCombatComponent>(TEXT("CombatComponent"));
 	Combat->SetIsReplicated(true);
+
+	Buff = CreateDefaultSubobject<UBuffComponent>(TEXT("BuffComponent"));
+	Buff->SetIsReplicated(true);
 
 	GetCharacterMovement()->NavAgentProps.bCanCrouch = true;
 
@@ -164,6 +168,10 @@ void AFillainCharacter::PostInitializeComponents()
 	if (Combat)
 	{
 		Combat->Character = this;
+	}
+	if (Buff)
+	{
+		Buff->Character = this;
 	}
 
 }
