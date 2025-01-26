@@ -53,6 +53,7 @@ public:
 	virtual void Destroyed() override;
 	void OnFillainDying(AFillainCharacter* InstigatorFillain, AFillainCharacter* DyingFillain, class AFillainPlayerController* InstigatorController);
 	void ResetCachedDamageParameters();
+	void UpdateHUDHealth();
 
 	UPROPERTY()
 	class AFillainPlayerController* FillainPlayerController;
@@ -185,7 +186,7 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent)
 	void ShowPlayerName();
 	
-	void UpdateHUDHealth();
+
 	// Poll for any relevant classes and initialize our HUD
 	void PollInit();
 
@@ -263,7 +264,7 @@ private:
 	float MaxHealth = 100.f;
 
 	UFUNCTION()
-	void OnRep_Health();
+	void OnRep_Health(float LastHealth);
 
 
 
@@ -349,6 +350,7 @@ public:
 	FORCEINLINE bool GetDisableGameplay() const { return bDisableGameplay; }
 	FORCEINLINE UAnimMontage* GetReloadingMontage() const { return ReloadingMontage; }
 	FORCEINLINE UStaticMeshComponent* GetAttachedGrenade() const { return AttachedGrenade; }
-	
+	FORCEINLINE UBuffComponent* GetBuffComponent() const { return Buff; }
+	FORCEINLINE void SetHealth(float Amount) { Health = Amount; }
 	
 };

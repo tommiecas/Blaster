@@ -456,9 +456,12 @@ void AFillainCharacter::ReceiveDamage(AActor* DamagedPawn, float Damage, const U
 	}		
 
 
-void AFillainCharacter::OnRep_Health()
+void AFillainCharacter::OnRep_Health(float LastHealth)
 {
-	PlayHitReactMontage();
+	if (Health < LastHealth)
+	{
+		PlayHitReactMontage();
+	}
 	UpdateHUDHealth();
 }
 
