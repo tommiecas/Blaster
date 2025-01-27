@@ -41,7 +41,6 @@ protected:
 	class USoundCue* HitSound;
 
 private:
-private:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class AHitScanWeaponAmmo> HitScanWeaponAmmoClass;
 

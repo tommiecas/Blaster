@@ -6,16 +6,17 @@
 #include "Kismet/GameplayStatics.h"
 #include "Weapons/Projectile.h"
 #include "Sound/SoundCue.h"
-#include "Niagara/Public/NiagaraComponent.h"
-#include "Niagara/Public/NiagaraFunctionLibrary.h"
-#include "Niagara/Public/NiagaraSystemInstance.h"
+
 #include "GameFramework/Character.h"
 #include "Weapons/Weapon.h"
 #include "Characters/FillainCharacter.h"
 #include "Components/BoxComponent.h"
 #include "Components/AudioComponent.h"
-#include "GameFramework/ProjectileMovementComponent.h"
-#include "Components/CombatComponent.h"
+#include "Weapons/RocketMovementComponent.h"
+#include "HAFComponents/CombatComponent.h"
+#include "Niagara/Public/NiagaraComponent.h"
+#include "Niagara/Public/NiagaraFunctionLibrary.h"
+#include "Niagara/Public/NiagaraSystemInstance.h"
 
 
 AHitScanWeaponAmmo::AHitScanWeaponAmmo()
@@ -35,12 +36,11 @@ void AHitScanWeaponAmmo::BeginPlay()
 	}
 }
 
-void AHitScanWeaponAmmo::DestroyTimerFinished()
-{
-}
 
-void AHitScanWeaponAmmo::OnHit(UPrimitiveComponent* HitComp, AActor* DamagedActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
+
+void AHitScanWeaponAmmo::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
+	/*
 	APawn* GunFiringPawn = GetInstigator();
 	if (GunFiringPawn && HasAuthority())
 	{
@@ -81,6 +81,37 @@ void AHitScanWeaponAmmo::OnHit(UPrimitiveComponent* HitComp, AActor* DamagedActo
 				}
 			}
 		}
+	}
+	*/
+	if (OtherActor == GetOwner())
+	{
+		return;
+	}
+	ExplodeDamage();
+	StartDestroyTimer();
+	if (ImpactParticles)
+	{
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticles, GetActorTransform());
+	}
+	if (ImpactPlayerCharacterParticles)
+	{
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactPlayerCharacterParticles, GetActorTransform());
+	}
+	if (ImpactNiagaraSystem)
+	{
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ImpactNiagaraSystem, GetActorLocation(), GetActorRotation());
+	}
+	if (ImpactPlayerCharacterNiagaraSystem)
+	{
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ImpactPlayerCharacterNiagaraSystem, GetActorLocation(), GetActorRotation());
+	}
+	if (ImpactSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation());
+	}
+	if (ImpactPlayerCharacterSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, ImpactPlayerCharacterSound, GetActorLocation());
 	}
 }
 

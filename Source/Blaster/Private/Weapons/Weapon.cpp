@@ -10,9 +10,8 @@
 #include "Weapons/Casing.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Engine/SkeletalMeshSocket.h"
-#include "Characters/FillainCharacter.h"
 #include "PlayerController/FillainPlayerController.h"
-#include "Components/CombatComponent.h"
+#include "HAFComponents/CombatComponent.h"
 
 AWeapon::AWeapon()
 {
@@ -26,7 +25,6 @@ AWeapon::AWeapon()
 	WeaponMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
 	WeaponMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
 	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	WeaponMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
 
 	WeaponMesh->SetCustomDepthStencilValue(CUSTOM_DEPTH_BLUE);
 	WeaponMesh->MarkRenderStateDirty();
@@ -43,22 +41,6 @@ AWeapon::AWeapon()
 	PickupWidgetB = CreateDefaultSubobject<UWidgetComponent>(TEXT("PickupWidgetB"));
 	PickupWidgetB->SetupAttachment(RootComponent);
 
-}
-
-void AWeapon::DropWeapon()
-{
-	SetWeaponState(EWeaponState::EWS_Dropped);
-	FDetachmentTransformRules DetachRules(EDetachmentRule::KeepWorld, true);
-	WeaponMesh->DetachFromComponent(DetachRules);
-	SetOwner(nullptr);
-	FillainOwnerCharacter = nullptr;
-	FillainOwnerController = nullptr;
-}
-
-void AWeapon::AddAmmo(int32 AmmoToAdd)
-{
-	Ammo = FMath::Clamp(Ammo - AmmoToAdd, 0, MagCapacity);
-	SetHUDAmmo();
 }
 
 void AWeapon::EnableCustomDepth(bool bEnable)
@@ -139,7 +121,7 @@ void AWeapon::FireSingleRoundOfAmmo()
 {
 	Ammo = FMath::Clamp(Ammo - 1, 0, MagCapacity);
 	SetHUDAmmo();
-	
+
 }
 
 void AWeapon::OnRep_Ammo()
@@ -204,16 +186,6 @@ void AWeapon::SetWeaponState(EWeaponState State)
 	}
 }
 
-bool AWeapon::IsWeaponEmpty()
-{
-	return Ammo <= 0;
-}
-
-bool AWeapon::IsWeaponFull()
-{
-	return Ammo == MagCapacity;
-}
-
 void AWeapon::OnRep_WeaponState()
 {
 	switch (WeaponState)
@@ -223,6 +195,13 @@ void AWeapon::OnRep_WeaponState()
 		WeaponMesh->SetSimulatePhysics(false);
 		WeaponMesh->SetEnableGravity(false);
 		WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		if (WeaponType == EWeaponType::EWT_SubmachineGun)
+		{
+			WeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+			WeaponMesh->SetEnableGravity(true);
+			WeaponMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+		}
+		EnableCustomDepth(false);
 		break;
 	case EWeaponState::EWS_Dropped:
 		WeaponMesh->SetSimulatePhysics(true);
@@ -231,11 +210,13 @@ void AWeapon::OnRep_WeaponState()
 		WeaponMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
 		WeaponMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
 		WeaponMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
+		
+		WeaponMesh->SetCustomDepthStencilValue(CUSTOM_DEPTH_BLUE);
+		WeaponMesh->MarkRenderStateDirty();
+		EnableCustomDepth(true);
 		break;
 	}
 }
-
-
 
 void AWeapon::ShowPickupWidgets(bool bShowWidget)
 {
@@ -257,21 +238,47 @@ void AWeapon::Fire(const FVector& HitTarget)
 	}
 	if (CasingClass)
 	{
-		const USkeletalMeshSocket* AmmoEject = WeaponMesh->GetSocketByName(FName("AmmoEject"));
-		if (AmmoEject)
+		const USkeletalMeshSocket* AmmoEjectSocket = WeaponMesh->GetSocketByName(FName("AmmoEject"));
+		if (AmmoEjectSocket)
 		{
-			FTransform SocketTransform = AmmoEject->GetSocketTransform(WeaponMesh);
+			FTransform SocketTransform = AmmoEjectSocket->GetSocketTransform(WeaponMesh);
 			UWorld* World = GetWorld();
 			if (World)
 			{
 				World->SpawnActor<ACasing>(
-				CasingClass,
-				SocketTransform.GetLocation(),
-				SocketTransform.GetRotation().Rotator()
+					CasingClass,
+					SocketTransform.GetLocation(),
+					SocketTransform.GetRotation().Rotator()
 				);
 			}
 		}
 	}
 	FireSingleRoundOfAmmo();
+}
+
+void AWeapon::DropWeapon()
+{
+	SetWeaponState(EWeaponState::EWS_Dropped);
+	FDetachmentTransformRules DetachRules(EDetachmentRule::KeepWorld, true);
+	WeaponMesh->DetachFromComponent(DetachRules);
+	SetOwner(nullptr);
+	FillainOwnerCharacter = nullptr;
+	FillainOwnerController = nullptr;
+}
+
+void AWeapon::AddAmmo(int32 AmmoToAdd)
+{
+	Ammo = FMath::Clamp(Ammo - AmmoToAdd, 0, MagCapacity);
+	SetHUDAmmo();
+}
+
+bool AWeapon::IsWeaponEmpty()
+{
+	return Ammo <= 0;
+}
+
+bool AWeapon::IsWeaponFull()
+{
+	return Ammo == MagCapacity;
 }
 

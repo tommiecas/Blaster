@@ -10,8 +10,6 @@
 #include "NiagaraComponent.h"
 #include "Engine/SkeletalMeshSocket.h"
 #include "Sound/SoundCue.h"
-#include "Niagara/Public/NiagaraComponent.h"
-#include "Niagara/Public/NiagaraFunctionLibrary.h"
 #include "Niagara/Public/NiagaraSystemInstance.h"
 
 
@@ -58,13 +56,12 @@ void AShotgun::Fire(const FVector& HitTarget)
 			if (ImpactNiagaraSystem)
 			{
 				UNiagaraFunctionLibrary::SpawnSystemAtLocation(
-					GetWorld(),
+					this,
 					ImpactNiagaraSystem,
 					FireHit.ImpactPoint,
 					FireHit.ImpactNormal.Rotation()
 				);
 			}
-
 			if (HitSound)
 			{
 				UGameplayStatics::PlaySoundAtLocation(

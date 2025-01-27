@@ -15,10 +15,10 @@ class BLASTER_API AProjectile : public AActor
 public:	
 	AProjectile();
 	virtual void Tick(float DeltaTime) override;
-	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	// virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void Destroyed() override;
-	void HandlePostHitSFXDamagingPlayer();
-	void HandlePostHitSFXDamagingEnvironment();
+	// void HandlePostHitSFXDamagingPlayer();
+	// void HandlePostHitSFXDamagingEnvironment();
 
 	UFUNCTION()
 	virtual void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
@@ -44,8 +44,8 @@ public:
 	UPROPERTY(VisibleAnywhere)
 	USkeletalMeshComponent* AmmoMesh;
 
-	bool bHitByRocketLauncher = false;
-	bool bMissedByRocketLauncher = true;
+	// bool bHitByRocketLauncher = false;
+	// bool bMissedByRocketLauncher = true;
 
 	UPROPERTY()
 	class AFillainCharacter* DamagedPawn;
@@ -59,11 +59,14 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
+	/*
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastDestroy();
 
+	
 	UPROPERTY(Replicated)
 	bool bHitPlayerCharacter = false;
+	*/
 
 	UPROPERTY(EditAnywhere)
 	class UNiagaraSystem* TrailSystem;

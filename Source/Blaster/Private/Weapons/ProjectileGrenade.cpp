@@ -8,7 +8,7 @@
 
 AProjectileGrenade::AProjectileGrenade()
 {
-	ProjectileMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("GrenadeMesh"));
+	ProjectileMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Grenade Mesh"));
 	ProjectileMesh->SetupAttachment(RootComponent);
 	ProjectileMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
@@ -28,12 +28,6 @@ void AProjectileGrenade::BeginPlay()
 	ProjectileMovementComponent->OnProjectileBounce.AddDynamic(this, &AProjectileGrenade::OnBounce);
 }
 
-void AProjectileGrenade::Destroyed()
-{
-	ExplodeDamage();
-	Super::Destroyed();
-}
-
 void AProjectileGrenade::OnBounce(const FHitResult& ImpactResult, const FVector& ImpactVelocity)
 {
 	if (BounceSound)
@@ -45,3 +39,10 @@ void AProjectileGrenade::OnBounce(const FHitResult& ImpactResult, const FVector&
 		);
 	}
 }
+
+void AProjectileGrenade::Destroyed()
+{
+	ExplodeDamage();
+	Super::Destroyed();
+}
+

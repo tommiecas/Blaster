@@ -6,6 +6,33 @@
 #include "HUD/CharacterOverlay.h"
 #include "HUD/Announcement.h"
 
+
+
+void AFillainHUD::BeginPlay()
+{
+	Super::BeginPlay();
+}
+
+void AFillainHUD::AddCharacterOverlay()
+{
+	APlayerController* PlayerController = GetOwningPlayerController();
+	if (PlayerController && CharacterOverlayClass)
+	{
+		CharacterOverlay = CreateWidget<UCharacterOverlay>(PlayerController, CharacterOverlayClass);
+		CharacterOverlay->AddToViewport();
+	}
+}
+
+void AFillainHUD::AddAnnouncement()
+{
+	APlayerController* PlayerController = GetOwningPlayerController();
+	if (PlayerController && AnnouncementClass)
+	{
+		Announcement = CreateWidget<UAnnouncement>(PlayerController, AnnouncementClass);
+		Announcement->AddToViewport();
+	}
+}
+
 void AFillainHUD::DrawHUD()
 {
 	Super::DrawHUD();
@@ -50,32 +77,6 @@ void AFillainHUD::DrawHUD()
 		}
 	}
 }
-
-void AFillainHUD::BeginPlay()
-{
-	Super::BeginPlay();
-}
-
-void AFillainHUD::AddCharacterOverlay()
-{
-	APlayerController* PlayerController = GetOwningPlayerController();
-	if (PlayerController && CharacterOverlayClass)
-	{
-		CharacterOverlay = CreateWidget<UCharacterOverlay>(PlayerController, CharacterOverlayClass);
-		CharacterOverlay->AddToViewport();
-	}
-}
-
-void AFillainHUD::AddAnnouncement()
-{
-	APlayerController* PlayerController = GetOwningPlayerController();
-	if (PlayerController && AnnouncementClass)
-	{
-		Announcement = CreateWidget<UAnnouncement>(PlayerController, AnnouncementClass);
-		Announcement->AddToViewport();
-	}
-}
-
 void AFillainHUD::DrawCrosshair(UTexture2D* Texture, FVector2D ViewportCenter, FVector2D Spread, FLinearColor CrosshairsColor)
 {
 	const float TextureWidth = Texture->GetSizeX();

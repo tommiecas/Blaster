@@ -84,6 +84,40 @@ void AHitScanWeapon::Fire(const FVector& HitTarget)
 	}
 }
 
+void AHitScanWeapon::WeaponTraceHit(const FVector& TraceStart, const FVector& HitTarget, FHitResult& OutHit)
+{
+	UWorld* World = GetWorld();
+	if (World)
+	{
+		FVector End = bUseScatter ? TraceEndWithScatter(TraceStart, HitTarget) : TraceStart + (HitTarget - TraceStart) * 1.25f;
+		World->LineTraceSingleByChannel(
+			OutHit,
+			TraceStart,
+			End,
+			ECollisionChannel::ECC_Visibility
+		);
+		FVector BeamEnd = End;
+		if (OutHit.bBlockingHit)
+		{
+			BeamEnd = OutHit.ImpactPoint;
+		}
+		if (BeamParticles)
+		{
+			UParticleSystemComponent* Beam = UGameplayStatics::SpawnEmitterAtLocation(
+				World,
+				BeamParticles,
+				TraceStart,
+				FRotator::ZeroRotator,
+				true
+			);
+			if (Beam)
+			{
+				Beam->SetVectorParameter(FName("Target"), BeamEnd);
+			}
+		}
+	}
+}
+
 FVector AHitScanWeapon::TraceEndWithScatter(const FVector& TraceStart, const FVector& HitTarget)
 {
 	FVector ToTargetNormalized = (HitTarget - TraceStart.GetSafeNormal());
@@ -104,36 +138,4 @@ FVector AHitScanWeapon::TraceEndWithScatter(const FVector& TraceStart, const FVe
 	return FVector(TraceStart + ToEndLoc * TRACE_LENGTH / ToEndLoc.Size());
 }
 
-void AHitScanWeapon::WeaponTraceHit(const FVector& TraceStart, const FVector& HitTarget, FHitResult& OutHit)
-{
-	UWorld* World = GetWorld();
-	if (World)
-	{
-		FVector End = bUseScatter ? TraceEndWithScatter(TraceStart, HitTarget) : TraceStart + (HitTarget - TraceStart) * 1.25f;
-		World->LineTraceSingleByChannel(
-			OutHit,
-			TraceStart,
-			End,
-			ECollisionChannel::ECC_Visibility
-		);
-		FVector BeamEnd = End;
-		if (OutHit.bBlockingHit)
-		{
-			BeamEnd = OutHit.ImpactPoint;
-			if (BeamParticles)
-			{
-				UParticleSystemComponent* Beam = UGameplayStatics::SpawnEmitterAtLocation(
-					World,
-					BeamParticles,
-					TraceStart,
-					FRotator::ZeroRotator,
-					true
-				);
-				if (Beam)
-				{
-					Beam->SetVectorParameter(FName("Targget"), BeamEnd);
-				}
-			}
-		}
-	}
-}
+

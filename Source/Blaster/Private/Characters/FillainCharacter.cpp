@@ -13,8 +13,8 @@
 #include "HUD/OverheadWidget.h"
 #include "Net/UnrealNetwork.h"
 #include "Weapons/Weapon.h"
-#include "Components/CombatComponent.h"
-#include "Components/BuffComponent.h"
+#include "HAFComponents/CombatComponent.h"
+#include "HAFComponents/BuffComponent.h"
 #include "Components/CapsuleComponent.h"
 #include <Kismet/KismetMathLibrary.h>
 #include "Characters/FillainAnimInstance.h"
@@ -34,7 +34,7 @@
 AFillainCharacter::AFillainCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
-	SpawnCollisionHandlingMethod = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+	// SpawnCollisionHandlingMethod = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 	bUseControllerRotationYaw = false;
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	// GetCharacterMovement()->RotationRate = FRotator(0.f, 400.f, 0.f);
@@ -63,7 +63,7 @@ AFillainCharacter::AFillainCharacter()
 	GetMesh()->SetCollisionObjectType(ECC_SkeletalMesh);
 	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
 	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
-	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Block);
+// 	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Block);
 	GetCharacterMovement()->RotationRate = FRotator(0.f, 0.f, 1000.f);
 
 	TurningInPlace = ETurningInPlace::ETIP_NotTurning;
@@ -83,7 +83,7 @@ void AFillainCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME_CONDITION(AFillainCharacter, OverlappingWeapon, COND_OwnerOnly);
-	DOREPLIFETIME(AFillainCharacter, HitReactMontage);
+	// DOREPLIFETIME(AFillainCharacter, HitReactMontage);
 	DOREPLIFETIME(AFillainCharacter, Health);
 	DOREPLIFETIME(AFillainCharacter, bDisableGameplay);
 }
@@ -94,100 +94,6 @@ void AFillainCharacter::OnRep_ReplicatedMovement()
 	Super::OnRep_ReplicatedMovement();
 	SimProxiesTurn();
 	TimeSinceLastMovementReplication = 0.f;
-}
-
-void AFillainCharacter::BeginPlay()
-{
-	Super::BeginPlay();
-
-	if (AFillainPlayerController* FillainController = Cast<AFillainPlayerController>(Controller))
-	{
-		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(FillainController->GetLocalPlayer()))
-		{
-			Subsystem->AddMappingContext(HAFMappingContext, 0);
-		}
-	}
-	/*if (FillainPlayerController == nullptr)
-	{
-		FillainPlayerController = Cast<AFillainPlayerController>(GetController());
-	}
-	if (FillainPlayerController)
-	{
-		// Set the player state or any other necessary properties here
-		FillainPlayerController->InitPlayerState();
-		HAFPlayerState = FillainPlayerController->GetPlayerState<AHAFPlayerState>();
-
-		// Log the player controller name for debugging
-		UE_LOG(LogTemp, Log, TEXT("FillainPlayerController initialized: %s"), *FillainPlayerController->GetName());
-	}*/
-	UpdateHUDHealth();
-	if (HasAuthority())
-	{
-		OnTakeAnyDamage.AddDynamic(this, &AFillainCharacter::ReceiveDamage);
-	}
-	if (AttachedGrenade)
-	{
-		AttachedGrenade->SetVisibility(false);
-	}
-}
-
-void AFillainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
-	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent))
-	{
-		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AFillainCharacter::Move);
-		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AFillainCharacter::Look);
-		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &AFillainCharacter::Jump);
-		EnhancedInputComponent->BindAction(EquipAction, ETriggerEvent::Triggered, this, &AFillainCharacter::EquipButtonPressed);
-		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Triggered, this, &AFillainCharacter::CrouchButtonPressed);
-		EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Started, this, &AFillainCharacter::AimButtonPressed);
-		EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Completed, this, &AFillainCharacter::AimButtonReleased);
-		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &AFillainCharacter::FireButtonPressed);
-		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Completed, this, &AFillainCharacter::FireButtonReleased);
-		EnhancedInputComponent->BindAction(ReloadAction, ETriggerEvent::Triggered, this, &AFillainCharacter::ReloadButtonPressed);
-		EnhancedInputComponent->BindAction(ThrowAction, ETriggerEvent::Triggered, this, & AFillainCharacter::GrenadeButtonPressed);
-	}
-}
-
-void AFillainCharacter::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-	RotateInPlace(DeltaTime);
-}
-
-void AFillainCharacter::Restart()
-{
-	Super::Restart();
-}
-
-void AFillainCharacter::PostInitializeComponents()
-{
-	Super::PostInitializeComponents();
-	if (Combat)
-	{
-		Combat->Character = this;
-	}
-	if (Buff)
-	{
-		Buff->Character = this;
-	}
-
-}
-
-void AFillainCharacter::PlayFireMontage(bool bAiming)
-{
-	if (Combat == nullptr || Combat->EquippedWeapon == nullptr) return;
-
-	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	if (AnimInstance && FireWeaponMontage)
-	{
-		AnimInstance->Montage_Play(FireWeaponMontage);
-		FName SectionName;
-		SectionName = bAiming ? FName("RifleAim") : FName("RifleHip");
-		AnimInstance->Montage_JumpToSection(SectionName);
-	}
 }
 
 void AFillainCharacter::Eliminate()
@@ -238,7 +144,7 @@ void AFillainCharacter::MulticastEliminate_Implementation()
 	if (EliminationBotEffect)
 	{
 		FVector EliminationBotSpawnPoint(GetActorLocation().X, GetActorLocation().Y, GetActorLocation().Z + 200.f);
-		UGameplayStatics::SpawnEmitterAtLocation(
+		EliminationBotComponent = UGameplayStatics::SpawnEmitterAtLocation(
 			GetWorld(),
 			EliminationBotEffect,
 			EliminationBotSpawnPoint,
@@ -265,11 +171,10 @@ void AFillainCharacter::EliminationTimerFinished()
 	AHAFGameMode* HAFGameMode = GetWorld()->GetAuthGameMode<AHAFGameMode>();
 	if (HAFGameMode)
 	{
-			HAFGameMode->RequestRespawn(this, Controller);
-	
+		HAFGameMode->RequestRespawn(this, Controller);
+
 	}
 }
-
 void AFillainCharacter::Destroyed()
 {
 	Super::Destroyed();
@@ -286,35 +191,47 @@ void AFillainCharacter::Destroyed()
 	}
 }
 
-void AFillainCharacter::GrenadeButtonPressed()
+void AFillainCharacter::BeginPlay()
 {
-	if (Combat)
-	{
-		Combat->ThrowGrenade();
-	}
-}
+	Super::BeginPlay();
 
-void AFillainCharacter::UpdateHUDHealth()
-{
-	FillainPlayerController = FillainPlayerController == nullptr ? Cast<AFillainPlayerController>(Controller) : FillainPlayerController;
-
-	if (FillainPlayerController)
+	if (AFillainPlayerController* FillainController = Cast<AFillainPlayerController>(Controller))
 	{
-		FillainPlayerController->SetHUDHealth(Health, MaxHealth);
-	}
-}
-
-void AFillainCharacter::PollInit()
-{
-	if (HAFPlayerState == nullptr)
-	{
-		HAFPlayerState = GetPlayerState<AHAFPlayerState>();
-		if (HAFPlayerState)
+		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(FillainController->GetLocalPlayer()))
 		{
-			HAFPlayerState->AddToScore(0.f);
-			HAFPlayerState->AddToDefeats(0);
+			Subsystem->AddMappingContext(HAFMappingContext, 0);
 		}
 	}
+	/*if (FillainPlayerController == nullptr)
+	{
+		FillainPlayerController = Cast<AFillainPlayerController>(GetController());
+	}
+	if (FillainPlayerController)
+	{
+		// Set the player state or any other necessary properties here
+		FillainPlayerController->InitPlayerState();
+		HAFPlayerState = FillainPlayerController->GetPlayerState<AHAFPlayerState>();
+
+		// Log the player controller name for debugging
+		UE_LOG(LogTemp, Log, TEXT("FillainPlayerController initialized: %s"), *FillainPlayerController->GetName());
+	}*/
+	UpdateHUDHealth();
+	if (HasAuthority())
+	{
+		OnTakeAnyDamage.AddDynamic(this, &AFillainCharacter::ReceiveDamage);
+	}
+	if (AttachedGrenade)
+	{
+		AttachedGrenade->SetVisibility(false);
+	}
+}
+
+void AFillainCharacter::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+	RotateInPlace(DeltaTime);
+	HideCharacterIfCameraClose();
+	PollInit();
 }
 
 void AFillainCharacter::RotateInPlace(float DeltaTime)
@@ -340,36 +257,50 @@ void AFillainCharacter::RotateInPlace(float DeltaTime)
 	}
 }
 
-void AFillainCharacter::ReloadButtonPressed()
+void AFillainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
-	if (bDisableGameplay) return;
+	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	if (Combat)
+	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent))
 	{
-		Combat->Reloading();
+		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AFillainCharacter::Move);
+		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AFillainCharacter::Look);
+		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &AFillainCharacter::Jump);
+		EnhancedInputComponent->BindAction(EquipAction, ETriggerEvent::Triggered, this, &AFillainCharacter::EquipButtonPressed);
+		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Triggered, this, &AFillainCharacter::CrouchButtonPressed);
+		EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Started, this, &AFillainCharacter::AimButtonPressed);
+		EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Completed, this, &AFillainCharacter::AimButtonReleased);
+		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &AFillainCharacter::FireButtonPressed);
+		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Completed, this, &AFillainCharacter::FireButtonReleased);
+		EnhancedInputComponent->BindAction(ReloadAction, ETriggerEvent::Triggered, this, &AFillainCharacter::ReloadButtonPressed);
+		EnhancedInputComponent->BindAction(ThrowAction, ETriggerEvent::Triggered, this, &AFillainCharacter::GrenadeButtonPressed);
 	}
 }
 
-void AFillainCharacter::PlayHitReactMontage()
+void AFillainCharacter::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+	if (Combat)
+	{
+		Combat->Character = this;
+	}
+	if (Buff)
+	{
+		Buff->Character = this;
+	}
+}
+
+void AFillainCharacter::PlayFireMontage(bool bAiming)
 {
 	if (Combat == nullptr || Combat->EquippedWeapon == nullptr) return;
 
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	if (AnimInstance && HitReactMontage)
+	if (AnimInstance && FireWeaponMontage)
 	{
-		AnimInstance->Montage_Play(HitReactMontage);
-		FName SectionName("FromFront");
+		AnimInstance->Montage_Play(FireWeaponMontage);
+		FName SectionName;
+		SectionName = bAiming ? FName("RifleAim") : FName("RifleHip");
 		AnimInstance->Montage_JumpToSection(SectionName);
-	}
-	ReceiveDamage(CachedDamagedPawn, CachedDamage, CachedDamageType, CachedInstigatorController, CachedDamageCauser);
-}
-
-void AFillainCharacter::PlayEliminatedMontage()
-{
-	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	if (AnimInstance && EliminatedMontage)
-	{
-		AnimInstance->Montage_Play(EliminatedMontage);
 	}
 }
 
@@ -407,8 +338,16 @@ void AFillainCharacter::PlayReloadingMontage()
 			break;
 
 		}
-
 		AnimInstance->Montage_JumpToSection(SectionName);
+	}
+}
+
+void AFillainCharacter::PlayEliminatedMontage()
+{
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && EliminatedMontage)
+	{
+		AnimInstance->Montage_Play(EliminatedMontage);
 	}
 }
 
@@ -421,53 +360,62 @@ void AFillainCharacter::PlayThrowGrenadeMontage()
 	}
 }
 
+void AFillainCharacter::PlayHitReactMontage()
+{
+	if (Combat == nullptr || Combat->EquippedWeapon == nullptr) return;
+
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && HitReactMontage)
+	{
+		AnimInstance->Montage_Play(HitReactMontage);
+		FName SectionName("FromFront");
+		AnimInstance->Montage_JumpToSection(SectionName);
+	}
+	// ReceiveDamage(CachedDamagedPawn, CachedDamage, CachedDamageType, CachedInstigatorController, CachedDamageCauser);
+}
+
+void AFillainCharacter::GrenadeButtonPressed()
+{
+	if (Combat)
+	{
+		Combat->ThrowGrenade();
+	}
+}
+
 void AFillainCharacter::ReceiveDamage(AActor* DamagedPawn, float Damage, const UDamageType* DamageType, AController* InstigatorController, AActor* DamageCauser)
 {
 	if (bIsEliminated) return;
-	CacheDamageParameters(DamagedPawn, Damage, DamageType, InstigatorController, DamageCauser);
 
 	Health = FMath::Clamp(Health - Damage, 0.f, MaxHealth);
 	UpdateHUDHealth();
 	PlayHitReactMontage();
+	CacheDamageParameters(DamagedPawn, Damage, DamageType, InstigatorController, DamageCauser);
 
 	if (Health == 0.f)
 	{
-		AFillainCharacter* KillerFillain = Cast<AFillainCharacter>(InstigatorController->GetPawn());
-		AFillainCharacter* VictimFillain = Cast<AFillainCharacter>(DamagedPawn);
-		AFillainPlayerController* KillerController = Cast<AFillainPlayerController>(GetInstigatorController());
-		OnFillainDying(KillerFillain, VictimFillain, KillerController);
-	}
-
-	ResetCachedDamageParameters();
-}
-
-	void AFillainCharacter::OnFillainDying(AFillainCharacter* KillerFillain, AFillainCharacter* VictimFillain, AFillainPlayerController* InstigatorController)
-	{		
 		AHAFGameMode* HAFGameMode = GetWorld()->GetAuthGameMode<AHAFGameMode>();
-		VictimCharacter = Cast<AFillainCharacter>(VictimFillain);
-		VictimController = Cast<AFillainPlayerController>(VictimCharacter->GetController());
-		AFillainPlayerController* KillerController = Cast<AFillainPlayerController>(InstigatorController);
-		if (VictimCharacter && HAFGameMode && VictimController && KillerController)
+				
+		if (HAFGameMode)
 		{
-			HAFGameMode->PlayerEliminated(this, VictimController, KillerController);
-			VictimController->SetHUDEliminationMessage(KillerController, VictimController);
-			KillerController->SetHUDEliminationMessage(KillerController, VictimController);
+			FillainPlayerController = FillainPlayerController == nullptr ? Cast<AFillainPlayerController>(Controller) : FillainPlayerController;
+			AFillainPlayerController* KillerController = Cast<AFillainPlayerController>(InstigatorController);
+			AFillainCharacter* KillerFillain = Cast<AFillainCharacter>(InstigatorController->GetPawn());
+			AFillainCharacter* VictimFillain = Cast<AFillainCharacter>(DamagedPawn);
+			AFillainPlayerController* ControllerOfVictim = Cast<AFillainPlayerController>(VictimFillain->GetController());
+			HAFGameMode->PlayerEliminated(this, ControllerOfVictim, KillerController);
+			ControllerOfVictim->SetHUDEliminationMessage(KillerController, ControllerOfVictim);
+			KillerController->SetHUDEliminationMessage(KillerController, ControllerOfVictim);
 		}
-	}		
-
-
-void AFillainCharacter::OnRep_Health(float LastHealth)
-{
-	if (Health < LastHealth)
-	{
-		PlayHitReactMontage();
 	}
-	UpdateHUDHealth();
+	ResetCachedDamageParameters();
 }
 
 void AFillainCharacter::Move(const FInputActionValue& Value)
 {
-	if (bDisableGameplay) return;
+	if (bDisableGameplay)
+	{
+		bDisableGameplay = false;
+	}
 	const FVector2D MovementVector = Value.Get<FVector2D>();
 
 	const FRotator Rotation = Controller->GetControlRotation();
@@ -476,21 +424,24 @@ void AFillainCharacter::Move(const FInputActionValue& Value)
 	const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 	AddMovementInput(ForwardDirection, MovementVector.Y);
 	const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
-	AddMovementInput(RightDirection, MovementVector.X);	
+	AddMovementInput(RightDirection, MovementVector.X);
 }
 
 void AFillainCharacter::Look(const FInputActionValue& Value)
 {
 	const FVector2D LookAxisVector = Value.Get<FVector2D>();
-	
+
 	AddControllerYawInput(LookAxisVector.X);
 	AddControllerPitchInput(LookAxisVector.Y);
-	
+
 }
 
 void AFillainCharacter::EquipButtonPressed()
 {
-	if (bDisableGameplay) return;
+	if (bDisableGameplay)
+	{
+		bDisableGameplay = false;
+	}
 
 	if (Combat)
 	{
@@ -515,21 +466,39 @@ void AFillainCharacter::ServerEquipButtonPressed_Implementation()
 
 void AFillainCharacter::CrouchButtonPressed()
 {
-	if (bDisableGameplay) return;
-
+	if (bDisableGameplay)
+	{
+		bDisableGameplay = false;
+	}
 	if (bIsCrouched)
 	{
 		UnCrouch();
 	}
-	else 
+	else
 	{
 		Crouch();
 	}
 }
 
+void AFillainCharacter::ReloadButtonPressed()
+{
+	if (bDisableGameplay)
+	{
+		bDisableGameplay = false;
+	}
+
+	if (Combat)
+	{
+		Combat->Reloading();
+	}
+}
+
 void AFillainCharacter::AimButtonPressed()
 {
-	if (bDisableGameplay) return;
+	if (bDisableGameplay)
+	{
+		bDisableGameplay = false;
+	}
 
 	if (Combat)
 	{
@@ -539,12 +508,22 @@ void AFillainCharacter::AimButtonPressed()
 
 void AFillainCharacter::AimButtonReleased()
 {
-	if (bDisableGameplay) return;
+	if (bDisableGameplay)
+	{
+		bDisableGameplay = false;
+	}
 
 	if (Combat)
 	{
 		Combat->SetAiming(false);
 	}
+}
+
+float AFillainCharacter::CalculateSpeed()
+{
+	FVector Velocity = GetVelocity();
+	Velocity.Z = 0.f;
+	return Velocity.Size();
 }
 
 void AFillainCharacter::AimOffset(float DeltaTime)
@@ -574,7 +553,6 @@ void AFillainCharacter::AimOffset(float DeltaTime)
 		bUseControllerRotationYaw = true;
 		TurningInPlace = ETurningInPlace::ETIP_NotTurning;
 	}
-
 	CalculateAO_Pitch();
 }
 
@@ -595,14 +573,13 @@ void AFillainCharacter::SimProxiesTurn()
 	if (Combat == nullptr || Combat->EquippedWeapon == nullptr) return;
 	bRotateRootBone = false;
 	float Speed = CalculateSpeed();
-	bool bIsInAir = GetCharacterMovement()->IsFalling();
 	if (Speed > 0.f)
 	{
 		TurningInPlace = ETurningInPlace::ETIP_NotTurning;
 		return;
 	}
 
-	
+
 	ProxyRotationLastFrame = ProxyRotation;
 	ProxyRotation = GetActorRotation();
 	ProxyYaw = UKismetMathLibrary::NormalizedDeltaRotator(ProxyRotation, ProxyRotationLastFrame).Yaw;
@@ -613,7 +590,7 @@ void AFillainCharacter::SimProxiesTurn()
 		{
 			TurningInPlace = ETurningInPlace::ETIP_Right;
 		}
-		else if (ProxyYaw < TurnThreshold)
+		else if (ProxyYaw < -TurnThreshold)
 		{
 			TurningInPlace = ETurningInPlace::ETIP_Left;
 		}
@@ -626,9 +603,28 @@ void AFillainCharacter::SimProxiesTurn()
 	TurningInPlace = ETurningInPlace::ETIP_NotTurning;
 }
 
+void AFillainCharacter::Jump()
+{
+	if (bDisableGameplay)
+	{
+		bDisableGameplay = false;
+	}
+	if (bIsCrouched)
+	{
+		UnCrouch();
+	}
+	else
+	{
+		Super::Jump();
+	}
+}
+
 void AFillainCharacter::FireButtonPressed()
 {
-	if (bDisableGameplay) return;
+	if (bDisableGameplay)
+	{
+		bDisableGameplay = false;
+	}
 
 	if (Combat)
 	{
@@ -638,15 +634,17 @@ void AFillainCharacter::FireButtonPressed()
 
 void AFillainCharacter::FireButtonReleased()
 {
-	if (bDisableGameplay) return;
+	if (bDisableGameplay)
+	{
+		bDisableGameplay = false;
+	}
+
 
 	if (Combat)
 	{
 		Combat->FireButtonPressed(false);
 	}
 }
-
-
 
 void AFillainCharacter::TurnInPlace(float DeltaTime)
 {
@@ -690,11 +688,37 @@ void AFillainCharacter::HideCharacterIfCameraClose()
 		}
 	}
 }
-float AFillainCharacter::CalculateSpeed()
+
+void AFillainCharacter::OnRep_Health(float LastHealth)
 {
-	FVector Velocity = GetVelocity();
-	Velocity.Z = 0.f;
-	return Velocity.Size();
+	UpdateHUDHealth();
+	if (Health < LastHealth)
+	{
+		PlayHitReactMontage();
+	}
+}
+
+void AFillainCharacter::UpdateHUDHealth()
+{
+	FillainPlayerController = FillainPlayerController == nullptr ? Cast<AFillainPlayerController>(Controller) : FillainPlayerController;
+
+	if (FillainPlayerController)
+	{
+		FillainPlayerController->SetHUDHealth(Health, MaxHealth);
+	}
+}
+
+void AFillainCharacter::PollInit()
+{
+	if (HAFPlayerState == nullptr)
+	{
+		HAFPlayerState = GetPlayerState<AHAFPlayerState>();
+		if (HAFPlayerState)
+		{
+			HAFPlayerState->AddToScore(0.f);
+			HAFPlayerState->AddToDefeats(0);
+		}
+	}
 }
 
 void AFillainCharacter::UpdateDissolveMaterial(float DissolveValue)
@@ -723,7 +747,7 @@ void AFillainCharacter::SetOverlappingWeapon(AWeapon* Weapon)
 	}
 
 	OverlappingWeapon = Weapon;
-	
+
 	if (IsLocallyControlled())
 	{
 		if (OverlappingWeapon)
@@ -755,18 +779,10 @@ bool AFillainCharacter::IsAiming()
 	return (Combat && Combat->bAiming);
 }
 
-AWeapon* AFillainCharacter::GetOverlappingWeapon()
-{
-	AFillainCharacter* FillainCharacter = Cast<AFillainCharacter>(this);
-	if (FillainCharacter == nullptr) return nullptr;
-	return FillainCharacter->OverlappingWeapon;
-}
-
 AWeapon* AFillainCharacter::GetEquippedWeapon()
 {
-	AFillainCharacter* FillainCharacter = Cast<AFillainCharacter>(this);
-	if (FillainCharacter == nullptr) return nullptr;
-	return FillainCharacter->Combat->EquippedWeapon;
+	if (Combat == nullptr) return nullptr;
+	return Combat->EquippedWeapon;
 }
 
 FVector AFillainCharacter::GetHitTarget() const
@@ -781,7 +797,37 @@ ECombatState AFillainCharacter::GetCombatState() const
 	return Combat->CombatState;
 }
 
-AFillainPlayerController* AFillainCharacter::GetFillainPlayerController() 
+
+
+
+
+
+/************************************************************************
+**   I added the following functions to complete optional challenges   **
+**   in the course, and they're proven to work correctly.			   **
+************************************************************************/
+
+void AFillainCharacter::SwitchWeapon(AWeapon* NewWeapon)
+{
+	if (NewWeapon && Combat && Combat->EquippedWeapon)
+	{
+		Combat->EquippedWeapon = NewWeapon;
+		// Update the HUD with the new weapon type
+		AFillainPlayerController* PC = Cast<AFillainPlayerController>(GetFillainPlayerController());
+		if (PC)
+		{
+			PC->SetHUDWeaponType(this);
+		}
+	}
+}
+
+AWeapon* AFillainCharacter::GetOverlappingWeapon()
+{
+	return OverlappingWeapon;
+}
+
+
+AFillainPlayerController* AFillainCharacter::GetFillainPlayerController()
 {
 	AFillainPlayerController* FillainController = Cast<AFillainPlayerController>(GetController());
 	return FillainController;
@@ -807,19 +853,6 @@ void AFillainCharacter::ResetCachedDamageParameters()
 	CachedDamageType = nullptr;
 	CachedInstigatorController = nullptr;
 	CachedDamageCauser = nullptr;
-}
-
-void AFillainCharacter::Jump()
-{
-	if (bDisableGameplay) return;
-	if (bIsCrouched)
-	{
-		UnCrouch();
-	}
-	else
-	{
-		Super::Jump();
-	}
 }
 
 void AFillainCharacter::OnRep_PlayerState()
@@ -851,4 +884,26 @@ void AFillainCharacter::PossessedBy(AController* NewController)
 	}
 }
 
+ /******************************************************\
+| **   The following were also added for challenges.  ** |
+| **   They didn't do squat.			              ** |
+ \******************************************************/
 
+/* void AFillainCharacter::Restart()
+{
+	Super::Restart();
+} 
+
+void AFillainCharacter::OnFillainDying(AFillainCharacter* KillerFillain, AFillainCharacter* VictimFillain, AFillainPlayerController* InstigatorController)
+{
+	AHAFGameMode* HAFGameMode = GetWorld()->GetAuthGameMode<AHAFGameMode>();
+	VictimCharacter = Cast<AFillainCharacter>(VictimFillain);
+	VictimController = Cast<AFillainPlayerController>(VictimCharacter->GetController());
+	AFillainPlayerController* KillerController = Cast<AFillainPlayerController>(InstigatorController);
+	if (VictimCharacter && HAFGameMode && VictimController && KillerController)
+	{
+		HAFGameMode->PlayerEliminated(this, VictimController, KillerController);
+		VictimController->SetHUDEliminationMessage(KillerController, VictimController);
+		KillerController->SetHUDEliminationMessage(KillerController, VictimController);
+	}
+} */

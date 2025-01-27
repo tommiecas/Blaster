@@ -23,7 +23,11 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
+	UPROPERTY()
+	UNiagaraSystem* ImpactNiagaraSystem;
 
+	UPROPERTY()
+	UNiagaraSystem* ImpactPlayerCharacterNiagaraSystem;
 
 	UPROPERTY(EditAnywhere)
 	class USoundCue* ProjectileLoop;
@@ -37,7 +41,6 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	class URocketMovementComponent* RocketMovementComponent;
 
-private:
 	UPROPERTY()
 	class AProjectile* Projectile;
 

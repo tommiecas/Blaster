@@ -28,6 +28,21 @@ void AHAFPlayerState::AddToScore(float ScoreAmount)
 	}
 }
 
+void AHAFPlayerState::OnRep_Score()
+{
+	Super::OnRep_Score();
+
+	Character = Character == nullptr ? Cast<AFillainCharacter>(GetPawn()) : Character;
+	if (Character)
+	{
+		Controller = Controller == nullptr ? Cast<AFillainPlayerController>(Character->Controller) : Controller;
+		if (Controller)
+		{
+			Controller->SetHUDScore(GetScore());
+		}
+	}
+}
+
 void AHAFPlayerState::AddToDefeats(int32 DefeatsAmount)
 {
 	Defeats += DefeatsAmount;
@@ -55,20 +70,6 @@ void AHAFPlayerState::OnRep_Defeats()
 	}
 }
 
-void AHAFPlayerState::OnRep_Score()
-{
-	Super::OnRep_Score();
-
-	Character = Character == nullptr ? Cast<AFillainCharacter>(GetPawn()) : Character;
-	if (Character)
-	{
-		Controller =  Controller == nullptr ? Cast<AFillainPlayerController>(Character->Controller) : Controller;
-		if (Controller)
-		{
-			Controller->SetHUDScore(GetScore());
-		}
-	}
-}
 
 
 

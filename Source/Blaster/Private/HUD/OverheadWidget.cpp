@@ -59,6 +59,7 @@ void UOverheadWidget::ShowPlayerName(APawn* InPawn)
 
 void UOverheadWidget::NativeConstruct()
 {
+	RemoveFromParent();
 	Super::NativeConstruct();
 
 }

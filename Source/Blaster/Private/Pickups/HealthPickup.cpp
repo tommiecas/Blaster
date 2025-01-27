@@ -3,7 +3,7 @@
 
 #include "Pickups/HealthPickup.h"
 #include "Characters/FillainCharacter.h"
-#include "Components/BuffComponent.h"
+#include "HAFComponents/BuffComponent.h"
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraComponent.h"
 
@@ -34,8 +34,6 @@ void AHealthPickup::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AA
 
 void AHealthPickup::Destroyed()
 {
-	Super::Destroyed();
-
 	if (PickupEffect)
 	{
 		UNiagaraFunctionLibrary::SpawnSystemAtLocation(

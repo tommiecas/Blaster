@@ -41,7 +41,7 @@ public:
 	AFillainCharacter();
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
-	virtual void Restart() override;
+	// virtual void Restart() override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void OnRep_PlayerState() override;
 	virtual void PossessedBy(AController* NewController) override;
@@ -49,17 +49,17 @@ public:
 	virtual void PostInitializeComponents() override;
 	virtual void OnRep_ReplicatedMovement() override;
 	void Eliminate();
-	void FinishElimination();
+	// void FinishElimination();
 	virtual void Destroyed() override;
-	void OnFillainDying(AFillainCharacter* InstigatorFillain, AFillainCharacter* DyingFillain, class AFillainPlayerController* InstigatorController);
-	void ResetCachedDamageParameters();
+	// void OnFillainDying(AFillainCharacter* InstigatorFillain, AFillainCharacter* DyingFillain, class AFillainPlayerController* InstigatorController);
 	void UpdateHUDHealth();
+	void SwitchWeapon(AWeapon* NewWeapon);
 
 	UPROPERTY()
-	class AFillainPlayerController* FillainPlayerController;
+	AFillainPlayerController* FillainPlayerController;
 
 	UPROPERTY()
-	class AFillainPlayerController* VictimController;
+	AFillainPlayerController* VictimController;
 
 	UPROPERTY()
 	class AHAFPlayerState* HAFPlayerState;
@@ -80,7 +80,7 @@ public:
 	class UBuffComponent* Buff;
 
 	void CacheDamageParameters(AActor* DamagedPawn, float Damage, const UDamageType* DamageType, AController* InstigatorController, AActor* DamageCauser);
-	void ResetCacheDamageParameters();
+	void ResetCachedDamageParameters();
 
 	/************
 	** Jumping **

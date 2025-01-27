@@ -21,13 +21,19 @@ protected:
 	virtual void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit) override;
 	virtual void BeginPlay() override;
 
-	void DestroyTimerFinished();
+	// void DestroyTimerFinished();
 
 
 
 private:
 	UPROPERTY()
 	class AProjectile* Projectile;
+
+	UPROPERTY()
+	class UNiagaraSystem* ImpactNiagaraSystem;
+
+	UPROPERTY()
+	UNiagaraSystem* ImpactPlayerCharacterNiagaraSystem;
 
 	FTimerHandle DestroyTimer;
 

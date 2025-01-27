@@ -16,7 +16,7 @@
 #include "Niagara/Public/NiagaraFunctionLibrary.h"
 #include "Weapons/Weapon.h" // Add this include to resolve the incomplete type error
 #include "Weapons/WeaponTypes.h"
-#include "Components/CombatComponent.h" // Add this include to resolve the incomplete type error#inc
+#include "HAFComponents/CombatComponent.h" // Add this include to resolve the incomplete type error#inc
 #include "PlayerController/FillainPLayerController.h"
 #include "Engine/DamageEvents.h"
 #include "GameFramework/DamageType.h"
@@ -79,9 +79,39 @@ void AProjectile::BeginPlay()
 	}
 }
 
+
+void AProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* DamagedActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
+{
+	/* /Player was hit, but by what?
+	ACharacter* KillerCharacter = Cast<ACharacter>(GetInstigator());
+	if (KillerCharacter)
+	{
+		AFillainCharacter* KillerFillain = Cast<AFillainCharacter>(KillerCharacter);
+		AWeapon* FiredWeapon = KillerFillain->GetCombatComponent()->EquippedWeapon;
+		if (KillerFillain && DamagedActor && DamagedActor->Implements<UInteractWithCrosshairsInterface>() && FiredWeapon && FiredWeapon->GetWeaponType() == EWeaponType::EWT_RocketLauncher)
+		{
+			bHitPlayerCharacter = true;
+			AFillainPlayerController* KillerController = Cast<AFillainPlayerController>(GetInstigatorController());
+			AFillainCharacter* HitFillain = Cast<AFillainCharacter>(DamagedActor);
+			HandlePostHitSFXDamagingPlayer();
+			UDamageType const* const DamageType = UDamageType::StaticClass()->GetDefaultObject<UDamageType>();
+			HitFillain->ReceiveDamage(KillerFillain, Damage, DamageType, KillerController, this);
+		}
+		else
+		{
+			bHitPlayerCharacter = false;
+			bHitByRocketLauncher = false;
+			bMissedByRocketLauncher = true;
+			HandlePostHitSFXDamagingEnvironment();
+			return;
+		}
+	}*/
+	Destroy();
+}
+
 void AProjectile::SpawnTrailSystem()
 {
-	if (TrailSystem && TrailSystemComponent)
+	if (TrailSystem)
 	{
 		TrailSystemComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(
 			TrailSystem,
@@ -93,21 +123,6 @@ void AProjectile::SpawnTrailSystem()
 			false
 		);
 	}
-}
-
-void AProjectile::StartDestroyTimer()
-{
-	GetWorldTimerManager().SetTimer(
-		DestroyTimer,
-		this,
-		&AProjectile::DestroyTimerFinished,
-		DestroyTime
-	);
-}
-
-void AProjectile::DestroyTimerFinished()
-{
-	Destroy();
 }
 
 void AProjectile::ExplodeDamage()
@@ -138,50 +153,25 @@ void AProjectile::ExplodeDamage()
 	}
 }
 
-void AProjectile::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
-{
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-	DOREPLIFETIME(AProjectile, bHitPlayerCharacter);
-}
-
-void AProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* DamagedActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
-{
-	//Player was hit, but by what?
-	ACharacter* KillerCharacter = Cast<ACharacter>(GetInstigator());
-	if (KillerCharacter)
-	{
-		AFillainCharacter* KillerFillain = Cast<AFillainCharacter>(KillerCharacter);
-		AWeapon* FiredWeapon = KillerFillain->GetCombatComponent()->EquippedWeapon;
-		if (KillerFillain && DamagedActor && DamagedActor->Implements<UInteractWithCrosshairsInterface>() && FiredWeapon && FiredWeapon->GetWeaponType() == EWeaponType::EWT_RocketLauncher)
-		{
-			bHitPlayerCharacter = true;
-			AFillainPlayerController* KillerController = Cast<AFillainPlayerController>(GetInstigatorController());
-			AFillainCharacter* HitFillain = Cast<AFillainCharacter>(DamagedActor);
-			HandlePostHitSFXDamagingPlayer();
-			UDamageType const* const DamageType = UDamageType::StaticClass()->GetDefaultObject<UDamageType>();
-			HitFillain->ReceiveDamage(KillerFillain, Damage, DamageType, KillerController, this);
-		}
-		else
-		{
-			bHitPlayerCharacter = false;
-			bHitByRocketLauncher = false;
-			bMissedByRocketLauncher = true;
-			HandlePostHitSFXDamagingEnvironment();
-			return;
-		}
-	}
-}
-
-void AProjectile::MulticastDestroy_Implementation()
-{
-	Destroy();
-}
-
 void AProjectile::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 }
 
+void AProjectile::StartDestroyTimer()
+{
+	GetWorldTimerManager().SetTimer(
+		DestroyTimer,
+		this,
+		&AProjectile::DestroyTimerFinished,
+		DestroyTime
+	);
+}
+
+void AProjectile::DestroyTimerFinished()
+{
+	Destroy();
+}
 
 void AProjectile::Destroyed()
 {
@@ -196,6 +186,21 @@ void AProjectile::Destroyed()
 		UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation());
 	}
 }
+
+/*
+void AProjectile::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(AProjectile, bHitPlayerCharacter);
+}
+
+
+void AProjectile::MulticastDestroy_Implementation()
+{
+	Destroy();
+}
+
+
 
 void AProjectile::HandlePostHitSFXDamagingPlayer()
 {
@@ -236,4 +241,4 @@ void AProjectile::HandlePostHitSFXDamagingEnvironment()
 		UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation());
 	}
 }
-	
+*/
