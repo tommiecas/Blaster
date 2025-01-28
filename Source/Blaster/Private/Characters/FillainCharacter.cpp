@@ -218,6 +218,7 @@ void AFillainCharacter::BeginPlay()
 		UE_LOG(LogTemp, Log, TEXT("FillainPlayerController initialized: %s"), *FillainPlayerController->GetName());
 	}*/
 	UpdateHUDHealth();
+	UpdateHUDShield();
 	if (HasAuthority())
 	{
 		OnTakeAnyDamage.AddDynamic(this, &AFillainCharacter::ReceiveDamage);
@@ -390,8 +391,24 @@ void AFillainCharacter::ReceiveDamage(AActor* DamagedPawn, float Damage, const U
 {
 	if (bIsEliminated) return;
 
-	Health = FMath::Clamp(Health - Damage, 0.f, MaxHealth);
+	float DamageToHealth = Damage;
+	if (Shield > 0.f)
+	{
+		if (Shield >= Damage)
+		{
+			Shield = FMath::Clamp(Shield - Damage, 0.f, MaxShield);
+			DamageToHealth = 0.f;
+		}
+		else
+		{
+			Shield = 0.f;
+			DamageToHealth = FMath::Clamp(DamageToHealth - Shield, 0.f, Damage);
+		}
+	}
+
+	Health = FMath::Clamp(Health - DamageToHealth, 0.f, MaxHealth);
 	UpdateHUDHealth();
+	UpdateHUDShield();
 	PlayHitReactMontage();
 	CacheDamageParameters(DamagedPawn, Damage, DamageType, InstigatorController, DamageCauser);
 
@@ -696,6 +713,7 @@ void AFillainCharacter::HideCharacterIfCameraClose()
 void AFillainCharacter::OnRep_Health(float LastHealth)
 {
 	UpdateHUDHealth();
+	UpdateHUDShield();
 	if (Health < LastHealth)
 	{
 		PlayHitReactMontage();

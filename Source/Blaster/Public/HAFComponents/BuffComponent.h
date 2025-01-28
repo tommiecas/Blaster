@@ -16,6 +16,7 @@ public:
 	UBuffComponent();
 	friend class AFillainCharacter;
 	void Heal(float HealAmount, float HealingTime);
+	void ReplenishShield(float ShieldReplenishAmount, float ShieldReplenishingTime);
 	void BuffSpeed(float BuffBaseSpeed, float BuffCrouchSpeed, float BuffTime);
 	void BuffJump(float BuffJumpVelocity, float BuffTime);
 	void ResetSpeed();
@@ -34,6 +35,7 @@ public:
 protected:
 	virtual void BeginPlay() override;
 	void HealRampUp(float DeltaTime);
+	void ShieldRampUp(float DeltaTime);
 
 private:
 	UPROPERTY()
@@ -45,6 +47,13 @@ private:
 	bool bAmIAlreadyHealing = false;
 	float HealingRate = 0;
 	float AmountToHeal = 0.f;
+
+	/***********************************
+	***   REPLENISHING SHIELD BUFF   ***
+	***********************************/
+	bool bAmIAlreadyReplenishingShield = false;
+	float ShieldReplenishingRate = 0;
+	float AmountToReplenishShield = 0.f;
 
 	/*********************
 	***   SPEED BUFF   ***
