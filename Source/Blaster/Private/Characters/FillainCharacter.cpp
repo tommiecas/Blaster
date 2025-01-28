@@ -85,6 +85,7 @@ void AFillainCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 	DOREPLIFETIME_CONDITION(AFillainCharacter, OverlappingWeapon, COND_OwnerOnly);
 	// DOREPLIFETIME(AFillainCharacter, HitReactMontage);
 	DOREPLIFETIME(AFillainCharacter, Health);
+	DOREPLIFETIME(AFillainCharacter, Shield);
 	DOREPLIFETIME(AFillainCharacter, bDisableGameplay);
 }
 
@@ -175,6 +176,7 @@ void AFillainCharacter::EliminationTimerFinished()
 
 	}
 }
+
 void AFillainCharacter::Destroyed()
 {
 	Super::Destroyed();
@@ -700,6 +702,15 @@ void AFillainCharacter::OnRep_Health(float LastHealth)
 	}
 }
 
+void AFillainCharacter::OnRep_Shield(float LastShield)
+{
+	UpdateHUDShield();
+	if (Shield < LastShield)
+	{
+		PlayHitReactMontage();
+	}
+}
+
 void AFillainCharacter::UpdateHUDHealth()
 {
 	FillainPlayerController = FillainPlayerController == nullptr ? Cast<AFillainPlayerController>(Controller) : FillainPlayerController;
@@ -710,6 +721,15 @@ void AFillainCharacter::UpdateHUDHealth()
 	}
 }
 
+void AFillainCharacter::UpdateHUDShield()
+{
+	FillainPlayerController = FillainPlayerController == nullptr ? Cast<AFillainPlayerController>(Controller) : FillainPlayerController;
+
+	if (FillainPlayerController)
+	{
+		FillainPlayerController->SetHUDShield(Shield, MaxShield);
+	}
+}
 void AFillainCharacter::PollInit()
 {
 	if (HAFPlayerState == nullptr)
