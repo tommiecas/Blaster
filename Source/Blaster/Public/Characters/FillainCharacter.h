@@ -54,6 +54,7 @@ public:
 	// void OnFillainDying(AFillainCharacter* InstigatorFillain, AFillainCharacter* DyingFillain, class AFillainPlayerController* InstigatorController);
 	void UpdateHUDHealth();
 	void UpdateHUDShield();
+	void UpdateHUDAmmo();
 	void SwitchWeapon(AWeapon* NewWeapon);
 
 	UPROPERTY()
@@ -109,6 +110,8 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void ShowSniperScopeWidget(bool bShowScope);
+
+	void SpawnDefaultWeapon();
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
@@ -192,6 +195,7 @@ protected:
 	void PollInit();
 
 	void RotateInPlace(float DeltaTime);
+
 
 	
 
@@ -338,6 +342,12 @@ private:
 	************/
 	UPROPERTY(VisibleAnywhere) 
 	UStaticMeshComponent* AttachedGrenade;
+
+	/*************************
+	***   Default Weapon   ***
+	*************************/
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<AWeapon> DefaultWeaponClass;
 
 public:
 	void SetOverlappingWeapon(AWeapon* Weapon);

@@ -101,7 +101,14 @@ void AFillainCharacter::Eliminate()
 {
 	if (Combat && Combat->EquippedWeapon)
 	{
-		Combat->EquippedWeapon->DropWeapon();
+		if (Combat->EquippedWeapon->bDestroyWeapon)
+		{
+			Combat->EquippedWeapon->Destroy();
+		}
+		else
+		{
+			Combat->EquippedWeapon->DropWeapon();
+		}
 	}
 	MulticastEliminate();
 	GetWorldTimerManager().SetTimer(
@@ -160,8 +167,8 @@ void AFillainCharacter::MulticastEliminate_Implementation()
 			GetActorLocation()
 		);
 	}
-	bool bHideSniperSscope = IsLocallyControlled() && Combat && Combat->bAiming && Combat->EquippedWeapon && Combat->EquippedWeapon->GetWeaponType() == EWeaponType::EWT_SniperRifle;
-	if (bHideSniperSscope)
+	bool bHideSniperScope = IsLocallyControlled() && Combat && Combat->bAiming && Combat->EquippedWeapon && Combat->EquippedWeapon->GetWeaponType() == EWeaponType::EWT_SniperRifle;
+	if (bHideSniperScope)
 	{
 		ShowSniperScopeWidget(false);
 	}
@@ -217,6 +224,9 @@ void AFillainCharacter::BeginPlay()
 		// Log the player controller name for debugging
 		UE_LOG(LogTemp, Log, TEXT("FillainPlayerController initialized: %s"), *FillainPlayerController->GetName());
 	}*/
+
+	SpawnDefaultWeapon();
+	UpdateHUDAmmo();
 	UpdateHUDHealth();
 	UpdateHUDShield();
 	if (HasAuthority())
@@ -429,6 +439,21 @@ void AFillainCharacter::ReceiveDamage(AActor* DamagedPawn, float Damage, const U
 		}
 	}
 	ResetCachedDamageParameters();
+}
+
+void AFillainCharacter::SpawnDefaultWeapon()
+{
+	AHAFGameMode* HAFGameMode = Cast<AHAFGameMode>(UGameplayStatics::GetGameMode(this));
+	UWorld* World = GetWorld(); 
+	if (HAFGameMode && World && !bIsEliminated && DefaultWeaponClass)
+	{
+		AWeapon* StartingWeapon = World->SpawnActor<AWeapon>(DefaultWeaponClass);
+		StartingWeapon->bDestroyWeapon = true;
+		if (Combat)
+		{
+			Combat->EquipWeapon(StartingWeapon);
+		}
+	}
 }
 
 void AFillainCharacter::Move(const FInputActionValue& Value)
@@ -746,6 +771,16 @@ void AFillainCharacter::UpdateHUDShield()
 	if (FillainPlayerController)
 	{
 		FillainPlayerController->SetHUDShield(Shield, MaxShield);
+	}
+}
+void AFillainCharacter::UpdateHUDAmmo()
+{
+	FillainPlayerController = FillainPlayerController == nullptr ? Cast<AFillainPlayerController>(Controller) : FillainPlayerController;
+
+	if (FillainPlayerController && Combat && Combat->EquippedWeapon)
+	{
+		FillainPlayerController->SetHUDCarriedAmmo(Combat->CarriedAmmo);
+		FillainPlayerController->SetHUDWeaponAmmo(Combat->EquippedWeapon->GetAmmo());
 	}
 }
 void AFillainCharacter::PollInit()

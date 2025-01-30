@@ -233,6 +233,11 @@ void AFillainPlayerController::SetHUDWeaponAmmo(int32 WeaponAmmo)
 		FString WeaponAmmoText = FString::Printf(TEXT("%d"), WeaponAmmo);
 		FillainHUD->CharacterOverlay->WeaponAmmoAmount->SetText(FText::FromString(WeaponAmmoText));
 	}
+	else
+	{
+		bInitializeWeaponAmmo = true;
+		HUDWeaponAmmo = WeaponAmmo;
+	}
 }
 
 void AFillainPlayerController::SetHUDCarriedAmmo(int32 CarriedAmmo)
@@ -243,6 +248,11 @@ void AFillainPlayerController::SetHUDCarriedAmmo(int32 CarriedAmmo)
 	{
 		FString CarriedAmmoText = FString::Printf(TEXT("%d"), CarriedAmmo);
 		FillainHUD->CharacterOverlay->CarriedAmmoAmount->SetText(FText::FromString(CarriedAmmoText));
+	}
+	else
+	{
+		bInitializeCarriedAmmo = true;
+		HUDCarriedAmmo = CarriedAmmo;
 	}
 }
 
@@ -344,6 +354,8 @@ void AFillainPlayerController::PollInit()
 				if (bInitializeScore) SetHUDScore(HUDScore);
 				if (bInitializeGrenades) SetHUDGrenades(HUDGrenades);
 				if (bInitializeShield) SetHUDShield(HUDShield, HUDMaxShield);
+				if (bInitializeCarriedAmmo) SetHUDCarriedAmmo(HUDCarriedAmmo);
+				if (bInitializeWeaponAmmo) SetHUDWeaponAmmo(HUDWeaponAmmo);
 
 				AFillainCharacter* FillainCharacter = Cast<AFillainCharacter>(GetPawn());
 				if (FillainCharacter && FillainCharacter->GetCombatComponent())

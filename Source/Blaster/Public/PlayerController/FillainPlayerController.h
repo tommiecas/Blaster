@@ -131,6 +131,8 @@ private:
 	bool bInitializeDefeats = false;
 	bool bInitializeGrenades = false;
 	bool bInitializeShield = false;
+	bool bInitializeWeaponAmmo = false;
+	bool bInitializeCarriedAmmo = false;
 
 	float HUDHealth;
 	float HUDMaxHealth;
@@ -139,6 +141,8 @@ private:
 	int32 HUDGrenades;
 	float HUDShield;
 	float HUDMaxShield;
+	float HUDCarriedAmmo;
+	float HUDWeaponAmmo;
 
 	int32 ThirtySecondsOnTheClock = 30;
 
