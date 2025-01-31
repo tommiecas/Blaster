@@ -196,7 +196,8 @@ protected:
 
 	void RotateInPlace(float DeltaTime);
 
-
+	void DropOrDestroyWeapon(AWeapon* Weapon);
+	void DropOrDestroyBothWeapons();
 	
 
 private:	

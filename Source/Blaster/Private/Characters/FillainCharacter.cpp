@@ -99,17 +99,7 @@ void AFillainCharacter::OnRep_ReplicatedMovement()
 
 void AFillainCharacter::Eliminate()
 {
-	if (Combat && Combat->EquippedWeapon)
-	{
-		if (Combat->EquippedWeapon->bDestroyWeapon)
-		{
-			Combat->EquippedWeapon->Destroy();
-		}
-		else
-		{
-			Combat->EquippedWeapon->DropWeapon();
-		}
-	}
+	DropOrDestroyBothWeapons();
 	MulticastEliminate();
 	GetWorldTimerManager().SetTimer(
 		EliminationTimer,
@@ -181,6 +171,34 @@ void AFillainCharacter::EliminationTimerFinished()
 	{
 		HAFGameMode->RequestRespawn(this, Controller);
 
+	}
+}
+
+void AFillainCharacter::DropOrDestroyWeapon(AWeapon* Weapon)
+{
+	if (Weapon == nullptr) return;
+	if (Weapon->bDestroyWeapon)
+	{
+		Weapon->Destroy();
+	}
+	else
+	{
+		Weapon->DropWeapon();
+	}
+}
+
+void AFillainCharacter::DropOrDestroyBothWeapons()
+{
+	if (Combat)
+	{
+		if (Combat->EquippedWeapon)
+		{
+			DropOrDestroyWeapon(Combat->EquippedWeapon);
+		}
+		if (Combat->SecondaryWeapon)
+		{
+			DropOrDestroyWeapon(Combat->SecondaryWeapon);
+		}
 	}
 }
 
@@ -491,14 +509,7 @@ void AFillainCharacter::EquipButtonPressed()
 
 	if (Combat)
 	{
-		if (HasAuthority())
-		{
-			Combat->EquipWeapon(OverlappingWeapon);
-		}
-		else
-		{
-			ServerEquipButtonPressed();
-		}
+		ServerEquipButtonPressed();
 	}
 }
 

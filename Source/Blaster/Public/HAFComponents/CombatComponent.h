@@ -36,6 +36,9 @@ public:
 	UPROPERTY(ReplicatedUsing = OnRep_EquippedWeapon)
 	AWeapon* EquippedWeapon;
 
+	UPROPERTY(ReplicatedUsing = OnRep_SecondaryWeapon)
+	AWeapon* SecondaryWeapon;
+
     UPROPERTY()
     EWeaponType WeaponType;
 
@@ -60,6 +63,9 @@ protected:
 
 	UFUNCTION()
 	void OnRep_EquippedWeapon();
+
+	UFUNCTION()
+	void OnRep_SecondaryWeapon();
 
 	
 	void Fire();
@@ -92,16 +98,19 @@ protected:
 
 	void AttachActorToRightHand(class AActor* ActorToAttach);
 	void AttachActorToLeftHand(class AActor* ActorToAttach);
-
+	void AttachActorToBackpack(class AActor* ActorToAttach);	
 	void UpdateCarriedAmmo();
 
-	void PlayWeaponEquipSound();
+	void PlayWeaponEquipSound(AWeapon* nWeaponToEquip);
 
 	void ReloadEmptyWeapon();
 
 	void ShowAttachedGrenade(bool bShowGrenade); 
 
 	void UpdateHUDGrenades();
+
+	void EquipPrimaryWeapon(AWeapon* WeaponToEquip);
+	void EquipSecondaryWeapon(AWeapon* WeaponToEquip);
 
 private:
 	UPROPERTY()
