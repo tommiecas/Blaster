@@ -175,6 +175,10 @@ private:
 
 	bool CanIFire();
 
+	/****************
+	***    AMMO   ***
+	****************/
+
 	//carried ammo for the currently equipped weapon
 	UPROPERTY(ReplicatedUsing = OnRep_CarriedAmmo)
 	int32 CarriedAmmo;

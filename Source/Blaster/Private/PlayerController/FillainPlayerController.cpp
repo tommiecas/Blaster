@@ -32,6 +32,7 @@
 #include "GameMode/LobbyGameMode.h"
 #include "HUD/Announcement.h"
 #include "GameStates/HAFGameState.h"
+#include "Components/Image.h"
 
 AFillainPlayerController::AFillainPlayerController()
 {
@@ -41,7 +42,7 @@ AFillainPlayerController::AFillainPlayerController()
 
 	MatchCountdownColor = FLinearColor(0.10033f, 8.602301f, 10.0f, 10.0f);
 	MatchCountdownBlinkingColor = FLinearColor(10.0f, 0.0f, 0.491076f, 10.0f);
-	
+
 	bIsMatchCountdownVisible = true;
 }
 
@@ -65,6 +66,7 @@ void AFillainPlayerController::Tick(float DeltaTime)
 	SetHUDTime();
 	CheckTimeSync(DeltaTime);
 	PollInit();
+	CheckPing(DeltaTime);
 
 	/************************
 	*** OPTIONAL CHALLENGE **
@@ -95,6 +97,41 @@ void AFillainPlayerController::Tick(float DeltaTime)
 	}
 }
 
+void AFillainPlayerController::CheckPing(float DeltaTime)
+{
+    HighPingRunningTime += DeltaTime;
+    if (HighPingRunningTime > CheckPingFrequency)
+    {
+        PlayerState = PlayerState == nullptr ? TObjectPtr<APlayerState>(GetPlayerState<APlayerState>()) : PlayerState;
+        if (PlayerState)
+        {
+            float PingInMs = PlayerState->GetPingInMilliseconds(); // Assuming GetPingInMilliseconds() is a method that returns the ping in milliseconds
+            if (PingInMs * 4 > HighPingThreshold) // ping is compressed; it's actually ping / 4
+            {
+                HighPingWarning();
+                PingAnimationRunningTime = 0.f;
+            }
+        }
+        HighPingRunningTime = 0.f;
+    }
+    bool bIsHighPingAnimationPlaying =
+        FillainHUD &&
+        FillainHUD->CharacterOverlay &&
+        FillainHUD->CharacterOverlay->HighPingAnimation &&
+        FillainHUD->CharacterOverlay->IsAnimationPlaying(FillainHUD->CharacterOverlay->HighPingAnimation);
+    if (bIsHighPingAnimationPlaying)
+    {
+        PingAnimationRunningTime += DeltaTime;
+        if (PingAnimationRunningTime > HighPingDuration)
+        {
+            StopHighPingWarning();
+        }
+    }
+    else
+    {
+        StopHighPingWarning();
+    }
+}
 
 void AFillainPlayerController::CheckTimeSync(float DeltaTime)
 {
@@ -105,6 +142,34 @@ void AFillainPlayerController::CheckTimeSync(float DeltaTime)
 		TimeSyncRunningTime = 0.f;
 	}
 }
+
+void AFillainPlayerController::HighPingWarning()
+{
+	FillainHUD = FillainHUD == nullptr ? Cast<AFillainHUD>(GetHUD()) : FillainHUD;
+
+	bool bIsHUDValid = FillainHUD && FillainHUD->CharacterOverlay && FillainHUD->CharacterOverlay->HighPingImage && FillainHUD->CharacterOverlay->HighPingAnimation;
+	if (bIsHUDValid)
+	{
+		FillainHUD->CharacterOverlay->HighPingImage->SetOpacity(1.f);
+		FillainHUD->CharacterOverlay->PlayAnimation(FillainHUD->CharacterOverlay->HighPingAnimation, 0.f, 5);
+	}
+}
+
+void AFillainPlayerController::StopHighPingWarning()
+{
+	FillainHUD = FillainHUD == nullptr ? Cast<AFillainHUD>(GetHUD()) : FillainHUD;
+
+	bool bIsHUDValid = FillainHUD && FillainHUD->CharacterOverlay && FillainHUD->CharacterOverlay->HighPingImage && FillainHUD->CharacterOverlay->HighPingAnimation;
+	if (bIsHUDValid)
+	{
+		FillainHUD->CharacterOverlay->HighPingImage->SetOpacity(0.f);
+		if (FillainHUD->CharacterOverlay->IsAnimationPlaying(FillainHUD->CharacterOverlay->HighPingAnimation))
+		{
+			FillainHUD->CharacterOverlay->StopAnimation(FillainHUD->CharacterOverlay->HighPingAnimation);
+		}
+	}
+}
+
 
 
 void AFillainPlayerController::ServerCheckMatchState_Implementation()
@@ -545,7 +610,7 @@ void AFillainPlayerController::ToggleMatchCountdownVisibility()
 FString AFillainPlayerController::GetWeaponTypeDisplayName(EWeaponType WeaponType)
 {
 	const UEnum* EnumPtr = FindObject<UEnum>(ANY_PACKAGE, TEXT("WeaponType"), true);
-	if (!EnumPtr) return FString("Invalid");
+	if (!EnumPtr) return FString("");
 
 	return EnumPtr->GetDisplayNameTextByValue((int64)WeaponType).ToString();
 }
