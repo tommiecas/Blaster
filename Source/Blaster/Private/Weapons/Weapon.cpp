@@ -257,7 +257,11 @@ void AWeapon::Fire(const FVector& HitTarget)
 			}
 		}
 	}
-	FireSingleRoundOfAmmo();
+	if (HasAuthority())
+	{
+		FireSingleRoundOfAmmo();
+	}
+
 }
 
 void AWeapon::DropWeapon()

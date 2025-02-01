@@ -61,6 +61,8 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
+	void SwapWeapons();
+
 	UFUNCTION()
 	void OnRep_EquippedWeapon();
 
@@ -69,6 +71,7 @@ protected:
 
 	
 	void Fire();
+	void LocalFire(const FVector_NetQuantize& TraceHitTarget);
 
 	UFUNCTION(Server, Reliable)
 	void ServerFire(const FVector_NetQuantize& TraceHitTarget);
