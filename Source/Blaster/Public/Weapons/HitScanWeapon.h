@@ -14,9 +14,10 @@ class BLASTER_API AHitScanWeapon : public AWeapon
 {
 	GENERATED_BODY()
 
-protected:
+public:
 	virtual void Fire(const FVector& HitTarget) override;
-	FVector TraceEndWithScatter(const FVector& TraceStart, const FVector& HitTarget);
+
+protected:
 	void WeaponTraceHit(const FVector& TraceStart, const FVector& HitTarget, FHitResult& OutHit);
 	
 	UPROPERTY(EditAnywhere)
@@ -44,17 +45,9 @@ private:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class AHitScanWeaponAmmo> HitScanWeaponAmmoClass;
 
-	/*************************
-	* Trace End eith Scatter * 
-	*************************/
-	UPROPERTY(EditAnywhere, Category = "Weapon Scatter")
-	float DistanceToSphere = 800.f;
 
-	UPROPERTY(EditAnywhere, Category = "Weapon Scatter")
-	float SphereRadius = 75.f;
 
-	UPROPERTY(EditAnywhere, Category = "Weapon Scatter")
-	bool bUseScatter = false;
+
 
 
 
