@@ -517,7 +517,14 @@ void AFillainCharacter::ServerEquipButtonPressed_Implementation()
 {
 	if (Combat)
 	{
-		Combat->EquipWeapon(OverlappingWeapon);
+		if (OverlappingWeapon)
+		{
+			Combat->EquipWeapon(OverlappingWeapon);
+		}
+		else if (Combat->ShouldSwapWeapons())
+		{
+			Combat->SwapWeapons();
+		}
 	}
 }
 

@@ -22,6 +22,7 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	void EquipWeapon(class AWeapon* WeaponToEquip);
+	void SwapWeapons();
 	void Reloading();
 	void SetAiming(bool bIsAiming);
 
@@ -60,8 +61,6 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
-
-	void SwapWeapons();
 
 	UFUNCTION()
 	void OnRep_EquippedWeapon();
@@ -237,6 +236,7 @@ public:
 	FORCEINLINE bool IsAiming() const { return bAiming; }
 	FORCEINLINE EWeaponType GetWeaponType() const { return WeaponType; }
 	FORCEINLINE int32 GetGrenades() const { return Grenades; }	
+	bool ShouldSwapWeapons();
 	
 		
 };

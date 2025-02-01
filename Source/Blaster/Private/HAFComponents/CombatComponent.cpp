@@ -203,6 +203,9 @@ void UCombatComponent::SwapWeapons()
 	EquippedWeapon->SetHUDAmmo();
 	UpdateCarriedAmmo();
 	PlayWeaponEquipSound(EquippedWeapon);
+
+	SecondaryWeapon->SetWeaponState(EWeaponState::EWS_EquippedSecondary);
+	AttachActorToBackpack(SecondaryWeapon);
 }
 void UCombatComponent::EquipPrimaryWeapon(AWeapon* WeaponToEquip)
 {
@@ -216,24 +219,16 @@ void UCombatComponent::EquipPrimaryWeapon(AWeapon* WeaponToEquip)
 	UpdateCarriedAmmo();
 	PlayWeaponEquipSound(WeaponToEquip);
 	ReloadEmptyWeapon();
-	EquippedWeapon->EnableCustomDepth(false);
 }
 
 void UCombatComponent::EquipSecondaryWeapon(AWeapon* WeaponToEquip)
 {
 	if (WeaponToEquip == nullptr) return;
 	SecondaryWeapon = WeaponToEquip;
-	SecondaryWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
+	SecondaryWeapon->SetWeaponState(EWeaponState::EWS_EquippedSecondary);
 	AttachActorToBackpack(WeaponToEquip);
 	PlayWeaponEquipSound(WeaponToEquip);
-	if (SecondaryWeapon->GetWeaponMesh())
-	{
-		SecondaryWeapon->GetWeaponMesh()->SetCustomDepthStencilValue(CUSTOM_DEPTH_TAN);
-		SecondaryWeapon->GetWeaponMesh()->MarkRenderStateDirty();
-	}
-
-	if (EquippedWeapon == nullptr) return;
-	EquippedWeapon->SetOwner(Character);
+	SecondaryWeapon->SetOwner(Character);
 }
 
 void UCombatComponent::AttachActorToBackpack(AActor* ActorToAttach)
@@ -519,6 +514,11 @@ void UCombatComponent::UpdateHUDGrenades()
 	}
 }
 
+bool UCombatComponent::ShouldSwapWeapons()
+{
+	return (EquippedWeapon != nullptr && SecondaryWeapon != nullptr);
+}
+
 void UCombatComponent::ShowAttachedGrenade(bool bShowGrenade)
 {
 	if (Character && Character->GetAttachedGrenade())
@@ -538,6 +538,7 @@ void UCombatComponent::OnRep_EquippedWeapon()
 
 		PlayWeaponEquipSound(EquippedWeapon);
 		EquippedWeapon->EnableCustomDepth(false);
+		EquippedWeapon->SetHUDAmmo();
 
 		if (Controller)
 		{
@@ -550,14 +551,9 @@ void UCombatComponent::OnRep_SecondaryWeapon()
 {
 	if (SecondaryWeapon && Character)
 	{
-		SecondaryWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
+		SecondaryWeapon->SetWeaponState(EWeaponState::EWS_EquippedSecondary);
 		AttachActorToBackpack(SecondaryWeapon);
 		PlayWeaponEquipSound(EquippedWeapon);
-		if (SecondaryWeapon->GetWeaponMesh())
-		{
-			SecondaryWeapon->GetWeaponMesh()->SetCustomDepthStencilValue(CUSTOM_DEPTH_TAN);
-			SecondaryWeapon->GetWeaponMesh()->MarkRenderStateDirty();
-		}
 	}
 }
 
