@@ -14,9 +14,11 @@
 #include "Kismet/KismetMathLibrary.h"
 
 
-void AShotgun::Fire(const FVector& HitTarget)
+
+
+void AShotgun::FireShotgun(const TArray<FVector_NetQuantize>& HitTargets)
 {
-	AWeapon::Fire(HitTarget);
+	AWeapon::Fire(FVector());
 	APawn* OwnerPawn = Cast<APawn>(GetOwner());
 	if (OwnerPawn == nullptr) return;
 	AController* InstigatorController = OwnerPawn->GetController();
@@ -24,16 +26,18 @@ void AShotgun::Fire(const FVector& HitTarget)
 	const USkeletalMeshSocket* MuzzleFlashSocket = GetWeaponMesh()->GetSocketByName("MuzzleFlash");
 	if (MuzzleFlashSocket)
 	{
-		FTransform SocketTransform = MuzzleFlashSocket->GetSocketTransform(GetWeaponMesh());
-		FVector Start = SocketTransform.GetLocation();
+		const FTransform SocketTransform = MuzzleFlashSocket->GetSocketTransform(GetWeaponMesh());
+		const FVector Start = SocketTransform.GetLocation();
+
+		// Maps hit character to number of times hit
 		TMap<AFillainCharacter*, uint32> HitMap;
-		for (uint32 i = 0; i < BuckshotCount; i++)
+		for (FVector_NetQuantize HitTarget : HitTargets)
 		{
 			FHitResult FireHit;
 			WeaponTraceHit(Start, HitTarget, FireHit);
 
 			AFillainCharacter* FillainCharacter = Cast<AFillainCharacter>(FireHit.GetActor());
-			if (FillainCharacter && HasAuthority() && InstigatorController)
+			if (FillainCharacter)
 			{
 				if (HitMap.Contains(FillainCharacter))
 				{
@@ -43,33 +47,34 @@ void AShotgun::Fire(const FVector& HitTarget)
 				{
 					HitMap.Emplace(FillainCharacter, 1);
 				}
-			}
-
-			if (ImpactParticles)
-			{
-				UGameplayStatics::SpawnEmitterAtLocation(
-					GetWorld(),
-					ImpactParticles,
-					FireHit.ImpactPoint,
-					FireHit.ImpactNormal.Rotation()
-				);
-			}
-			if (ImpactNiagaraSystem)
-			{
-				UNiagaraFunctionLibrary::SpawnSystemAtLocation(
-					this,
-					ImpactNiagaraSystem,
-					FireHit.ImpactPoint,
-					FireHit.ImpactNormal.Rotation()
-				);
-			}
-			if (HitSound)
-			{
-				UGameplayStatics::PlaySoundAtLocation(
-					this, HitSound, FireHit.ImpactPoint,
-					.5f,
-					FMath::FRandRange(-.5f, .5f)
-				);
+				if (ImpactParticles)
+				{
+					UGameplayStatics::SpawnEmitterAtLocation(
+						GetWorld(),
+						ImpactParticles,
+						FireHit.ImpactPoint,
+						FireHit.ImpactNormal.Rotation()
+					);
+				}
+				if (ImpactNiagaraSystem)
+				{
+					UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+						this,
+						ImpactNiagaraSystem,
+						FireHit.ImpactPoint,
+						FireHit.ImpactNormal.Rotation()
+					);
+				}
+				if (HitSound)
+				{
+					UGameplayStatics::PlaySoundAtLocation(
+						this,
+						HitSound,
+						FireHit.ImpactPoint,
+						.5f,
+						FMath::FRandRange(-.5f, .5f)
+					);
+				}
 			}
 		}
 		for (auto HitPair : HitMap)
@@ -77,18 +82,18 @@ void AShotgun::Fire(const FVector& HitTarget)
 			if (HitPair.Key && HasAuthority() && InstigatorController)
 			{
 				UGameplayStatics::ApplyDamage(
-					HitPair.Key,
-					Damage * HitPair.Value,
+					HitPair.Key, // Character that was hit
+					Damage * HitPair.Value, // Multiply Damage by number of times hit
 					InstigatorController,
 					this,
 					UDamageType::StaticClass()
 				);
 			}
 		}
-	}
+	}	
 }
 
-void AShotgun::ShotgunTraceEndWithScatter(const FVector& HitTarget, TArray<FVector>& HitTargets)
+void AShotgun::ShotgunTraceEndWithScatter(const FVector& HitTarget, TArray<FVector_NetQuantize>& HitTargets)
 {
 	const USkeletalMeshSocket* MuzzleFlashSocket = GetWeaponMesh()->GetSocketByName("MuzzleFlash");
 	if (MuzzleFlashSocket == nullptr) return;
@@ -108,3 +113,5 @@ void AShotgun::ShotgunTraceEndWithScatter(const FVector& HitTarget, TArray<FVect
 		HitTargets.Add(ToEndLoc);
 	}
 }
+
+
