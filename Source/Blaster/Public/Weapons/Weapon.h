@@ -168,16 +168,24 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Weapon Properties")
 	TSubclassOf<class ACasing> CasingClass;
 
-	UPROPERTY(EditAnywhere, ReplicatedUsing = OnRep_Ammo)
+	UPROPERTY(EditAnywhere)
 	int32 Ammo;
 
-	UFUNCTION()
-	void OnRep_Ammo();
+	UFUNCTION(Client, Reliable)
+	void ClientUpdateAmmo(int32 ServerAmmo);
+
+	UFUNCTION(Client, Reliable)
+	void ClientAddAmmo(int32 ServerAmmo);
+
 
 	void FireSingleRoundOfAmmo();
 
 	UPROPERTY(EditAnywhere);
 	int32 MagCapacity;
+
+	// The number of unprocessed serverrrequests for Ammo.
+	//Incremented in FireSingleRoundOfAmmmo, decremented in ClientUpdateAmmo.
+	int32 Sequence = 0;
 
 	UPROPERTY()
 	class AFillainCharacter* FillainOwnerCharacter;
