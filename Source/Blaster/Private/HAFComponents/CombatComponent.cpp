@@ -374,9 +374,11 @@ void UCombatComponent::ReloadEmptyWeapon()
 
 void UCombatComponent::Reloading()
 {
-	if (CarriedAmmo > 0 && CombatState == ECombatState::ECS_Unoccupied && EquippedWeapon && !EquippedWeapon->IsWeaponFull())
+	if (CarriedAmmo > 0 && CombatState == ECombatState::ECS_Unoccupied && EquippedWeapon && !EquippedWeapon->IsWeaponFull() && !bLocallyReloading)
 	{
 		ServerReloading();
+		HandleReload();
+		bLocallyReloading = true;
 	}
 }
 
@@ -385,7 +387,7 @@ void UCombatComponent::ServerReloading_Implementation()
 	if (Character == nullptr || EquippedWeapon == nullptr) return;
 
 	CombatState = ECombatState::ECS_Reloading;
-	HandleReload();
+	if (!Character->IsLocallyControlled()) HandleReload();
 }
 
 void UCombatComponent::FinishReloading()
@@ -497,7 +499,7 @@ void UCombatComponent::OnRep_CombatState()
 	switch (CombatState)
 	{
 	case ECombatState::ECS_Reloading:
-		HandleReload();
+		if (!Character->IsLocallyControlled()) HandleReload();
 		break;
 	case ECombatState::ECS_Unoccupied:
 		if (bIsFireButtonPressed)
@@ -518,7 +520,10 @@ void UCombatComponent::OnRep_CombatState()
 
 void UCombatComponent::HandleReload()
 {
-	Character->PlayReloadingMontage();
+	if (Character)
+	{
+		Character->PlayReloadingMontage();
+	}
 }
 
 int32 UCombatComponent::AmountToReload()
@@ -792,6 +797,7 @@ void UCombatComponent::ServerSetAiming_Implementation(bool bIsAiming)
 bool UCombatComponent::CanIFire()
 {
 	if (EquippedWeapon == nullptr) return false;
+	if (bLocallyReloading) return false;
 	if (!EquippedWeapon->IsWeaponEmpty() && bCanGunFire && CombatState == ECombatState::ECS_Reloading && EquippedWeapon->GetWeaponType() == EWeaponType::EWT_Shotgun) return true;
 	return !EquippedWeapon->IsWeaponEmpty() && bCanGunFire && CombatState == ECombatState::ECS_Unoccupied;
 }

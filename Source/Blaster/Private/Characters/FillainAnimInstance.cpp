@@ -75,6 +75,10 @@ void UFillainAnimInstance::NativeUpdateAnimation(float DeltaTime)
 	}
 
 	bUseFABRIK = FillainCharacter->GetCombatState() == ECombatState::ECS_Unoccupied;
+	if (FillainCharacter->IsLocallyControlled() && FillainCharacter->GetCombatState() != ECombatState::ECS_ThrowingGrenade)
+	{
+		bUseFABRIK = !FillainCharacter->IsLocallyReloading();
+	}
 	bUseAimOffsets = FillainCharacter->GetCombatState() == ECombatState::ECS_Unoccupied && !FillainCharacter->GetDisableGameplay();
 	bTransformRightHand = FillainCharacter->GetCombatState() == ECombatState::ECS_Unoccupied && !FillainCharacter->GetDisableGameplay();;
 

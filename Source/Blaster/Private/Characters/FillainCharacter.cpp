@@ -890,6 +890,11 @@ ECombatState AFillainCharacter::GetCombatState() const
 	return Combat->CombatState;
 }
 
+bool AFillainCharacter::IsLocallyReloading()
+{
+	if (Combat == nullptr) return false;
+	return Combat->bLocallyReloading;
+}
 
 
 
