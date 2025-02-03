@@ -31,6 +31,7 @@ class AFillainPlayerController;
 class AHAFPlayerState;
 class ALobbyGameMode;
 class AProjectile;
+class UBoxComponent;
 
 UCLASS()
 class BLASTER_API AFillainCharacter : public ACharacter, public IInteractWithCrosshairsInterface
@@ -120,6 +121,9 @@ public:
 	void ShowSniperScopeWidget(bool bShowScope);
 
 	void SpawnDefaultWeapon();
+
+	UPROPERTY()
+	TMap<FName, UBoxComponent*> HitCollisionBoxes;
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
