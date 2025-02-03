@@ -56,6 +56,9 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	void ShowFramePackage(const FFramePackage& Package, const FColor& Color);
 	FServerSideRewindResult ServerSideRewind(AFillainCharacter* HitCharacter, const FVector_NetQuantize& TraceStart, const FVector_NetQuantize& HitLoccation, float HitTime);
+	
+	UFUNCTION(Server, Reliable)
+	void ServerScoreRequest(AFillainCharacter* HitCharacter, const FVector_NetQuantize& TraceStart, const FVector_NetQuantize& HitLocation, float HitTime, class AWeapon* DamageCauser);
 
 protected:
 	virtual void BeginPlay() override;
@@ -70,6 +73,7 @@ protected:
 	void MoveBoxes(AFillainCharacter* HitCharacter, const FFramePackage& Package);
 	void ResetHitBoxes(AFillainCharacter* HitCharacter, const FFramePackage& Package);
 	void EnableCharacterMeshCollision(AFillainCharacter* HitCharacter, ECollisionEnabled::Type CollisionEnabled);
+	void SaveFramePackage();
 
 private:
 	UPROPERTY()

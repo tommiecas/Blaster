@@ -139,6 +139,18 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Weapon Scatter")
 	float SphereRadius = 75.f;
 
+	UPROPERTY(EditAnywhere)
+	float Damage = 20.f;
+
+	UPROPERTY(EditAnywhere)
+	bool bUseServerSideRewind = false;
+
+	UPROPERTY()
+	class AFillainCharacter* FillainOwnerCharacter;
+
+	UPROPERTY()
+	class AFillainPlayerController* FillainOwnerPlayerController;
+
 private:
 	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
 	USkeletalMeshComponent* WeaponMesh;
@@ -187,12 +199,6 @@ private:
 	//Incremented in FireSingleRoundOfAmmmo, decremented in ClientUpdateAmmo.
 	int32 Sequence = 0;
 
-	UPROPERTY()
-	class AFillainCharacter* FillainOwnerCharacter;
-	
-	UPROPERTY()
-	class AFillainPlayerController* FillainOwnerController;
-
 	UPROPERTY(EditAnywhere)
 	EWeaponType WeaponType;
 
@@ -210,6 +216,7 @@ public:
 	FORCEINLINE int32 GetAmmo() const { return Ammo; }
 	FORCEINLINE int32 GetMagCapacity() const { return MagCapacity; }
 	FORCEINLINE AProjectile* GetProjectile() const { return Projectile; }
+	FORCEINLINE float GetDamage() const { return Damage; }
 
 
 };

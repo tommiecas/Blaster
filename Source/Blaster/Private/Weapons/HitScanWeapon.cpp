@@ -2,6 +2,7 @@
 
 #include "Weapons/HitScanWeapon.h"
 #include "Characters/FillainCharacter.h"
+#include "PlayerController/FillainPlayerController.h"
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "NiagaraFunctionLibrary.h"
@@ -11,6 +12,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "DrawDebugHelpers.h"
 #include "Weapons/WeaponTypes.h"
+#include "HAFComponents/LagCompensationComponent.h"
 
 void AHitScanWeapon::Fire(const FVector& HitTarget)
 {
@@ -30,15 +32,33 @@ void AHitScanWeapon::Fire(const FVector& HitTarget)
 		WeaponTraceHit(Start, HitTarget, FireHit);
 
 		AFillainCharacter* FillainCharacter = Cast<AFillainCharacter>(FireHit.GetActor());
-		if (FillainCharacter && HasAuthority() && InstigatorController)
+		if (FillainCharacter && InstigatorController)
 		{
-			UGameplayStatics::ApplyDamage(
-				FillainCharacter,
-				Damage,
-				InstigatorController,
-				this,
-				UDamageType::StaticClass()
-			);
+			if (HasAuthority() && !bUseServerSideRewind)
+			{
+				UGameplayStatics::ApplyDamage(
+					FillainCharacter,
+					Damage,
+					InstigatorController,
+					this,
+					UDamageType::StaticClass()
+				);
+			}
+			if (!HasAuthority() && bUseServerSideRewind)
+			{
+				FillainOwnerCharacter = FillainOwnerCharacter == nullptr ? Cast<AFillainCharacter>(OwnerPawn) : FillainOwnerCharacter;
+				FillainOwnerPlayerController = FillainOwnerPlayerController == nullptr ? Cast<AFillainPlayerController>(InstigatorController) : FillainOwnerPlayerController;
+				if (FillainOwnerPlayerController && FillainOwnerCharacter && FillainOwnerCharacter->GetLagCompensation())
+				{
+					FillainOwnerCharacter->GetLagCompensation()->ServerScoreRequest(
+						FillainCharacter,
+						Start,
+						HitTarget,
+						FillainOwnerPlayerController->GetServerTime() - FillainOwnerPlayerController->SingleTripTime,
+						this
+					);
+				}
+			}
 		}
 		if (ImpactParticles)
 		{

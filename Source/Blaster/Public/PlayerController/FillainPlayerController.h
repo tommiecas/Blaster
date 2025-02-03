@@ -55,6 +55,8 @@ public:
 	void OnMatchStateSet(FName State);
 	void HandleCooldown();
 
+	float SingleTripTime = 0.f;
+
 	UPROPERTY()
 	class AWeapon* EquippedWeapon;
 

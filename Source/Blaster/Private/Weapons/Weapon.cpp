@@ -108,10 +108,10 @@ void AWeapon::SetHUDAmmo()
 	FillainOwnerCharacter = FillainOwnerCharacter == nullptr ? Cast<AFillainCharacter>(GetOwner()) : FillainOwnerCharacter;
 	if (FillainOwnerCharacter)
 	{
-		FillainOwnerController = FillainOwnerController == nullptr ? Cast<AFillainPlayerController>(FillainOwnerCharacter->Controller) : FillainOwnerController;
-		if (FillainOwnerController)
+		FillainOwnerPlayerController = FillainOwnerPlayerController == nullptr ? Cast<AFillainPlayerController>(FillainOwnerCharacter->Controller) : FillainOwnerPlayerController;
+		if (FillainOwnerPlayerController)
 		{
-			FillainOwnerController->SetHUDWeaponAmmo(Ammo);
+			FillainOwnerPlayerController->SetHUDWeaponAmmo(Ammo);
 		}
 	}
 }
@@ -164,7 +164,7 @@ void AWeapon::OnRep_Owner()
 	if (Owner == nullptr)
 	{
 		FillainOwnerCharacter = nullptr;
-		FillainOwnerController = nullptr;
+		FillainOwnerPlayerController = nullptr;
 	}
 	else
 	{
@@ -303,7 +303,7 @@ void AWeapon::DropWeapon()
 	WeaponMesh->DetachFromComponent(DetachRules);
 	SetOwner(nullptr);
 	FillainOwnerCharacter = nullptr;
-	FillainOwnerController = nullptr;
+	FillainOwnerPlayerController = nullptr;
 }
 
 bool AWeapon::IsWeaponEmpty()
