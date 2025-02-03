@@ -44,6 +44,7 @@ public:
 	friend class AFillainCharacter;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	void ShowFramePackage(const FFramePackage& Package, const FColor& Color);
+	void ServerSideRewind(AFillainCharacter* HitCharacter, const FVector_NetQuantize& TraceStart, const FVector_NetQuantize& HitLoccation, float HitTime);
 
 protected:
 	virtual void BeginPlay() override;

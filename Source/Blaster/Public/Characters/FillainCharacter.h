@@ -451,5 +451,6 @@ public:
 	FORCEINLINE void SetHealth(float Amount) { Health = Amount; }
 	FORCEINLINE void SetShield(float Amount) { Shield = Amount; }
 	bool IsLocallyReloading();
+	FORCEINLINE ULagCompensationComponent* GetLagCompensation() const { return LagCompensation; }
 
 };
