@@ -30,6 +30,7 @@
 #include "GameMode/LobbyGameMode.h"
 #include "Weapons/Projectile.h"
 #include "Components/BoxComponent.h"
+#include "HAFComponents/LagCompensationComponent.h"
 
 
 AFillainCharacter::AFillainCharacter()
@@ -57,6 +58,8 @@ AFillainCharacter::AFillainCharacter()
 
 	Buff = CreateDefaultSubobject<UBuffComponent>(TEXT("BuffComponent"));
 	Buff->SetIsReplicated(true);
+
+	LagCompensation = CreateDefaultSubobject<ULagCompensationComponent>(TEXT("LagCompensation"));
 
 	GetCharacterMovement()->NavAgentProps.bCanCrouch = true;
 
@@ -396,6 +399,14 @@ void AFillainCharacter::PostInitializeComponents()
 		Buff->Character = this;
 		Buff->SetInitialSpeed(GetCharacterMovement()->MaxWalkSpeed, GetCharacterMovement()->MaxWalkSpeedCrouched);
 		Buff->SetInitialJumpVelocity(GetCharacterMovement()->JumpZVelocity);
+	}
+	if (LagCompensation)
+	{
+		LagCompensation->Character = this;
+		if (Controller)
+		{
+			LagCompensation->Controller = Cast<AFillainPlayerController>(Controller);
+		}
 	}
 }
 

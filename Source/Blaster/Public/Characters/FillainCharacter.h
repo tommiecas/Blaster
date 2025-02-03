@@ -75,11 +75,19 @@ public:
 	UPROPERTY(Replicated)
 	bool bDisableGameplay = false;
 
+
+	/******************************
+	****    HAF COMPONENTS    *****
+	******************************/
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	class UCombatComponent* Combat;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	class UBuffComponent* Buff;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	class ULagCompensationComponent* LagCompensation;
 
 	void CacheDamageParameters(AActor* DamagedPawn, float Damage, const UDamageType* DamageType, AController* InstigatorController, AActor* DamageCauser);
 	void ResetCachedDamageParameters();
