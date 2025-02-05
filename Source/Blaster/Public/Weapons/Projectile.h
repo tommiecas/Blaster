@@ -60,6 +60,17 @@ public:
 	UPROPERTY(EditAnywhere)
 	float Damage = 0.f;
 
+	/*******************************************
+	****    Used with Server Side Rewind    ****
+	*******************************************/
+
+	bool bUseServerSideRewind = false;
+	FVector_NetQuantize TraceStart;
+	FVector_NetQuantize100 InitialVelocity;
+
+	UPROPERTY(EditAnywhere)
+	float InitialSpeed = 15000;
+
 protected:
 	virtual void BeginPlay() override;
 
