@@ -9,6 +9,8 @@
 #include "GameFramework/Character.h"
 #include "Weapons/Weapon.h"
 #include "Characters/FillainCharacter.h"
+#include "HAFComponents/LagCompensationComponent.h"
+#include "PlayerController/FillainPlayerController.h"
 #include "Components/BoxComponent.h"
 #include "Components/AudioComponent.h"
 #include "Weapons/BulletMovementComponent.h"
@@ -31,7 +33,7 @@ AProjectileBullet::AProjectileBullet()
 void AProjectileBullet::BeginPlay()
 {
 	Super::BeginPlay();
-
+	/*
 	FPredictProjectilePathParams PathParams;
 	PathParams.bTraceWithChannel = true;
 	PathParams.bTraceWithCollision = true;
@@ -48,7 +50,7 @@ void AProjectileBullet::BeginPlay()
 	FPredictProjectilePathResult PathResult;
 
 	UGameplayStatics::PredictProjectilePath(this, PathParams, PathResult);
-
+	*/
 	if (!HasAuthority())
 	{
 		CollisionBox->OnComponentHit.AddDynamic(this, &AProjectile::OnHit);
@@ -77,6 +79,30 @@ void AProjectileBullet::BeginPlay()
 
 void AProjectileBullet::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
+	AFillainCharacter* OwnerCharacter = Cast<AFillainCharacter>(GetOwner());
+	if (OwnerCharacter)
+	{
+		AFillainPlayerController* OwnerController = Cast<AFillainPlayerController>(OwnerCharacter->Controller);
+		if (OwnerController)
+		{
+			if (OwnerCharacter->HasAuthority() && !bUseServerSideRewind)
+			{
+				UGameplayStatics::ApplyDamage(OtherActor, Damage, OwnerController, this, UDamageType::StaticClass());
+				Super::OnHit(HitComp, OtherActor, OtherComp, NormalImpulse, Hit);
+				return;
+			}
+			AFillainCharacter* HitCharacter = Cast<AFillainCharacter>(OtherActor);
+			if (bUseServerSideRewind && OwnerCharacter->GetLagCompensation() && OwnerCharacter->IsLocallyControlled() && HitCharacter)
+			{
+				OwnerCharacter->GetLagCompensation()->ProjectileServerScoreRequest(
+					HitCharacter,
+					TraceStart,
+					InitialVelocity,
+					OwnerController->GetServerTime() - OwnerController->SingleTripTime
+				);
+			}
+		}
+	}
 	if (OtherActor == GetOwner())
 	{
 		return;
@@ -161,6 +187,7 @@ void AProjectileBullet::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, 
 			ProjectileLoopComponent->Stop();
 		}
 		*/
+	Super::OnHit(HitComp, OtherActor, OtherComp, NormalImpulse, Hit);
 }
 
 void AProjectileBullet::Destroyed()

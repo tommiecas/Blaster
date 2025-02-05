@@ -34,7 +34,7 @@ void AHitScanWeapon::Fire(const FVector& HitTarget)
 		AFillainCharacter* FillainCharacter = Cast<AFillainCharacter>(FireHit.GetActor());
 		if (FillainCharacter && InstigatorController)
 		{
-			if (HasAuthority() && !bUseServerSideRewind)
+			if (HasAuthority())
 			{
 				UGameplayStatics::ApplyDamage(
 					FillainCharacter,
