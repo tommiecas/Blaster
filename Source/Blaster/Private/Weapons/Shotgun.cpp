@@ -4,6 +4,8 @@
 #include "Weapons/Shotgun.h"
 #include "Weapons/HitScanWeapon.h"
 #include "Characters/FillainCharacter.h"
+#include "PlayerController/FillainPlayerController.h"
+#include "HAFComponents/LagCompensationComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "NiagaraFunctionLibrary.h"
@@ -77,20 +79,28 @@ void AShotgun::FireShotgun(const TArray<FVector_NetQuantize>& HitTargets)
 				}
 			}
 		}
+		TArray<AFillainCharacter*>  HitCharacters;
 		for (auto HitPair : HitMap)
 		{
-			if (HitPair.Key && HasAuthority() && InstigatorController)
+			if (HitPair.Key && InstigatorController)
 			{
-				UGameplayStatics::ApplyDamage(
-					HitPair.Key, // Character that was hit
-					Damage * HitPair.Value, // Multiply Damage by number of times hit
-					InstigatorController,
-					this,
-					UDamageType::StaticClass()
-				);
+				if (HasAuthority() && !bUseServerSideRewind)
+				{
+					UGameplayStatics::ApplyDamage(HitPair.Key, /* Character that was hit */ Damage * HitPair.Value, /* Multiply Damage by number of times hit */ InstigatorController, this, UDamageType::StaticClass());
+				}
+				HitCharacters.Add(HitPair.Key);
 			}
 		}
-	}	
+		if (!HasAuthority() && bUseServerSideRewind)
+		{
+			FillainOwnerCharacter = FillainOwnerCharacter == nullptr ? Cast<AFillainCharacter>(OwnerPawn) : FillainOwnerCharacter;
+			FillainOwnerPlayerController = FillainOwnerPlayerController == nullptr ? Cast<AFillainPlayerController>(InstigatorController) : FillainOwnerPlayerController;
+			if (FillainOwnerPlayerController && FillainOwnerCharacter && FillainOwnerCharacter->GetLagCompensation() && FillainOwnerCharacter->IsLocallyControlled())
+			{
+				FillainOwnerCharacter->GetLagCompensation()->ShotgunServerScoreRequest(HitCharacters, Start, HitTargets, FillainOwnerPlayerController->GetServerTime() - FillainOwnerPlayerController->SingleTripTime);
+			}
+		}
+	}
 }
 
 void AShotgun::ShotgunTraceEndWithScatter(const FVector& HitTarget, TArray<FVector_NetQuantize>& HitTargets)

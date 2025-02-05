@@ -340,7 +340,7 @@ FFramePackage ULagCompensationComponent::GetFrameToCheck(AFillainCharacter* HitC
 		//interpolate between older and younger
 		FrameToCheck = InterpBetweenFrames(Older->GetValue(), Younger->GetValue(), HitTime);
 	}
-
+	FrameToCheck.Character = HitCharacter;
 	return (FrameToCheck);
 }
 

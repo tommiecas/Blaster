@@ -48,7 +48,7 @@ void AHitScanWeapon::Fire(const FVector& HitTarget)
 			{
 				FillainOwnerCharacter = FillainOwnerCharacter == nullptr ? Cast<AFillainCharacter>(OwnerPawn) : FillainOwnerCharacter;
 				FillainOwnerPlayerController = FillainOwnerPlayerController == nullptr ? Cast<AFillainPlayerController>(InstigatorController) : FillainOwnerPlayerController;
-				if (FillainOwnerPlayerController && FillainOwnerCharacter && FillainOwnerCharacter->GetLagCompensation())
+				if (FillainOwnerPlayerController && FillainOwnerCharacter && FillainOwnerCharacter->GetLagCompensation() && FillainOwnerCharacter->IsLocallyControlled())
 				{
 					FillainOwnerCharacter->GetLagCompensation()->ServerScoreRequest(
 						FillainCharacter,
