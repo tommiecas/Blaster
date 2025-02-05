@@ -58,7 +58,7 @@ public:
 	AFillainCharacter* InstigatorFillainCharacter;
 
 	UPROPERTY(EditAnywhere)
-	float Damage = 0.f;
+	float Damage = 20.f;
 
 	/*******************************************
 	****    Used with Server Side Rewind    ****
