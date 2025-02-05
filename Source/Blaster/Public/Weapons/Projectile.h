@@ -27,13 +27,17 @@ public:
 	class UParticleSystem* ImpactParticles;
 
 	UPROPERTY(EditAnywhere)
-	class UNiagaraSystem* ImpactNiagaraParticles;
+	class UParticleSystem* ImpactPlayerCharacterParticles;
+
+	UPROPERTY(EditAnywhere)
+	class UNiagaraSystem* ImpactNiagaraSystem;
+
+
+	UPROPERTY(EditAnywhere)
+	class UNiagaraSystem* ImpactPlayerCharacterNiagaraSystem;
 
 	UPROPERTY(EditAnywhere)
 	class USoundCue* ImpactSound;
-
-	UPROPERTY(EditAnywhere)
-	UParticleSystem* ImpactPlayerCharacterParticles;
 
 	UPROPERTY(EditAnywhere)
 	class USoundCue* ImpactPlayerCharacterSound;

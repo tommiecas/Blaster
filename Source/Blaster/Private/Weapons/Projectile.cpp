@@ -176,14 +176,30 @@ void AProjectile::DestroyTimerFinished()
 void AProjectile::Destroyed()
 {
 	Super::Destroyed();
-
-	if (ImpactParticles)
+	FHitResult HitResult;
+	if (ImpactParticles && (HitResult.GetActor() && !HitResult.GetActor()->Implements<UInteractWithCrosshairsInterface>()))
 	{
 		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticles, GetActorTransform());
 	}
-	if (ImpactSound)
+	else if (ImpactPlayerCharacterParticles && (HitResult.GetActor() && HitResult.GetActor()->Implements<UInteractWithCrosshairsInterface>()))
+	{
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactPlayerCharacterParticles, GetActorTransform());
+	}
+	if (ImpactNiagaraSystem && (HitResult.GetActor() && !HitResult.GetActor()->Implements<UInteractWithCrosshairsInterface>()))
+	{
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ImpactNiagaraSystem, GetActorLocation(), GetActorRotation());
+	}
+	else if (ImpactPlayerCharacterNiagaraSystem && (HitResult.GetActor() && HitResult.GetActor()->Implements<UInteractWithCrosshairsInterface>()))
+	{
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ImpactPlayerCharacterNiagaraSystem, GetActorLocation(), GetActorRotation());
+	}
+	if (ImpactSound && (HitResult.GetActor() && !HitResult.GetActor()->Implements<UInteractWithCrosshairsInterface>()))
 	{
 		UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation());
+	}
+	else if (ImpactPlayerCharacterSound && (HitResult.GetActor() && HitResult.GetActor()->Implements<UInteractWithCrosshairsInterface>()))
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, ImpactPlayerCharacterSound, GetActorLocation());
 	}
 }
 

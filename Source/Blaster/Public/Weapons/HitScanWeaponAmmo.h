@@ -29,11 +29,8 @@ private:
 	UPROPERTY()
 	class AProjectile* Projectile;
 
-	UPROPERTY()
-	class UNiagaraSystem* ImpactNiagaraSystem;
 
-	UPROPERTY()
-	UNiagaraSystem* ImpactPlayerCharacterNiagaraSystem;
+
 
 	FTimerHandle DestroyTimer;
 

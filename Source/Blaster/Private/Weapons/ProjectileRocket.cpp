@@ -78,7 +78,11 @@ void AProjectileRocket::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, 
 	}
 	if (ImpactPlayerCharacterNiagaraSystem)
 	{
-		UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ImpactPlayerCharacterNiagaraSystem, GetActorLocation(), GetActorRotation());
+		if (Hit.GetActor() && Hit.GetActor()->Implements<UInteractWithCrosshairsInterface>())
+		{
+			UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ImpactPlayerCharacterNiagaraSystem, GetActorLocation(), GetActorRotation());
+		}
+		else if (Hit.GetActor() && !Hit.GetActor()->Implements<UInteractWithCrosshairsInterface>()) return;
 	}
 	if (ImpactSound)
 	{
@@ -86,7 +90,11 @@ void AProjectileRocket::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, 
 	}
 	if (ImpactPlayerCharacterSound)
 	{
-		UGameplayStatics::PlaySoundAtLocation(this, ImpactPlayerCharacterSound, GetActorLocation());
+		if (Hit.GetActor() && Hit.GetActor()->Implements<UInteractWithCrosshairsInterface>())
+		{ 
+			UGameplayStatics::PlaySoundAtLocation(this, ImpactPlayerCharacterSound, GetActorLocation());
+		}
+		else if (Hit.GetActor() && !Hit.GetActor()->Implements<UInteractWithCrosshairsInterface>()) return;
 	}
 	if (ProjectileMesh)
 	{

@@ -7,7 +7,7 @@
 #include "ProjectileBullet.generated.h"
 
 /**
- * 
+ *
  */
 UCLASS()
 class BLASTER_API AProjectileBullet : public AProjectile
@@ -16,8 +16,31 @@ class BLASTER_API AProjectileBullet : public AProjectile
 
 public:
 	AProjectileBullet();
+	virtual void Destroyed() override;
 
 protected:
-	virtual void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherCOmp, FVector NormalImpulse, const FHitResult& Hit) override;
-		
+	virtual void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit) override;
+	virtual void BeginPlay() override;
+
+private:
+
+
+
+	UPROPERTY(EditAnywhere)
+	class USoundCue* ProjectileLoop;
+
+	UPROPERTY()
+	class UAudioComponent* ProjectileLoopComponent;
+
+	UPROPERTY(EditAnywhere)
+	class USoundAttenuation* LoopingSoundAttenuation;
+
+	UPROPERTY(VisibleAnywhere)
+	class UBulletMovementComponent* BulletMovementComponent;
+
+	UPROPERTY()
+	class AProjectile* Projectile;
+
+
+
 };

@@ -14,7 +14,7 @@ void AProjectileWeapon::Fire(const FVector& HitTarget)
 	if (!HasAuthority()) return;
 
 	APawn* InstigatorPawn = Cast<APawn>(GetOwner());
-	const USkeletalMeshSocket* MuzzleFlashSocket = GetWeaponMesh()->GetSocketByName(FName("MuzzleFlash"));
+	const USkeletalMeshSocket* MuzzleFlashSocket = GetWeaponMesh()->GetSocketByName(FName("MuzzleFlashSocket"));
 	if (MuzzleFlashSocket)
 	{
 		FTransform SocketTransform = MuzzleFlashSocket->GetSocketTransform(GetWeaponMesh());

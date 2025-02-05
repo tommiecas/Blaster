@@ -30,7 +30,11 @@ struct FFramePackage
 	UPROPERTY()
 	float Time;
 
+	UPROPERTY()
 	TMap<FName, FBoxInformation> HitBoxInfo;
+
+	UPROPERTY()
+	AFillainCharacter* Character;
 };
 
 USTRUCT(BlueprintType)
@@ -43,6 +47,19 @@ struct FServerSideRewindResult
 
 	UPROPERTY()
 	bool bHeadShot;
+};
+
+USTRUCT(BlueprintType)
+struct FShotgunServerSideRewindResult
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+	TMap<AFillainCharacter*, uint32> HeadShots;
+
+	UPROPERTY()
+	TMap<AFillainCharacter*, uint32> BodyShots;
+
 };
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -63,6 +80,13 @@ public:
 protected:
 	virtual void BeginPlay() override;
 	void SaveFramePackage(FFramePackage& Package);
+	FFramePackage GetFrameToCheck(AFillainCharacter* HitCharacter, float HitTime);
+
+	/******************
+	***   SHOTGUN   ***
+	******************/
+	FShotgunServerSideRewindResult ShotgunServerSideRewind(const TArray<AFillainCharacter*>& HitCharacters, const FVector_NetQuantize& TraceStart, const TArray<FVector_NetQuantize>& HitLocations, float HitTimee);
+	FShotgunServerSideRewindResult ShotgunConfirmHit(const TArray<FFramePackage>& FramePackages, const FVector_NetQuantize& TraceStart, const TArray<FVector_NetQuantize>& HitLocations);
 	FFramePackage InterpBetweenFrames(const FFramePackage& OlderFrame, const FFramePackage& YoungerFrame, float HitTime);
 	FServerSideRewindResult ConfirmHit(
 		const FFramePackage& Package,
