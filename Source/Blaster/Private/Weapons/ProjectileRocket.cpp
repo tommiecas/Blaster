@@ -24,11 +24,31 @@ AProjectileRocket::AProjectileRocket()
 	RocketMovementComponent = CreateDefaultSubobject<URocketMovementComponent>(TEXT("RocketMovementComponent"));
 	RocketMovementComponent->bRotationFollowsVelocity = true;
 	RocketMovementComponent->SetIsReplicated(true);
+	RocketMovementComponent->InitialSpeed = InitialSpeed;
+	RocketMovementComponent->MaxSpeed = InitialSpeed;
 }
 
 void AProjectileRocket::BeginPlay()
 {
 	Super::BeginPlay();
+
+	FPredictProjectilePathParams PathParams;
+	PathParams.bTraceWithChannel = true;
+	PathParams.bTraceWithCollision = true;
+	PathParams.DrawDebugTime = 5.f;
+	PathParams.DrawDebugType = EDrawDebugTrace::ForDuration;
+	PathParams.LaunchVelocity = GetActorForwardVector() * InitialSpeed;
+	PathParams.MaxSimTime = 4.f;
+	PathParams.ProjectileRadius = 5.f;
+	PathParams.SimFrequency = 30.f;
+	PathParams.StartLocation = GetActorLocation();
+	PathParams.TraceChannel = ECollisionChannel::ECC_Visibility;
+	PathParams.ActorsToIgnore.Add(this);
+
+	FPredictProjectilePathResult PathResult;
+
+	UGameplayStatics::PredictProjectilePath(this, PathParams, PathResult);
+
 
 	if (!HasAuthority())
 	{
@@ -156,5 +176,22 @@ void AProjectileRocket::Destroyed()
 {
 	
 }
+
+#if WITH_EDITOR
+void AProjectileRocket::PostEditChangeProperty(FPropertyChangedEvent& Event)
+{
+	Super::PostEditChangeProperty(Event);
+
+	FName PropertyName = Event.Property != nullptr ? Event.Property->GetFName() : NAME_None;
+	if (PropertyName == GET_MEMBER_NAME_CHECKED(AProjectileRocket, InitialSpeed))
+	{
+		if (RocketMovementComponent)
+		{
+			RocketMovementComponent->InitialSpeed = InitialSpeed;
+			RocketMovementComponent->MaxSpeed = InitialSpeed;
+		}
+	}
+}
+#endif
 
 

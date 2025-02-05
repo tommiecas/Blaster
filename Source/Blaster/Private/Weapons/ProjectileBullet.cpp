@@ -168,4 +168,21 @@ void AProjectileBullet::Destroyed()
 
 }
 
+#if WITH_EDITOR
+void AProjectileBullet::PostEditChangeProperty(FPropertyChangedEvent& Event)
+{
+	Super::PostEditChangeProperty(Event);
+	
+	FName PropertyName = Event.Property != nullptr ? Event.Property->GetFName() : NAME_None;
+	if (PropertyName == GET_MEMBER_NAME_CHECKED(AProjectileBullet, InitialSpeed))
+	{
+		if (BulletMovementComponent)
+		{
+			BulletMovementComponent->InitialSpeed = InitialSpeed;
+			BulletMovementComponent->MaxSpeed = InitialSpeed;
+		}
+	}
+}
+#endif
+
 
