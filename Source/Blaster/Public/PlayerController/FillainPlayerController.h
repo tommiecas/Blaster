@@ -7,8 +7,13 @@
 #include "Weapons/WeaponTypes.h"
 #include "FillainPlayerController.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FHighPingDelegate, bool, bPingTooHigh);
+
 struct FInputActionValue;
 class AFillainCharacter;
+
+
+
 
 /**
  * 
@@ -59,6 +64,9 @@ public:
 
 	UPROPERTY()
 	class AWeapon* EquippedWeapon;
+
+	FHighPingDelegate HighPingDelegate;
+
 
 protected:
 	virtual void BeginPlay() override;
@@ -161,6 +169,9 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	float CheckPingFrequency = 20.f;
+
+	UFUNCTION(Server, Reliable)
+	void ServerReportPingStatus(bool bHighPing);
 
 	UPROPERTY(EditAnywhere)
 	float HighPingThreshold = 50.f;

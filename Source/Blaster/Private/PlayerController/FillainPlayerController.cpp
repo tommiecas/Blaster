@@ -99,17 +99,25 @@ void AFillainPlayerController::Tick(float DeltaTime)
 
 void AFillainPlayerController::CheckPing(float DeltaTime)
 {
+	if (HasAuthority()) return;
+
     HighPingRunningTime += DeltaTime;
     if (HighPingRunningTime > CheckPingFrequency)
     {
         PlayerState = PlayerState == nullptr ? TObjectPtr<APlayerState>(GetPlayerState<APlayerState>()) : PlayerState;
         if (PlayerState)
         {
+			UE_LOG(LogTemp, Warning, TEXT("PlayerState->GetPingInMilliseconds() * 4 : %d"), PlayerState->GetPingInMilliseconds() * 4);
             float PingInMs = PlayerState->GetPingInMilliseconds(); // Assuming GetPingInMilliseconds() is a method that returns the ping in milliseconds
             if (PingInMs * 4 > HighPingThreshold) // ping is compressed; it's actually ping / 4
             {
                 HighPingWarning();
                 PingAnimationRunningTime = 0.f;
+				ServerReportPingStatus(true);
+			}
+			else
+			{
+				ServerReportPingStatus(false);
             }
         }
         HighPingRunningTime = 0.f;
@@ -131,6 +139,12 @@ void AFillainPlayerController::CheckPing(float DeltaTime)
     {
         StopHighPingWarning();
     }
+}
+
+// Is the ping too high?
+void AFillainPlayerController::ServerReportPingStatus_Implementation(bool bHighPing)
+{
+	HighPingDelegate.Broadcast(bHighPing);
 }
 
 void AFillainPlayerController::CheckTimeSync(float DeltaTime)
