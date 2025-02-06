@@ -75,7 +75,10 @@ void UFillainAnimInstance::NativeUpdateAnimation(float DeltaTime)
 	}
 
 	bUseFABRIK = FillainCharacter->GetCombatState() == ECombatState::ECS_Unoccupied;
-	if (FillainCharacter->IsLocallyControlled() && FillainCharacter->GetCombatState() != ECombatState::ECS_ThrowingGrenade)
+	bool bFABRIKOverride = FillainCharacter->IsLocallyControlled() &&
+		FillainCharacter->GetCombatState() != ECombatState::ECS_ThrowingGrenade &&
+		FillainCharacter->bFinishedSwapping;
+	if (bFABRIKOverride)
 	{
 		bUseFABRIK = !FillainCharacter->IsLocallyReloading();
 	}

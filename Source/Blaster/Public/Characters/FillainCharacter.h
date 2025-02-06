@@ -110,6 +110,7 @@ public:
 	void PlayEliminatedMontage();
 	void PlayReloadingMontage();
 	void PlayThrowGrenadeMontage();
+	void PlaySwapMontage();
 
 	UPROPERTY()
 	AProjectile* Projectile;
@@ -124,6 +125,9 @@ public:
 
 	UPROPERTY()
 	TMap<FName, UBoxComponent*> HitCollisionBoxes;
+
+	bool bFinishedSwapping = false;
+
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
@@ -315,6 +319,9 @@ private:
 
 	UPROPERTY(Replicated, EditAnywhere, Category = Combat)
 	class UAnimMontage* ThrowGrenadeMontage;
+
+	UPROPERTY(EditAnywhere, Category = Combat)
+	UAnimMontage* SwapMontage;
 
 	void HideCharacterIfCameraClose();
 

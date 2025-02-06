@@ -107,8 +107,8 @@ void AFillainPlayerController::CheckPing(float DeltaTime)
         PlayerState = PlayerState == nullptr ? TObjectPtr<APlayerState>(GetPlayerState<APlayerState>()) : PlayerState;
         if (PlayerState)
         {
-			UE_LOG(LogTemp, Warning, TEXT("PlayerState->GetPingInMilliseconds() * 4 : %d"), PlayerState->GetPingInMilliseconds() * 4);
-            float PingInMs = PlayerState->GetPingInMilliseconds(); // Assuming GetPingInMilliseconds() is a method that returns the ping in milliseconds
+			UE_LOG(LogTemp, Warning, TEXT("PlayerState->GetPingInMilliseconds() * 4 : %d"), static_cast<int32>(PlayerState->GetPingInMilliseconds() * 4));
+			float PingInMs = PlayerState->GetPingInMilliseconds(); // Assuming GetPingInMilliseconds() is a method that returns the ping in milliseconds
             if (PingInMs * 4 > HighPingThreshold) // ping is compressed; it's actually ping / 4
             {
                 HighPingWarning();
