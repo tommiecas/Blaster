@@ -91,7 +91,7 @@ void AHAFGameMode::PlayerEliminated(class AFillainCharacter* VictimCharacter, cl
 	}
 	if (VictimCharacter)
 	{
-		VictimCharacter->Eliminate();
+		VictimCharacter->Eliminate(false);
 	}
 }
 
@@ -108,6 +108,21 @@ void AHAFGameMode::RequestRespawn(ACharacter* VictimCharacter, AController* Vict
 		UGameplayStatics::GetAllActorsOfClass(this, APlayerStart::StaticClass(), PlayerStarts);
 		int32 Selection = FMath::RandRange(0, PlayerStarts.Num() - 1);
 		RestartPlayerAtPlayerStart(VictimController, PlayerStarts[Selection]);
+	}
+}
+
+void AHAFGameMode::PlayerLeftGame(AHAFPlayerState* LeavingPlayer)
+{
+	if (LeavingPlayer == nullptr) return;
+	AHAFGameState* HAFGameState = GetGameState<AHAFGameState>();
+	if (HAFGameState && HAFGameState->TopScoringPlayers.Contains(LeavingPlayer))
+	{
+		HAFGameState->TopScoringPlayers.Remove(LeavingPlayer);
+	}
+	AFillainCharacter* CharacterLeaving = Cast<AFillainCharacter>(LeavingPlayer->GetPawn());
+	if (CharacterLeaving)
+	{
+		CharacterLeaving->Eliminate(true);
 	}
 }
 

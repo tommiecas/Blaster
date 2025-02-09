@@ -33,6 +33,8 @@ class ALobbyGameMode;
 class AProjectile;
 class UBoxComponent;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerLeavesGame);
+
 UCLASS()
 class BLASTER_API AFillainCharacter : public ACharacter, public IInteractWithCrosshairsInterface
 {
@@ -49,7 +51,7 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void PostInitializeComponents() override;
 	virtual void OnRep_ReplicatedMovement() override;
-	void Eliminate();
+	void Eliminate(bool bPlayerLeftGame);
 	// void FinishElimination();
 	virtual void Destroyed() override;
 	// void OnFillainDying(AFillainCharacter* InstigatorFillain, AFillainCharacter* DyingFillain, class AFillainPlayerController* InstigatorController);
@@ -71,7 +73,7 @@ public:
 	AFillainCharacter* VictimCharacter = nullptr;
 
 	UFUNCTION(NetMulticast, Reliable)
-	void MulticastEliminate();
+	void MulticastEliminate(bool bPlayerLeftGame);
 	
 	UPROPERTY(Replicated)
 	bool bDisableGameplay = false;
@@ -127,6 +129,13 @@ public:
 	TMap<FName, UBoxComponent*> HitCollisionBoxes;
 
 	bool bFinishedSwapping = false;
+
+	UFUNCTION(Server, Reliable)
+	void ServerLeaveGame();
+
+	bool bLeftGame = false;
+
+	FOnPlayerLeavesGame PlayerLeavesGame;
 
 
 protected:

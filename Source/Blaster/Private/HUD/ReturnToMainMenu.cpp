@@ -6,6 +6,7 @@
 #include "Components/Button.h"
 #include "MultiplayerSessionsSubsystem.h"
 #include "GameFramework/GameModeBase.h"
+#include "Characters/FillainCharacter.h"
 
 void UReturnToMainMenu::MenuSetup()
 {
@@ -106,9 +107,30 @@ void UReturnToMainMenu::ReturnButtonClicked()
 {
 	ReturnButton->SetIsEnabled(false);
 
+	UWorld* World = GetWorld();
+	if (World)
+	{
+		APlayerController* FirstPlayerController = World->GetFirstPlayerController();
+		if (FirstPlayerController)
+		{
+			AFillainCharacter* FillainCharacter = Cast<AFillainCharacter>(FirstPlayerController->GetPawn());
+			if (FillainCharacter)
+			{
+				FillainCharacter->ServerLeaveGame();
+				FillainCharacter->PlayerLeavesGame.AddDynamic(this, &UReturnToMainMenu::OnPlayerLeavesGame);
+			}
+			else
+			{
+				ReturnButton->SetIsEnabled(true);
+			}
+		}
+	}
+}
+
+void UReturnToMainMenu::OnPlayerLeavesGame()
+{
 	if (MultiplayerSessionsSubsystem)
 	{
 		MultiplayerSessionsSubsystem->DestroySession();
 	}
 }
-

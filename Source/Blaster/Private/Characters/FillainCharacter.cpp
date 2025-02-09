@@ -187,20 +187,16 @@ void AFillainCharacter::OnRep_ReplicatedMovement()
 	TimeSinceLastMovementReplication = 0.f;
 }
 
-void AFillainCharacter::Eliminate()
+void AFillainCharacter::Eliminate(bool bPlayerLeftGame)
 {
 	DropOrDestroyBothWeapons();
-	MulticastEliminate();
-	GetWorldTimerManager().SetTimer(
-		EliminationTimer,
-		this,
-		&AFillainCharacter::EliminationTimerFinished,
-		EliminationDelay
-	);
+	MulticastEliminate(bPlayerLeftGame);
+	
 }
 
-void AFillainCharacter::MulticastEliminate_Implementation()
+void AFillainCharacter::MulticastEliminate_Implementation(bool bPlayerLeftGame)
 {
+	bLeftGame = bPlayerLeftGame;
 	if (VictimController)
 	{
 		VictimController->SetHUDWeaponAmmo(0);
@@ -252,14 +248,35 @@ void AFillainCharacter::MulticastEliminate_Implementation()
 	{
 		ShowSniperScopeWidget(false);
 	}
+	GetWorldTimerManager().SetTimer(
+		EliminationTimer,
+		this,
+		&AFillainCharacter::EliminationTimerFinished,
+		EliminationDelay
+	);
 }
 
 void AFillainCharacter::EliminationTimerFinished()
 {
 	AHAFGameMode* HAFGameMode = GetWorld()->GetAuthGameMode<AHAFGameMode>();
-	if (HAFGameMode)
+	if (HAFGameMode && !bLeftGame)
 	{
 		HAFGameMode->RequestRespawn(this, Controller);
+
+	}
+	if (bLeftGame && IsLocallyControlled())
+	{
+		PlayerLeavesGame.Broadcast();
+	}
+}
+
+void AFillainCharacter::ServerLeaveGame_Implementation()
+{
+	AHAFGameMode* GameMode = GetWorld()->GetAuthGameMode<AHAFGameMode>();
+	HAFPlayerState = HAFPlayerState == nullptr ? GetPlayerState<AHAFPlayerState>() : HAFPlayerState;
+	if (GameMode && HAFPlayerState)
+	{
+		GameMode->PlayerLeftGame(HAFPlayerState);
 
 	}
 }
