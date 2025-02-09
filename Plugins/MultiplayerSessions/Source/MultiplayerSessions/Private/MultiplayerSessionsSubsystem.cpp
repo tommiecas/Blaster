@@ -102,7 +102,7 @@ void UMultiplayerSessionsSubsystem::JoinSession(const FOnlineSessionSearchResult
 
 void UMultiplayerSessionsSubsystem::DestroySession()
 {
-	if (!SessionInterface.IsValid())
+	/*if (!SessionInterface.IsValid())
 	{
 		MultiplayerOnDestroySessionComplete.Broadcast(false);
 		return;
@@ -113,6 +113,28 @@ void UMultiplayerSessionsSubsystem::DestroySession()
 	if (!SessionInterface->DestroySession(NAME_GameSession))
 	{
 		SessionInterface->ClearOnDestroySessionCompleteDelegate_Handle(DestroySessionCompleteDelegateHandle);
+		MultiplayerOnDestroySessionComplete.Broadcast(false);
+	}
+	*/
+
+	if (!SessionInterface.IsValid())
+	{
+		MultiplayerOnDestroySessionComplete.Broadcast(false);
+		return;
+	}
+
+	// Ensure SessionInterface is still valid before proceeding
+	if (SessionInterface)
+	{
+		DestroySessionCompleteDelegateHandle = SessionInterface->AddOnDestroySessionCompleteDelegate_Handle(DestroySessionCompleteDelegate);
+		if (!SessionInterface->DestroySession(NAME_GameSession))
+		{
+			SessionInterface->ClearOnDestroySessionCompleteDelegate_Handle(DestroySessionCompleteDelegateHandle);
+			MultiplayerOnDestroySessionComplete.Broadcast(false);
+		}
+	}
+	else
+	{
 		MultiplayerOnDestroySessionComplete.Broadcast(false);
 	}
 }

@@ -33,6 +33,11 @@
 #include "HUD/Announcement.h"
 #include "GameStates/HAFGameState.h"
 #include "Components/Image.h"
+#include "Components/InputComponent.h"
+#include "EnhancedInputSubsystems.h"
+#include "EnhancedInputComponent.h"
+#include "HUD/ReturnToMainMenu.h"
+
 
 AFillainPlayerController::AFillainPlayerController()
 {
@@ -51,6 +56,11 @@ void AFillainPlayerController::BeginPlay()
 	Super::BeginPlay();
 	FillainHUD = Cast<AFillainHUD>(GetHUD());
 	ServerCheckMatchState();
+
+	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
+	{
+		Subsystem->AddMappingContext(FillainMappingContext, 0);
+	}
 }
 
 void AFillainPlayerController::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -439,9 +449,41 @@ void AFillainPlayerController::PollInit()
 				AFillainCharacter* FillainCharacter = Cast<AFillainCharacter>(GetPawn());
 				if (FillainCharacter && FillainCharacter->GetCombatComponent())
 				{
-					SetHUDGrenades(FillainCharacter->GetCombatComponent()->GetGrenades());
+					if (bInitializeGrenades) SetHUDGrenades(FillainCharacter->GetCombatComponent()->GetGrenades());
 				}
 			}
+		}
+	}
+}
+
+void AFillainPlayerController::SetupInputComponent()
+{
+	Super::SetupInputComponent();	
+	if (InputComponent == nullptr) return;
+
+	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(InputComponent))
+	
+	EnhancedInputComponent->BindAction(QuitAction, ETriggerEvent::Triggered, this, &AFillainPlayerController::ShowReturnToMainMenu);
+
+}
+
+void AFillainPlayerController::ShowReturnToMainMenu()
+{
+	if (ReturnToMainMenuWidget == nullptr) return;
+	if (ReturnToMainMenu == nullptr)
+	{
+		ReturnToMainMenu = CreateWidget<UReturnToMainMenu>(this, ReturnToMainMenuWidget);
+	}
+	if (ReturnToMainMenu)
+	{
+		bReturnToMainMenuOpen = !bReturnToMainMenuOpen;
+		if (bReturnToMainMenuOpen)
+		{
+			ReturnToMainMenu->MenuSetup();
+		}
+		else
+		{
+			ReturnToMainMenu->MenuTearDown();
 		}
 	}
 }

@@ -75,6 +75,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	class UInputMappingContext* FillainMappingContext;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+	class UInputAction* QuitAction;
+
 	/**************************************
 	* Sync Time Between Clinet And Server *
 	***************************************/
@@ -97,6 +100,10 @@ protected:
 	void CheckTimeSync(float DeltaTime);
 
 	void PollInit();
+
+	virtual void SetupInputComponent() override;
+	void ShowReturnToMainMenu();
+
 	void HandleMatchHasStarted();
 
 	UFUNCTION(Server, Reliable)
@@ -114,6 +121,18 @@ private:
 
 	UPROPERTY()
 	class AFillainHUD* FillainHUD;
+
+	/**********************************
+	****    RETURN TO MAIN MENU    ****
+	**********************************/
+
+	UPROPERTY(EditAnywhere, Category = "HUD")
+	TSubclassOf<class UUserWidget> ReturnToMainMenuWidget;
+
+	UPROPERTY()
+	class UReturnToMainMenu* ReturnToMainMenu;
+
+	bool bReturnToMainMenuOpen = false;
 
     UPROPERTY(meta = (AllowPrivateAccess = "true"))
     class AFillainCharacter* Fillain;
