@@ -6,6 +6,9 @@
 #include "HUD/CharacterOverlay.h"
 #include "HUD/Announcement.h"
 #include "HUD/EliminationAnnouncement.h"
+#include "Blueprint/WidgetLayoutLibrary.h"
+#include "Components/HorizontalBox.h"
+#include "Components/CanvasPanelSlot.h"
 
 
 
@@ -45,9 +48,37 @@ void AFillainHUD::AddEliminationAnnouncement(FString Killer, FString Victim)
 		{
 			EliminationAnnouncementWidget->SetEliminationAnnouncementText(Killer, Victim);
 			EliminationAnnouncementWidget->AddToViewport();
+
+			for (UEliminationAnnouncement* Message : EliminationMessages)
+			{
+				if (Message && Message->AnnouncementBox)
+				{
+					UCanvasPanelSlot* CanvasSlot = UWidgetLayoutLibrary::SlotAsCanvasSlot(Message->AnnouncementBox);
+					if (CanvasSlot)
+					{
+						FVector2D Position = CanvasSlot->GetPosition();
+						FVector2D NewPosition(CanvasSlot->GetPosition().X, Position.Y - CanvasSlot->GetSize().Y);
+						CanvasSlot->SetPosition(NewPosition);
+					}
+
+				}
+			}
+
+			EliminationMessages.Add(EliminationAnnouncementWidget);
+			FTimerHandle EliminationMessageTimer;
+			FTimerDelegate EliminationMessageDelegate;
+			EliminationMessageDelegate.BindUFunction(this, FName("EliminationAnnouncementTimerFinished"), EliminationAnnouncementWidget);
+			GetWorldTimerManager().SetTimer(EliminationMessageTimer, EliminationMessageDelegate, EliminationAnnouncementTime, false);
 		}
 	}
+}
 
+void AFillainHUD::EliminationAnnouncementTimerFinished(UEliminationAnnouncement* MessageToRemove)
+{
+	if (MessageToRemove)
+	{
+		MessageToRemove->RemoveFromParent();
+	}
 }
 
 void AFillainHUD::DrawHUD()
@@ -115,3 +146,5 @@ void AFillainHUD::DrawCrosshair(UTexture2D* Texture, FVector2D ViewportCenter, F
 
 
 }
+
+

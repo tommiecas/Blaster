@@ -65,6 +65,14 @@ private:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class UEliminationAnnouncement> EliminationAnnouncementClass;
 
+	UPROPERTY(EditAnywhere)
+	float EliminationAnnouncementTime = 2.5f;
+
+	UFUNCTION()
+	void EliminationAnnouncementTimerFinished(UEliminationAnnouncement* MessageToRemove);
+
+	UPROPERTY()
+	TArray<UEliminationAnnouncement*> EliminationMessages;
 
 public:
 	FORCEINLINE void SetHUDPackage(const FHUDPackage& Package) { HUDPackage = Package; }
