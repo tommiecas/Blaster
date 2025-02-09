@@ -31,6 +31,9 @@
 #include "Weapons/Projectile.h"
 #include "Components/BoxComponent.h"
 #include "HAFComponents/LagCompensationComponent.h"
+#include "NiagaraComponent.h"
+#include "NiagaraFunctionLibrary.h"
+#include "GameStates/HAFGameState.h"
 
 
 AFillainCharacter::AFillainCharacter()
@@ -247,6 +250,10 @@ void AFillainCharacter::MulticastEliminate_Implementation(bool bPlayerLeftGame)
 	if (bHideSniperScope)
 	{
 		ShowSniperScopeWidget(false);
+	}
+	if (CrownComponent)
+	{
+		CrownComponent->DestroyComponent();
 	}
 	GetWorldTimerManager().SetTimer(
 		EliminationTimer,
@@ -598,6 +605,27 @@ void AFillainCharacter::SpawnDefaultWeapon()
 	}
 }
 
+void AFillainCharacter::MulticastGainedTheLead_Implementation()
+{
+	if (CrownSystem == nullptr) return;
+	if (CrownComponent == nullptr)
+	{
+		CrownComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(CrownSystem, GetCapsuleComponent(), FName(), GetActorLocation() + FVector(0.f, 0.f, 110.f), GetActorRotation(), EAttachLocation::KeepWorldPosition, false);
+	}
+	if (CrownComponent)
+	{
+		CrownComponent->Activate();
+	}
+}
+
+void AFillainCharacter::MulticastLostTheLead_Implementation()
+{
+	if (CrownComponent)
+	{
+		CrownComponent->DestroyComponent();
+	}
+}
+
 void AFillainCharacter::Move(const FInputActionValue& Value)
 {
 	if (bDisableGameplay)
@@ -945,6 +973,13 @@ void AFillainCharacter::PollInit()
 		{
 			HAFPlayerState->AddToScore(0.f);
 			HAFPlayerState->AddToDefeats(0);
+			
+			AHAFGameState* HAFGameState = Cast<AHAFGameState>(UGameplayStatics::GetGameState(this));
+
+			if (HAFGameState && HAFGameState->TopScoringPlayers.Contains(HAFPlayerState))
+			{
+				MulticastGainedTheLead();
+			}
 		}
 	}
 }

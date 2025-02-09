@@ -74,26 +74,54 @@ void AHAFGameMode::OnMatchStateSet()
 
 void AHAFGameMode::PlayerEliminated(class AFillainCharacter* VictimCharacter, class AFillainPlayerController* VictimController, AFillainPlayerController* KillerController)
 {
-	if (KillerController == nullptr || KillerController->PlayerState == nullptr) return;
-	if (VictimController == nullptr || VictimController->PlayerState == nullptr) return;
-	AHAFPlayerState* KillerPlayerState = KillerController ? Cast<AHAFPlayerState>(KillerController->PlayerState) : nullptr;
-	AHAFPlayerState* VictimPlayerState = VictimController ? Cast<AHAFPlayerState>(VictimController->PlayerState) : nullptr;	
+    if (KillerController == nullptr || KillerController->PlayerState == nullptr) return;
+    if (VictimController == nullptr || VictimController->PlayerState == nullptr) return;
+    AHAFPlayerState* KillerPlayerState = KillerController ? Cast<AHAFPlayerState>(KillerController->PlayerState) : nullptr;
+    AHAFPlayerState* VictimPlayerState = VictimController ? Cast<AHAFPlayerState>(VictimController->PlayerState) : nullptr;
 
-	AHAFGameState* HAFGameState = GetGameState<AHAFGameState>();
-	if (KillerPlayerState && KillerPlayerState != VictimPlayerState && HAFGameState)
-	{
-		KillerPlayerState->AddToScore(1.f);
-		HAFGameState->UpdateTopScore(KillerPlayerState);
-	}
-	if (VictimPlayerState)
-	{
-		VictimPlayerState->AddToDefeats(1);
-	}
-	if (VictimCharacter)
-	{
-		VictimCharacter->Eliminate(false);
-	}
+    AHAFGameState* HAFGameState = GetGameState<AHAFGameState>();
+    if (KillerPlayerState && KillerPlayerState != VictimPlayerState && HAFGameState)
+    {
+        TArray<AHAFPlayerState*> PlayersCurrentlyInTheLead;
+        for (auto LeadPlayer : HAFGameState->TopScoringPlayers)
+        {
+            PlayersCurrentlyInTheLead.Add(LeadPlayer);
+        }
+
+        KillerPlayerState->AddToScore(1.f);
+        HAFGameState->UpdateTopScore(KillerPlayerState);
+
+        if (HAFGameState->TopScoringPlayers.Contains(KillerPlayerState))
+        {
+            AFillainCharacter* Leader = Cast<AFillainCharacter>(KillerPlayerState->GetPawn());
+            if (Leader)
+            {
+                Leader->MulticastGainedTheLead();
+            }
+        }
+
+        for (int32 i = 0; i < PlayersCurrentlyInTheLead.Num(); i++)
+        {
+            if (!HAFGameState->TopScoringPlayers.Contains(PlayersCurrentlyInTheLead[i]))
+            {
+                AFillainCharacter* Loser = Cast<AFillainCharacter>(PlayersCurrentlyInTheLead[i]->GetPawn());
+                if (Loser)
+                {
+                    Loser->MulticastLostTheLead();
+                }
+            }
+        }
+        if (VictimPlayerState)
+        {
+            VictimPlayerState->AddToDefeats(1);
+        }
+        if (VictimCharacter)
+        {
+            VictimCharacter->Eliminate(false);
+        }
+    }
 }
+
 
 void AHAFGameMode::RequestRespawn(ACharacter* VictimCharacter, AController* VictimController)
 {

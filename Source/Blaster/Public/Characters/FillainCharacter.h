@@ -137,6 +137,12 @@ public:
 
 	FOnPlayerLeavesGame PlayerLeavesGame;
 
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastGainedTheLead();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastLostTheLead();
+
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
@@ -405,9 +411,9 @@ private:
 	UPROPERTY(EditAnywhere, Category = Eliminations)
 	UMaterialInstance* DissolveMaterialInstance;
 
-	/********************
-	** Elimination-Bot **
-	********************/
+	/****************************
+	** Elimination-Bot/Effects **
+	****************************/
 
 	UPROPERTY(EditAnywhere)
 	UParticleSystem* EliminationBotEffect;
@@ -417,6 +423,12 @@ private:
 	
 	UPROPERTY(EditAnywhere)
 	class USoundCue* EliminationBotSound;
+
+	UPROPERTY(EditAnywhere)
+	class UNiagaraSystem* CrownSystem;
+
+	UPROPERTY(EditAnywhere)
+	class UNiagaraComponent* CrownComponent;
 	
 	AActor* CachedDamagedPawn;
 	float CachedDamage;
