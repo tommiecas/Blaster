@@ -51,6 +51,44 @@ AFillainPlayerController::AFillainPlayerController()
 	bIsMatchCountdownVisible = true;
 }
 
+void AFillainPlayerController::BroadcastElimination(APlayerState* Killer, APlayerState* Victim)
+{
+	ClientEliminationAnnouncement(Killer, Victim);
+}
+
+void AFillainPlayerController::ClientEliminationAnnouncement_Implementation(APlayerState* Killer, APlayerState* Victim)
+{
+	APlayerState* Self = GetPlayerState<APlayerState>();
+	if (Killer && Victim && Self)
+	{
+		FillainHUD = FillainHUD == nullptr ? Cast<AFillainHUD>(GetHUD()) : FillainHUD;
+		if (FillainHUD)
+		{
+			if (Killer == Self && Victim != Self)
+			{
+				FillainHUD->AddEliminationAnnouncement("You", Victim->GetPlayerName());
+				return;
+			}
+			if (Victim == Self && Killer != Self)
+			{
+				FillainHUD->AddEliminationAnnouncement(Killer->GetPlayerName(), "you");
+				return;
+			}
+			if (Killer == Victim && Killer == Self)
+			{
+				FillainHUD->AddEliminationAnnouncement("You", "yourself");
+				return;
+			}
+			if (Killer == Victim && Killer != Self)
+			{
+				FillainHUD->AddEliminationAnnouncement(Killer->GetPlayerName(), "themselves");
+				return;
+			}
+			FillainHUD->AddEliminationAnnouncement(Killer->GetPlayerName(), Victim->GetPlayerName());
+		}
+	}
+}
+
 void AFillainPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
@@ -150,6 +188,8 @@ void AFillainPlayerController::CheckPing(float DeltaTime)
         StopHighPingWarning();
     }
 }
+
+
 
 // Is the ping too high?
 void AFillainPlayerController::ServerReportPingStatus_Implementation(bool bHighPing)

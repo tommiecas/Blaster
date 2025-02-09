@@ -33,6 +33,7 @@ public:
 	virtual void DrawHUD() override;
 	void AddCharacterOverlay();
 	void AddAnnouncement();
+	void AddEliminationAnnouncement(FString Killer, FString Victim);
 
 
 	UPROPERTY(EditAnywhere, Category = "PlayerStats")
@@ -51,12 +52,19 @@ protected:
 	virtual void BeginPlay() override;
 private:
 	UPROPERTY()
+	class APlayerController* OwningPlayer;
+
+	UPROPERTY()
 	FHUDPackage HUDPackage;
 
 	void DrawCrosshair(UTexture2D* Texture, FVector2D ViewportCenter, FVector2D Spread, FLinearColor CrosshairsColor);
 
 	UPROPERTY(EditAnywhere)
 	float CrosshairSpreadMax = 16.f;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class UEliminationAnnouncement> EliminationAnnouncementClass;
+
 
 public:
 	FORCEINLINE void SetHUDPackage(const FHUDPackage& Package) { HUDPackage = Package; }

@@ -5,12 +5,14 @@
 #include "GameFramework/PlayerController.h"
 #include "HUD/CharacterOverlay.h"
 #include "HUD/Announcement.h"
+#include "HUD/EliminationAnnouncement.h"
 
 
 
 void AFillainHUD::BeginPlay()
 {
 	Super::BeginPlay();
+
 }
 
 void AFillainHUD::AddCharacterOverlay()
@@ -31,6 +33,21 @@ void AFillainHUD::AddAnnouncement()
 		Announcement = CreateWidget<UAnnouncement>(PlayerController, AnnouncementClass);
 		Announcement->AddToViewport();
 	}
+}
+
+void AFillainHUD::AddEliminationAnnouncement(FString Killer, FString Victim)
+{
+	OwningPlayer = OwningPlayer == nullptr ? GetOwningPlayerController() : OwningPlayer;
+	if (OwningPlayer && EliminationAnnouncementClass)
+	{
+		UEliminationAnnouncement* EliminationAnnouncementWidget = CreateWidget<UEliminationAnnouncement>(OwningPlayer, EliminationAnnouncementClass);
+		if (EliminationAnnouncementWidget)
+		{
+			EliminationAnnouncementWidget->SetEliminationAnnouncementText(Killer, Victim);
+			EliminationAnnouncementWidget->AddToViewport();
+		}
+	}
+
 }
 
 void AFillainHUD::DrawHUD()

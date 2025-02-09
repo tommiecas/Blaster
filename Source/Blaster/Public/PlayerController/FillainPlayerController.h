@@ -67,6 +67,7 @@ public:
 
 	FHighPingDelegate HighPingDelegate;
 
+	void BroadcastElimination(APlayerState* Killer, APlayerState* Victim);
 
 protected:
 	virtual void BeginPlay() override;
@@ -115,6 +116,9 @@ protected:
 	void HighPingWarning();
 	void StopHighPingWarning();
 	void CheckPing(float DeltaTime);
+
+	UFUNCTION(Client, Reliable)
+	void ClientEliminationAnnouncement(APlayerState* Killer, APlayerState* Victim);
 
 private:
 	FString GetWeaponTypeDisplayName(EWeaponType WeaponType);
