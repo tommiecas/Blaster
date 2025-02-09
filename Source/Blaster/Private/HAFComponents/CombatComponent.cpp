@@ -45,6 +45,8 @@ void UCombatComponent::ShotgunShellReload()
 	if (Character && Character->HasAuthority())
 	{
 		UpdateShotgunAmmoValues();
+
+		CombatState = ECombatState::ECS_Unoccupied;
 	}
 }
 
@@ -403,6 +405,7 @@ void UCombatComponent::Reloading()
 		ServerReloading();
 		HandleReload();
 		bLocallyReloading = true;
+		CombatState = ECombatState::ECS_Unoccupied;
 	}
 }
 
@@ -412,6 +415,7 @@ void UCombatComponent::ServerReloading_Implementation()
 
 	CombatState = ECombatState::ECS_Reloading;
 	if (!Character->IsLocallyControlled()) HandleReload();
+	CombatState = ECombatState::ECS_Unoccupied;
 }
 
 void UCombatComponent::FinishReloading()
@@ -578,6 +582,7 @@ void UCombatComponent::OnRep_CombatState()
 		}
 		break;
 	}
+	CombatState = ECombatState::ECS_Unoccupied;
 }
 
 void UCombatComponent::HandleReload()
@@ -586,6 +591,7 @@ void UCombatComponent::HandleReload()
 	{
 		Character->PlayReloadingMontage();
 	}
+	CombatState = ECombatState::ECS_Unoccupied;
 }
 
 int32 UCombatComponent::AmountToReload()
