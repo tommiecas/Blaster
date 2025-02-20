@@ -69,6 +69,30 @@ public:
 
 	void BroadcastElimination(APlayerState* Killer, APlayerState* Victim);
 
+	void AddPlayerChatTextBlock();
+
+	UFUNCTION()
+	void ToggleInputChatBox();
+
+	UFUNCTION()
+	void OnTextCommitted(const FText& Text, ETextCommit::Type CommitMethod);
+
+	UFUNCTION(Server, Reliable)
+	void ServerSetText(const FString& Text, const FString& PlayerName);
+
+	UFUNCTION(Client, Reliable)
+	void ClientSetText(const FString& Text, const FString& PlayerName);
+
+	UPROPERTY()
+	class AHAFGameMode* GameMode;
+
+private:
+	UPROPERTY(EditAnywhere, Category = HUD)
+	TSubclassOf<class UPlayerChat> PlayerChatClass;
+
+	UPROPERTY()
+	UPlayerChat* PlayerChatWidget;
+
 protected:
 	virtual void BeginPlay() override;
 	void SetHUDTime();
@@ -78,6 +102,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	class UInputAction* QuitAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+	class UInputAction* ChatAction;
 
 	/**************************************
 	* Sync Time Between Clinet And Server *

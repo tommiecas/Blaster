@@ -38,6 +38,9 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 	float CooldownTime = 10.f;
 
+	void SendChat(const FString& Text, const FString& PlayerName);
+
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void OnMatchStateSet() override;

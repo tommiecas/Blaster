@@ -162,5 +162,16 @@ void AHAFGameMode::PlayerLeftGame(AHAFPlayerState* LeavingPlayer)
 	}
 }
 
+void AHAFGameMode::SendChat(const FString& Text, const FString& PlayerName)
+{
+	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
+	{
+		AFillainPlayerController* FillainPlayerController = Cast<AFillainPlayerController>(*It);
+		if (FillainPlayerController)
+		{
+			FillainPlayerController->ClientSetText(Text, PlayerName);
+		}
+	}
+}
 
 

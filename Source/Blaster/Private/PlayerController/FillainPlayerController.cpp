@@ -37,6 +37,10 @@
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
 #include "HUD/ReturnToMainMenu.h"
+#include "HUD/PlayerChat.h"
+#include "HUD/PlayerChatTextBlock.h"
+#include "Components/EditableText.h"
+#include "Components/ScrollBox.h"
 
 
 AFillainPlayerController::AFillainPlayerController()
@@ -55,6 +59,80 @@ void AFillainPlayerController::BroadcastElimination(APlayerState* Killer, APlaye
 {
 	ClientEliminationAnnouncement(Killer, Victim);
 }
+
+void AFillainPlayerController::ToggleInputChatBox()
+{
+	if (PlayerChatWidget && PlayerChatWidget->InputTextBox)
+	{
+		if (PlayerChatWidget->InputTextBox->GetVisibility() == ESlateVisibility::Collapsed)
+		{
+			PlayerChatWidget->InputTextBox->SetVisibility(ESlateVisibility::Visible);
+			FInputModeGameAndUI InputMode;
+			InputMode.SetWidgetToFocus(PlayerChatWidget->InputTextBox->TakeWidget());
+			SetInputMode(InputMode);
+			SetShowMouseCursor(true);
+		}
+		else
+		{
+			PlayerChatWidget->InputTextBox->SetVisibility(ESlateVisibility::Collapsed);
+			FInputModeGameOnly InputMode;
+			SetInputMode(InputMode);
+			SetShowMouseCursor(false);
+		}
+	}
+}
+
+void AFillainPlayerController::OnTextCommitted(const FText& Text, ETextCommit::Type CommitMethod)
+{
+	if (CommitMethod != ETextCommit::OnEnter) return;
+
+	PlayerState = PlayerState == nullptr ? TObjectPtr<APlayerState>(GetPlayerState<APlayerState>()) : PlayerState;
+	FString PlayerName("");
+	if (PlayerState)
+	{
+		PlayerName = PlayerState->GetPlayerName();
+	}
+	if (PlayerChatWidget)
+	{
+		// UE_LOG(LogTemp, Warning, TEXT("Here"));
+		if (!Text.IsEmpty())
+		{
+			ServerSetText(Text.ToString(), PlayerName);
+		}
+		PlayerChatWidget->InputTextBox->SetText(FText());
+		PlayerChatWidget->InputTextBox->SetVisibility(ESlateVisibility::Collapsed);
+		FInputModeGameOnly InputMode;
+		SetInputMode(InputMode);
+		SetShowMouseCursor(false);
+	}
+}
+
+void AFillainPlayerController::ClientSetText_Implementation(const FString& Text, const FString& PlayerName)
+{
+	PlayerState = PlayerState == nullptr ? TObjectPtr<APlayerState>(GetPlayerState<APlayerState>()) : PlayerState;
+	if (PlayerChatWidget && PlayerState)
+	{
+		if (PlayerName == PlayerState->GetPlayerName())
+		{
+			PlayerChatWidget->SetChatText(Text, "You");
+		}
+		else
+		{
+			PlayerChatWidget->SetChatText(Text, PlayerName);
+		}
+	}
+}
+
+
+void AFillainPlayerController::ServerSetText_Implementation(const FString& Text, const FString& PlayerName)
+{
+	GameMode = GameMode == nullptr ? Cast<AHAFGameMode>(UGameplayStatics::GetGameMode(this)) : GameMode;
+	if (GameMode)
+	{
+		GameMode->SendChat(Text, PlayerName);
+	}
+}
+
 
 void AFillainPlayerController::ClientEliminationAnnouncement_Implementation(APlayerState* Killer, APlayerState* Victim)
 {
@@ -98,6 +176,18 @@ void AFillainPlayerController::BeginPlay()
 	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
 	{
 		Subsystem->AddMappingContext(FillainMappingContext, 0);
+	}
+
+	if (!IsLocalPlayerController()) return;  // This line is added because the editor keeps on giving me an error after exiting saying only local player controller can access widgets
+	if (PlayerChatClass)
+	{
+		PlayerChatWidget = PlayerChatWidget == nullptr ? CreateWidget<UPlayerChat>(this, PlayerChatClass) : PlayerChatWidget;
+		if (PlayerChatWidget)
+		{
+			PlayerChatWidget->AddToViewport();
+			PlayerChatWidget->InputTextBox->SetVisibility(ESlateVisibility::Collapsed);
+			PlayerChatWidget->InputTextBox->OnTextCommitted.AddDynamic(this, &AFillainPlayerController::OnTextCommitted);
+		}
 	}
 }
 
@@ -238,14 +328,14 @@ void AFillainPlayerController::StopHighPingWarning()
 
 void AFillainPlayerController::ServerCheckMatchState_Implementation()
 {
-	AHAFGameMode* GameMode = Cast<AHAFGameMode>(UGameplayStatics::GetGameMode(this));
-	if (GameMode)
+	AHAFGameMode* HAFGameMode = Cast<AHAFGameMode>(UGameplayStatics::GetGameMode(this));
+	if (HAFGameMode)
 	{
-		WarmupTime = GameMode->WarmupTime;
-		MatchTime = GameMode->MatchTime;
-		CooldownTime = GameMode->CooldownTime;
-		LevelStartingTime = GameMode->LevelStartingTime;
-		MatchState = GameMode->GetMatchState();
+		WarmupTime = HAFGameMode->WarmupTime;
+		MatchTime = HAFGameMode->MatchTime;
+		CooldownTime = HAFGameMode->CooldownTime;
+		LevelStartingTime = HAFGameMode->LevelStartingTime;
+		MatchState = HAFGameMode->GetMatchState();
 		ClientJoinMidGame(MatchState, WarmupTime, MatchTime, CooldownTime, LevelStartingTime);
 
 		if (FillainHUD && MatchState == MatchState::Cooldown)
@@ -498,13 +588,14 @@ void AFillainPlayerController::PollInit()
 
 void AFillainPlayerController::SetupInputComponent()
 {
-	Super::SetupInputComponent();	
+	Super::SetupInputComponent();
 	if (InputComponent == nullptr) return;
 
 	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(InputComponent))
-	
-	EnhancedInputComponent->BindAction(QuitAction, ETriggerEvent::Triggered, this, &AFillainPlayerController::ShowReturnToMainMenu);
-
+	{
+		EnhancedInputComponent->BindAction(QuitAction, ETriggerEvent::Triggered, this, &AFillainPlayerController::ShowReturnToMainMenu);
+		EnhancedInputComponent->BindAction(ChatAction, ETriggerEvent::Triggered, this, &AFillainPlayerController::ToggleInputChatBox);
+	}
 }
 
 void AFillainPlayerController::ShowReturnToMainMenu()
