@@ -560,8 +560,8 @@ void AFillainCharacter::ReceiveDamage(AActor* DamagedPawn, float Damage, const U
 		}
 		else
 		{
-			Shield = 0.f;
 			DamageToHealth = FMath::Clamp(DamageToHealth - Shield, 0.f, Damage);
+			Shield = 0.f;
 		}
 	}
 

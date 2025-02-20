@@ -57,8 +57,7 @@ void AHitScanWeapon::Fire(const FVector& HitTarget)
 						FillainCharacter,
 						Start,
 						HitTarget,
-						FillainOwnerPlayerController->GetServerTime() - FillainOwnerPlayerController->SingleTripTime,
-						this
+						FillainOwnerPlayerController->GetServerTime() - FillainOwnerPlayerController->SingleTripTime
 					);
 				}
 			}
