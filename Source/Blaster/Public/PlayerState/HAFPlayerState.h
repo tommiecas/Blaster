@@ -6,7 +6,9 @@
 #include "GameFramework/PlayerState.h"
 #include "Characters/FillainCharacter.h"
 #include "PlayerController/FillainPlayerController.h"
+#include "Blaster/BlasterTypes/Team.h"
 #include "HAFPlayerState.generated.h"
+
 
 /**
  * 
@@ -41,8 +43,13 @@ private:
 	UPROPERTY(ReplicatedUsing = OnRep_Defeats);
 	int32 Defeats;
 
+	UPROPERTY(Replicated)
+	ETeam Team = ETeam::ET_NoTeam;;
+
 public:
 	FORCEINLINE AFillainCharacter* GetFillainPlayerCharacter() const { return Character; }
 	FORCEINLINE AFillainPlayerController* GetFillainPlayerController() const { return Controller; }
+	FORCEINLINE ETeam GetTeam() const { return Team; }
+	FORCEINLINE void SetTeam(ETeam TeamToSet) { Team = TeamToSet; }
 
 };
