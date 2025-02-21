@@ -25,6 +25,7 @@ public:
 	void PlayerEliminated(class AFillainCharacter* VictimCharacter, class AFillainPlayerController* VictimController, AFillainPlayerController* KillerController);
 	virtual void RequestRespawn(ACharacter* VictimCharacter, AController* VictimController);
 	void PlayerLeftGame(class AHAFPlayerState* LeavingPlayer);
+	virtual float CalculateDamage(AController* Killer, AController* Victim, float BaseDamage);
 
 	UPROPERTY(EditDefaultsOnly)
 	float WarmupTime = 10.f;

@@ -72,6 +72,11 @@ void AHAFGameMode::OnMatchStateSet()
 	}
 }
 
+float AHAFGameMode::CalculateDamage(AController* Killer, AController* Victim, float BaseDamage)
+{
+	return BaseDamage;
+}
+
 void AHAFGameMode::PlayerEliminated(class AFillainCharacter* VictimCharacter, class AFillainPlayerController* VictimController, AFillainPlayerController* KillerController)
 {
 	if (KillerController == nullptr || KillerController->PlayerState == nullptr) return;

@@ -267,7 +267,7 @@ void AFillainCharacter::MulticastEliminate_Implementation(bool bPlayerLeftGame)
 
 void AFillainCharacter::EliminationTimerFinished()
 {
-	AHAFGameMode* HAFGameMode = GetWorld()->GetAuthGameMode<AHAFGameMode>();
+	HAFGameMode = HAFGameMode == nullptr ? GetWorld()->GetAuthGameMode<AHAFGameMode>() : HAFGameMode;
 	if (HAFGameMode && !bLeftGame)
 	{
 		HAFGameMode->RequestRespawn(this, Controller);
@@ -326,7 +326,7 @@ void AFillainCharacter::Destroyed()
 		EliminationBotComponent->DestroyComponent();
 	}
 
-	AHAFGameMode* HAFGameMode = Cast<AHAFGameMode>(UGameplayStatics::GetGameMode(this));
+	HAFGameMode = HAFGameMode == nullptr ? GetWorld()->GetAuthGameMode<AHAFGameMode>() : HAFGameMode;
 	bool bIsMatchNotInProgress = HAFGameMode && HAFGameMode->GetMatchState() != MatchState::InProgress;
 	if (Combat && Combat->EquippedWeapon && bIsMatchNotInProgress)
 	{
@@ -550,7 +550,9 @@ void AFillainCharacter::GrenadeButtonPressed()
 
 void AFillainCharacter::ReceiveDamage(AActor* DamagedPawn, float Damage, const UDamageType* DamageType, AController* InstigatorController, AActor* DamageCauser)
 {
-	if (bIsEliminated) return;
+	HAFGameMode = HAFGameMode == nullptr ? GetWorld()->GetAuthGameMode<AHAFGameMode>() : HAFGameMode;
+	if (bIsEliminated || HAFGameMode == nullptr) return;
+	Damage = HAFGameMode->CalculateDamage(InstigatorController, Controller, Damage);
 
 	float DamageToHealth = Damage;
 	if (Shield > 0.f)
@@ -575,8 +577,8 @@ void AFillainCharacter::ReceiveDamage(AActor* DamagedPawn, float Damage, const U
 
 	if (Health == 0.f)
 	{
-		AHAFGameMode* HAFGameMode = GetWorld()->GetAuthGameMode<AHAFGameMode>();
-				
+		HAFGameMode = HAFGameMode == nullptr ? GetWorld()->GetAuthGameMode<AHAFGameMode>() : HAFGameMode;
+
 		if (HAFGameMode)
 		{
 			FillainPlayerController = FillainPlayerController == nullptr ? Cast<AFillainPlayerController>(Controller) : FillainPlayerController;
@@ -594,8 +596,8 @@ void AFillainCharacter::ReceiveDamage(AActor* DamagedPawn, float Damage, const U
 
 void AFillainCharacter::SpawnDefaultWeapon()
 {
-	AHAFGameMode* HAFGameMode = Cast<AHAFGameMode>(UGameplayStatics::GetGameMode(this));
-	UWorld* World = GetWorld(); 
+	HAFGameMode = HAFGameMode == nullptr ? GetWorld()->GetAuthGameMode<AHAFGameMode>() : HAFGameMode;
+	UWorld* World = GetWorld();
 	if (HAFGameMode && World && !bIsEliminated && DefaultWeaponClass)
 	{
 		AWeapon* StartingWeapon = World->SpawnActor<AWeapon>(DefaultWeaponClass);

@@ -73,3 +73,19 @@ void ATeamsGameMode::HandleMatchHasStarted()
 		}
 	}
 }
+
+float ATeamsGameMode::CalculateDamage(AController * Killer, AController * Victim, float BaseDamage)
+{
+	AHAFPlayerState* KillerPState = Killer->GetPlayerState<AHAFPlayerState>();
+	AHAFPlayerState* VictimPState = Victim->GetPlayerState<AHAFPlayerState>();
+	if (KillerPState == nullptr || VictimPState == nullptr) return BaseDamage;
+	if (VictimPState == KillerPState)
+	{
+		return BaseDamage;
+	}
+	if (KillerPState->GetTeam() == VictimPState->GetTeam())
+	{
+		return 0.f;
+	}
+	return BaseDamage;
+}
