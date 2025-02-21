@@ -227,6 +227,8 @@ void AFillainCharacter::MulticastEliminate_Implementation(bool bPlayerLeftGame)
 	// Disable Collision
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	AttachedGrenade->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
 	//Spawn Elimination-Bot
 	if (EliminationBotEffect)
 	{
@@ -610,7 +612,7 @@ void AFillainCharacter::MulticastGainedTheLead_Implementation()
 	if (CrownSystem == nullptr) return;
 	if (CrownComponent == nullptr)
 	{
-		CrownComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(CrownSystem, GetCapsuleComponent(), FName(), GetActorLocation() + FVector(0.f, 0.f, 110.f), GetActorRotation(), EAttachLocation::KeepWorldPosition, false);
+		CrownComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(CrownSystem, GetMesh(), FName(), GetActorLocation() + FVector(0.f, 0.f, 110.f), GetActorRotation(), EAttachLocation::KeepWorldPosition, false);
 	}
 	if (CrownComponent)
 	{
