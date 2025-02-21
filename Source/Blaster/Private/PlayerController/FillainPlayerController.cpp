@@ -41,6 +41,7 @@
 #include "HUD/PlayerChatTextBlock.h"
 #include "Components/EditableText.h"
 #include "Components/ScrollBox.h"
+#include "Blaster/BlasterTypes/Announcement.h"
 
 
 AFillainPlayerController::AFillainPlayerController()
@@ -762,7 +763,7 @@ void AFillainPlayerController::HandleCooldown()
 		if (bHUDValid)
 		{
 			FillainHUD->Announcement->SetVisibility(ESlateVisibility::Visible);
-			FString AnnouncementText("New Match Starts In:");
+			FString AnnouncementText = Announcement::NewMatchStartsIn;
 			FillainHUD->Announcement->AnnouncementText->SetText(FText::FromString(AnnouncementText));
 
 			AHAFGameState* HAFGameState = Cast<AHAFGameState>(UGameplayStatics::GetGameState(this));
@@ -770,37 +771,8 @@ void AFillainPlayerController::HandleCooldown()
 			if (HAFGameState && HAFPlayerState)
 			{
 				TArray<AHAFPlayerState*> TopPlayers = HAFGameState->TopScoringPlayers;
-				FString InfoTextString;
-				if (TopPlayers.Num() == 0)
-				{
-					InfoTextString = FString("Nobody Won! \n You're all losers!");
-
-				}
-				else if (TopPlayers.Num() == 1 && TopPlayers[0] == HAFPlayerState)
-				{
-					InfoTextString = FString("YOU are the Winner! \n The rest of you suck!");
-				}
-				else if (TopPlayers.Num() == 1)
-				{
-					InfoTextString = FString::Printf(TEXT("The Winner Is: \n%s"), *TopPlayers[0]->GetPlayerName());
-				}
-				else if (TopPlayers.Num() > 1)
-				{
-					InfoTextString = FString("We have a tie! \n");
-					for (auto TiedPlayer : TopPlayers)
-					{
-						InfoTextString.Append(FString::Printf(TEXT("%s\n Fight to the Death!"), *TiedPlayer->GetPlayerName()));
-					}
-				}
-				else if (TopPlayers.Num() > 1 && TopPlayers.Contains(HAFPlayerState))
-				{
-					InfoTextString = FString("YOU Tied for the Win, Alongside: \n");
-					TopPlayers.Remove(HAFPlayerState);
-					for (auto TiedPlayer : TopPlayers)
-					{
-						InfoTextString.Append(FString::Printf(TEXT("%s\n Fight to the death!"), *TiedPlayer->GetPlayerName()));
-					}
-				}
+				FString InfoTextString = bShowTeamScores ? GetTeamsInfoText(HAFGameState) : GetInfoText(TopPlayers);
+				
 				FillainHUD->Announcement->InfoText->SetText(FText::FromString(InfoTextString));
 			}
 		}
@@ -811,6 +783,84 @@ void AFillainPlayerController::HandleCooldown()
 		FillainCharacter->bDisableGameplay = true;
 		FillainCharacter->GetCombatComponent()->FireButtonPressed(false);
 	}
+}
+
+FString AFillainPlayerController::GetInfoText(TArray<class AHAFPlayerState*>& Players) 
+{
+	AHAFPlayerState* HAFPlayerState = GetPlayerState<AHAFPlayerState>();
+	if (HAFPlayerState == nullptr) return FString();
+
+	FString InfoTextString;
+	if (Players.Num() == 0)
+	{
+		InfoTextString = Announcement::ThereIsNoWinner;
+
+	}
+	else if (Players.Num() == 1 && Players[0] == HAFPlayerState)
+	{
+		InfoTextString = Announcement::YouAreTheWinner;
+	}
+	else if (Players.Num() == 1)
+	{
+		InfoTextString = FString::Printf(TEXT("The Winner Is: \n%s"), *Players[0]->GetPlayerName());
+	}
+	else if (Players.Num() > 1)
+	{
+		InfoTextString = Announcement::WeHaveATie;
+		InfoTextString.Append(FString("\n"));
+		for (auto TiedPlayer : Players)
+		{
+			InfoTextString.Append(FString::Printf(TEXT("%s\n Can't We Kill Both? No? Damn!"), *TiedPlayer->GetPlayerName()));
+		}
+	}
+	else if (Players.Num() > 1 && Players.Contains(HAFPlayerState))
+	{
+		InfoTextString = FString("YOU Tied for the Win, Alongside: \n");
+		Players.Remove(HAFPlayerState);
+		for (auto TiedPlayer : Players)
+		{
+			InfoTextString.Append(FString::Printf(TEXT("%s\n Fight to the Death!"), *TiedPlayer->GetPlayerName()));
+		}
+	}
+	return InfoTextString;;
+}
+
+FString AFillainPlayerController::GetTeamsInfoText(AHAFGameState* HAFGameState)
+{
+	if (HAFGameState == nullptr) return FString();
+	FString InfoTextString;
+
+	const int32 RedTeamScore = HAFGameState->RedTeamScore;
+	const int32 BlueTeamScore = HAFGameState->BlueTeamScore;
+
+	if (RedTeamScore == 0 && BlueTeamScore == 0)
+	{
+		InfoTextString = Announcement::ThereIsNoWinner;
+	}
+	else if (RedTeamScore == BlueTeamScore)
+	{
+		InfoTextString = FString::Printf(TEXT("%s\n"), *Announcement::TeamsTiedForTheWin);
+		InfoTextString.Append(Announcement::RedTeam);
+		InfoTextString.Append(TEXT("\n"));
+		InfoTextString.Append(Announcement::BlueTeam);
+		InfoTextString.Append(TEXT("\n"));
+	}
+	else if (RedTeamScore > BlueTeamScore)
+	{
+		InfoTextString = Announcement::RedTeamWins;
+		InfoTextString.Append(TEXT("\n"));
+		InfoTextString.Append(FString::Printf(TEXT("%s: %d \n"), *Announcement::RedTeam, RedTeamScore));
+		InfoTextString.Append(FString::Printf(TEXT("%s: %d \n"), *Announcement::BlueTeam, BlueTeamScore));
+	}
+	else if (BlueTeamScore > RedTeamScore)
+	{
+		InfoTextString = Announcement::BlueTeamWins;
+		InfoTextString.Append(TEXT("\n"));
+		InfoTextString.Append(FString::Printf(TEXT("%s: %d \n"), *Announcement::BlueTeam, BlueTeamScore));
+		InfoTextString.Append(FString::Printf(TEXT("%s: %d \n"), *Announcement::RedTeam, RedTeamScore));
+	}
+
+	return InfoTextString;
 }
 
 void AFillainPlayerController::OnRep_ShowTeamScores()
@@ -824,6 +874,8 @@ void AFillainPlayerController::OnRep_ShowTeamScores()
 		HideTeamScores();
 	}
 }
+
+
 
 
 

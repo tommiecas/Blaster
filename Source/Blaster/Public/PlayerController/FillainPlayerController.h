@@ -157,6 +157,8 @@ protected:
 
 	UFUNCTION()
 	void OnRep_ShowTeamScores();
+	FString GetInfoText(TArray<class AHAFPlayerState*>& Players);
+	FString GetTeamsInfoText (class AHAFGameState* HAFGameState);
 
 private:
 	FString GetWeaponTypeDisplayName(EWeaponType WeaponType);
