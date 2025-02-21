@@ -72,6 +72,23 @@ void AHAFPlayerState::OnRep_Defeats()
 	}
 }
 
+void AHAFPlayerState::SetTeam(ETeam TeamToSet)
+{
+	Team = TeamToSet;
+
+	AFillainCharacter* BCharacter = Cast <AFillainCharacter>(GetPawn());
+	if (BCharacter)
+	{
+		BCharacter->SetTeamColor(Team);
+	}
+}
+
+void AHAFPlayerState::OnRep_Team()
+{
+}
+
+
+
 
 
 

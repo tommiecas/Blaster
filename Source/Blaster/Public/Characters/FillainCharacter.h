@@ -11,6 +11,7 @@
 #include "Components/TimelineComponent.h"
 #include "Blaster/BlasterTypes/CombatState.h"
 #include "GameMode/LobbyGameMode.h"
+#include "Blaster/BlasterTypes/Team.h"
 #include "FillainCharacter.generated.h"
 
 class USpringArmComponent;
@@ -142,6 +143,8 @@ public:
 
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastLostTheLead();
+
+	void SetTeamColor(ETeam Team);
 
 
 protected:
@@ -408,8 +411,30 @@ private:
 	UMaterialInstanceDynamic* DynamicDissolveMaterialInstance;
 
 	//Material Instance set ono the blueprint used with the dynamic material instance
-	UPROPERTY(EditAnywhere, Category = Eliminations)
+	UPROPERTY(VisibleAnywhere, Category = Eliminations)
 	UMaterialInstance* DissolveMaterialInstance;
+
+	/****************************
+	****      TEAM COLORS    ****
+	****************************/
+	UPROPERTY(EditAnywhere, Category = Eliminations)
+	UMaterialInstance* RedMaterial;
+
+	UPROPERTY(EditAnywhere, Category = Eliminations)
+	UMaterialInstance* RedDissolveMaterialInstance;
+
+	UPROPERTY(EditAnywhere, Category = Eliminations)
+	UMaterialInstance* BlueMaterial;
+
+	UPROPERTY(EditAnywhere, Category = Eliminations)
+	UMaterialInstance* BlueDissolveMaterialInstance;
+
+	UPROPERTY(EditAnywhere, Category = Eliminations)
+	UMaterialInstance* OriginalMaterial;
+
+	UPROPERTY(EditAnywhere, Category = Eliminations)
+	UMaterialInstance* OriginalDissolveMaterialInstance;
+
 
 	/****************************
 	** Elimination-Bot/Effects **
