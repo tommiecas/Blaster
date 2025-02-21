@@ -4,6 +4,7 @@
 #include "GameStates/HAFGameState.h"
 #include "Net/UnrealNetwork.h"
 #include "PlayerState/HAFPlayerState.h"
+#include "PlayerController/FillainPlayerController.h"
 
 void AHAFGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
@@ -38,17 +39,41 @@ void AHAFGameState::UpdateTopScore(AHAFPlayerState* ScoringPlayer)
 void AHAFGameState::RedTeamScores()
 {
 	++RedTeamScore;
+
+	AFillainPlayerController* BPlayer = Cast<AFillainPlayerController>(GetWorld()->GetFirstPlayerController());
+	if (BPlayer)
+	{
+		BPlayer->SetHUDRedTeamScore(RedTeamScore);
+	}
 }
 
 void AHAFGameState::BlueTeamScores()
 {
 	++BlueTeamScore;
+	AFillainPlayerController* BPlayer = Cast<AFillainPlayerController>(GetWorld()->GetFirstPlayerController());
+	if (BPlayer)
+	{
+		BPlayer->SetHUDBlueTeamScore(BlueTeamScore);
+	}
 }
 
 void AHAFGameState::OnRep_RedTeamScore()
 {
+	++RedTeamScore;
+
+	AFillainPlayerController* BPlayer = Cast<AFillainPlayerController>(GetWorld()->GetFirstPlayerController());
+	if (BPlayer)
+	{
+		BPlayer->SetHUDRedTeamScore(RedTeamScore);
+	}
 }
 
 void AHAFGameState::OnRep_BlueTeamScore()
 {
+	++BlueTeamScore;
+	AFillainPlayerController* BPlayer = Cast<AFillainPlayerController>(GetWorld()->GetFirstPlayerController());
+	if (BPlayer)
+	{
+		BPlayer->SetHUDBlueTeamScore(BlueTeamScore);
+	}
 }

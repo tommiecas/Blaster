@@ -5,6 +5,7 @@
 #include "GameStates/HAFGameState.h"
 #include "PlayerState/HAFPlayerState.h"
 #include "Kismet/GameplayStatics.h"
+#include "PlayerController/FillainPLayerController.h"
 
 ATeamsGameMode::ATeamsGameMode()
 {
@@ -93,4 +94,23 @@ float ATeamsGameMode::CalculateDamage(AController * Killer, AController * Victim
 		return 0.f;
 	}
 	return BaseDamage;
+}
+
+void ATeamsGameMode::PlayerEliminated(AFillainCharacter* VictimCharacter, AFillainPlayerController* VictimController, AFillainPlayerController* KillerController)
+{
+	Super::PlayerEliminated(VictimCharacter, VictimController, KillerController);
+
+	AHAFGameState* BGameState = Cast<AHAFGameState>(UGameplayStatics::GetGameState(this));
+	AHAFPlayerState* KillerPlayerState = KillerController ? Cast<AHAFPlayerState>(KillerController->PlayerState) : nullptr;
+	if (BGameState && KillerPlayerState)
+	{
+		if (KillerPlayerState->GetTeam() == ETeam::ET_BlueTeam)
+		{
+			BGameState->BlueTeamScores();
+		}
+		if (KillerPlayerState->GetTeam() == ETeam::ET_RedTeam)
+		{
+			BGameState->RedTeamScores();
+		}
+	}
 }

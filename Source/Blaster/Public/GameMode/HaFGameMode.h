@@ -22,7 +22,7 @@ class BLASTER_API AHAFGameMode : public AGameMode
 public:
 	AHAFGameMode();
 	virtual void Tick(float DeltaTime) override;
-	void PlayerEliminated(class AFillainCharacter* VictimCharacter, class AFillainPlayerController* VictimController, AFillainPlayerController* KillerController);
+	virtual void PlayerEliminated(class AFillainCharacter* VictimCharacter, class AFillainPlayerController* VictimController, AFillainPlayerController* KillerController);
 	virtual void RequestRespawn(ACharacter* VictimCharacter, AController* VictimController);
 	void PlayerLeftGame(class AHAFPlayerState* LeavingPlayer);
 	virtual float CalculateDamage(AController* Killer, AController* Victim, float BaseDamage);
