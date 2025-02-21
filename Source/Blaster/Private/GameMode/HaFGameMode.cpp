@@ -67,7 +67,7 @@ void AHAFGameMode::OnMatchStateSet()
 		AFillainPlayerController* FillainPlayer = Cast<AFillainPlayerController>(*It);
 		if (FillainPlayer)
 		{
-			FillainPlayer->OnMatchStateSet(MatchState);
+			FillainPlayer->OnMatchStateSet(MatchState, bTeamsMatch);
 		}
 	}
 }

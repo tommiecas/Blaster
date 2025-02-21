@@ -196,6 +196,7 @@ void AFillainPlayerController::GetLifetimeReplicatedProps(TArray<FLifetimeProper
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(AFillainPlayerController, MatchState);
+	DOREPLIFETIME(AFillainPlayerController, bShowTeamScores);
 }
 
 void AFillainPlayerController::Tick(float DeltaTime)
@@ -527,6 +528,59 @@ void AFillainPlayerController::SetHUDGrenades(int32 Grenades)
 	}
 }
 
+void AFillainPlayerController::HideTeamScores()
+{
+	FillainHUD = FillainHUD == nullptr ? Cast<AFillainHUD>(GetHUD()) : FillainHUD;
+
+	bool bIsHUDValid = FillainHUD && FillainHUD->CharacterOverlay && FillainHUD->CharacterOverlay->RedTeamScore && FillainHUD->CharacterOverlay->BlueTeamScore && FillainHUD->CharacterOverlay->ScoreSpacerText;
+	if (bIsHUDValid)
+	{
+		FillainHUD->CharacterOverlay->RedTeamScore->SetText(FText());
+		FillainHUD->CharacterOverlay->BlueTeamScore->SetText(FText());
+		FillainHUD->CharacterOverlay->ScoreSpacerText->SetText(FText());
+	}
+}
+
+void AFillainPlayerController::InitTeamScores()
+{
+	FillainHUD = FillainHUD == nullptr ? Cast<AFillainHUD>(GetHUD()) : FillainHUD;
+
+	bool bIsHUDValid = FillainHUD && FillainHUD->CharacterOverlay && FillainHUD->CharacterOverlay->RedTeamScore && FillainHUD->CharacterOverlay->BlueTeamScore && FillainHUD->CharacterOverlay->ScoreSpacerText;
+	if (bIsHUDValid)
+	{
+		FString Zero("0");
+		FString Spacer("|");
+
+		FillainHUD->CharacterOverlay->RedTeamScore->SetText(FText::FromString(Zero));
+		FillainHUD->CharacterOverlay->BlueTeamScore->SetText(FText::FromString(Zero));
+		FillainHUD->CharacterOverlay->ScoreSpacerText->SetText(FText::FromString(Spacer));
+	}
+}
+
+void AFillainPlayerController::SetHUDRedTeamScore(int32 RedScore)
+{
+	FillainHUD = FillainHUD == nullptr ? Cast<AFillainHUD>(GetHUD()) : FillainHUD;
+
+	bool bIsHUDValid = FillainHUD && FillainHUD->CharacterOverlay && FillainHUD->CharacterOverlay->RedTeamScore;;
+	if (bIsHUDValid)
+	{
+		FString ScoreText = FString::Printf(TEXT(" % d"), RedScore);
+		FillainHUD->CharacterOverlay->RedTeamScore->SetText(FText::FromString(ScoreText));
+	}
+}
+
+void AFillainPlayerController::SetHUDBlueTeamScore(int32 BlueScore)
+{
+	FillainHUD = FillainHUD == nullptr ? Cast<AFillainHUD>(GetHUD()) : FillainHUD;
+
+	bool bIsHUDValid = FillainHUD && FillainHUD->CharacterOverlay && FillainHUD->CharacterOverlay->BlueTeamScore;;
+	if (bIsHUDValid)
+	{
+		FString ScoreText = FString::Printf(TEXT(" % d"), BlueScore);
+		FillainHUD->CharacterOverlay->BlueTeamScore->SetText(FText::FromString(ScoreText));
+	}
+}
+
 void AFillainPlayerController::SetHUDTime()
 {
 	float TimeLeft = 0.f;
@@ -648,13 +702,13 @@ void AFillainPlayerController::ReceivedPlayer()
 	}
 }
 
-void AFillainPlayerController::OnMatchStateSet(FName NewState)
+void AFillainPlayerController::OnMatchStateSet(FName NewState,  bool bTeamsMatch)
 {
 	MatchState = NewState;
 
 	if (MatchState == MatchState::InProgress)
 	{
-		HandleMatchHasStarted();
+		HandleMatchHasStarted(bTeamsMatch);
 	}
 	else if (MatchState == MatchState::Cooldown)
 	{
@@ -675,8 +729,9 @@ void AFillainPlayerController::OnRep_MatchState()
 	}
 }
 
-void AFillainPlayerController::HandleMatchHasStarted()
+void AFillainPlayerController::HandleMatchHasStarted(bool bTeamsMatch)
 {
+	if (HasAuthority()) bShowTeamScores = bTeamsMatch;
 	FillainHUD = FillainHUD == nullptr ? Cast<AFillainHUD>(GetHUD()) : FillainHUD;
 	if (FillainHUD)
 	{
@@ -684,6 +739,15 @@ void AFillainPlayerController::HandleMatchHasStarted()
 		if (FillainHUD->Announcement)
 		{
 			FillainHUD->Announcement->SetVisibility(ESlateVisibility::Hidden);
+		}
+		if (!HasAuthority()) return;
+		if (bTeamsMatch)
+		{
+			InitTeamScores();
+		}
+		else
+		{
+			HideTeamScores();
 		}
 	}
 }
@@ -749,7 +813,17 @@ void AFillainPlayerController::HandleCooldown()
 	}
 }
 
-
+void AFillainPlayerController::OnRep_ShowTeamScores()
+{
+	if (bShowTeamScores)
+	{
+		InitTeamScores();
+	}
+	else
+	{
+		HideTeamScores();
+	}
+}
 
 
 
@@ -794,6 +868,8 @@ void AFillainPlayerController::ToggleMatchCountdownVisibility()
 		FillainHUD->CharacterOverlay->MatchCountdownText->SetVisibility(ESlateVisibility::Visible);
 	}
 }
+
+
 
 FString AFillainPlayerController::GetWeaponTypeDisplayName(EWeaponType WeaponType)
 {

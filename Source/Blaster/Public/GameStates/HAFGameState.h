@@ -25,6 +25,9 @@ public:
 	****    TEAMS    ****
 	********************/
 
+	void RedTeamScores();
+	void BlueTeamScores();
+
 	TArray<AHAFPlayerState*> RedTeam;
 	TArray<AHAFPlayerState*> BlueTeam;
 

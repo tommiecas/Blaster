@@ -41,6 +41,8 @@ public:
 
 	void SendChat(const FString& Text, const FString& PlayerName);
 
+	bool bTeamsMatch = false;
+
 
 protected:
 	virtual void BeginPlay() override;

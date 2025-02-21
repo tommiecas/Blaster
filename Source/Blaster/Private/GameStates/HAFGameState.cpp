@@ -35,6 +35,16 @@ void AHAFGameState::UpdateTopScore(AHAFPlayerState* ScoringPlayer)
 	}
 }
 
+void AHAFGameState::RedTeamScores()
+{
+	++RedTeamScore;
+}
+
+void AHAFGameState::BlueTeamScores()
+{
+	++BlueTeamScore;
+}
+
 void AHAFGameState::OnRep_RedTeamScore()
 {
 }
