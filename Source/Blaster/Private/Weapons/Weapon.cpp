@@ -92,6 +92,8 @@ void AWeapon::OnSphereOverlap(UPrimitiveComponent* OverlappedCOmponent, AActor* 
 	AFillainCharacter* FillainCharacter = Cast<AFillainCharacter>(OtherActor);
 	if (FillainCharacter)
 	{
+		if (WeaponType == EWeaponType::EWT_Sword && FillainCharacter->GetTeam() != Team) return;
+		if (FillainCharacter->IsHoldingTheSword()) return;
 		FillainCharacter->SetOverlappingWeapon(this);
 	}
 }
@@ -101,6 +103,8 @@ void AWeapon::OnSphereEndOverlap(UPrimitiveComponent* OverlappingCOmponent, AAct
 	AFillainCharacter* FillainCharacter = Cast<AFillainCharacter>(OtherActor);
 	if (FillainCharacter)
 	{
+		if (WeaponType == EWeaponType::EWT_Sword && FillainCharacter->GetTeam() != Team) return;
+		if (FillainCharacter->IsHoldingTheSword()) return;
 		FillainCharacter->SetOverlappingWeapon(nullptr);
 	}
 }

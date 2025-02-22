@@ -1116,6 +1116,13 @@ bool AFillainCharacter::IsHoldingTheSword() const
 
 }
 
+ETeam AFillainCharacter::GetTeam()
+{
+	HAFPlayerState = HAFPlayerState == nullptr ? GetPlayerState<AHAFPlayerState>() : HAFPlayerState;
+	if (HAFPlayerState == nullptr) return ETeam::ET_NoTeam;
+	return HAFPlayerState->GetTeam();
+}
+
 
 
 

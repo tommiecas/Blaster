@@ -7,6 +7,7 @@
 #include "Components/SphereComponent.h"
 #include "Animation/AnimationAsset.h"
 #include "Weapons/WeaponTypes.h"
+#include "Blaster/BlasterTypes/Team.h"
 #include "Weapon.generated.h"
 
 UENUM(BlueprintType)
@@ -208,7 +209,8 @@ private:
 	UPROPERTY(EditAnywhere)
 	EWeaponType WeaponType;
 
-
+	UPROPERTY(EditAnywhere)
+	ETeam Team;
 
 public:	
 	void SetWeaponState(EWeaponState State);
