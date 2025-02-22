@@ -85,7 +85,7 @@ public:
 	UPROPERTY(EditAnywhere, Category = Combat)
 	bool bIsAutomaticWeapon = true;
 
-	void DropWeapon();
+	virtual void DropWeapon();
 
 	void AddAmmo(int32 AmmoToAdd);
 

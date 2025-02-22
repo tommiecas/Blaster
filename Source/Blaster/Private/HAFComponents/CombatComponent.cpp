@@ -265,9 +265,10 @@ void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 	{
 		Character->Crouch();
 		bHoldingTheSword = true;
-		AttachSwordToLeftHand(WeaponToEquip);
 		WeaponToEquip->SetWeaponState(EWeaponState::EWS_Equipped);
+		AttachSwordToLeftHand(WeaponToEquip);
 		WeaponToEquip->SetOwner(Character);
+		TheSword = WeaponToEquip;
 	}
 	else
 	{

@@ -16,6 +16,11 @@ class BLASTER_API ASword : public AWeapon
 
 public:
 	ASword();
+	virtual void DropWeapon() override;
+
+protected:
+	virtual void OnEquipped() override;
+	virtual void OnDropped() override;
 
 private: 
 	UPROPERTY(VisibleAnywhere)

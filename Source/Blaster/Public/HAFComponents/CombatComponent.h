@@ -264,6 +264,9 @@ private:
 	UFUNCTION()
 	void OnRep_HoldingTheSword();
 
+	UPROPERTY()
+	AWeapon* TheSword;
+
 public:	
 	FORCEINLINE bool IsAiming() const { return bAiming; }
 	FORCEINLINE EWeaponType GetWeaponType() const { return WeaponType; }

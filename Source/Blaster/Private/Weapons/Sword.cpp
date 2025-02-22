@@ -17,3 +17,41 @@ ASword::ASword()
 	SwordMesh ->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 	SwordMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
+
+void ASword::DropWeapon()
+{
+	SetWeaponState(EWeaponState::EWS_Dropped);
+	FDetachmentTransformRules DetachRules(EDetachmentRule::KeepWorld, true);
+	SwordMesh->DetachFromComponent(DetachRules);
+	SetOwner(nullptr);
+	FillainOwnerCharacter = nullptr;
+	FillainOwnerPlayerController = nullptr;
+}
+
+void ASword::OnEquipped()
+{
+	ShowPickupWidgets(false);
+	GetAreaSphere()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	SwordMesh->SetSimulatePhysics(false);
+	SwordMesh->SetEnableGravity(false);
+	SwordMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	EnableCustomDepth(false);
+}
+
+void ASword::OnDropped()
+{
+	if (HasAuthority())
+	{
+		GetAreaSphere()->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	}
+	SwordMesh->SetSimulatePhysics(true);
+	SwordMesh->SetEnableGravity(true);
+	SwordMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	SwordMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
+	SwordMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
+	SwordMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
+
+	SwordMesh->SetCustomDepthStencilValue(CUSTOM_DEPTH_BLUE);
+	SwordMesh->MarkRenderStateDirty();
+	EnableCustomDepth(true);
+}
