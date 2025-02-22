@@ -13,4 +13,7 @@ ASword::ASword()
 
 	GetAreaSphere()->SetupAttachment(SwordMesh);
 	GetPickupWidgetA()->SetupAttachment(SwordMesh);
+
+	SwordMesh ->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+	SwordMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }

@@ -383,6 +383,13 @@ void AFillainCharacter::Tick(float DeltaTime)
 
 void AFillainCharacter::RotateInPlace(float DeltaTime)
 {
+	if (Combat && Combat->bHoldingTheSword)
+	{
+		bUseControllerRotationYaw = false;
+		GetCharacterMovement()->bOrientRotationToMovement = true;
+		TurningInPlace = ETurningInPlace::ETIP_NotTurning;
+		return;
+	}
 	if (bDisableGameplay)
 	{
 		bUseControllerRotationYaw = false;

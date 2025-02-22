@@ -120,6 +120,7 @@ protected:
 
 	void AttachActorToRightHand(class AActor* ActorToAttach);
 	void AttachActorToLeftHand(class AActor* ActorToAttach);
+	void AttachSwordToLeftHand(AWeapon* Sword);
 	void AttachActorToBackpack(class AActor* ActorToAttach);	
 	void UpdateCarriedAmmo();
 
@@ -257,7 +258,11 @@ private:
 	UPROPERTY(EditAnywhere)
 	int32 MaxGrenades = 4;
 
+	UPROPERTY(ReplicatedUsing = OnRep_HoldingTheSword)
 	bool bHoldingTheSword = false;
+
+	UFUNCTION()
+	void OnRep_HoldingTheSword();
 
 public:	
 	FORCEINLINE bool IsAiming() const { return bAiming; }
