@@ -551,6 +551,7 @@ void AFillainCharacter::GrenadeButtonPressed()
 {
 	if (Combat)
 	{
+		if (Combat && Combat->bHoldingTheSword) return;
 		Combat->ThrowGrenade();
 	}
 }
@@ -694,6 +695,7 @@ void AFillainCharacter::EquipButtonPressed()
 
 	if (Combat)
 	{
+		if (Combat->bHoldingTheSword) return;
 		if (Combat->CombatState == ECombatState::ECS_Unoccupied) ServerEquipButtonPressed();
 		bool bSwap = Combat->ShouldSwapWeapons() &&
 			!HasAuthority() &&
@@ -726,6 +728,7 @@ void AFillainCharacter::ServerEquipButtonPressed_Implementation()
 
 void AFillainCharacter::CrouchButtonPressed()
 {
+	if (Combat && Combat->bHoldingTheSword) return;
 	if (bDisableGameplay)
 	{
 		bDisableGameplay = false;
@@ -742,6 +745,7 @@ void AFillainCharacter::CrouchButtonPressed()
 
 void AFillainCharacter::ReloadButtonPressed()
 {
+	if (Combat && Combat->bHoldingTheSword) return;
 	if (bDisableGameplay)
 	{
 		bDisableGameplay = false;
@@ -755,6 +759,7 @@ void AFillainCharacter::ReloadButtonPressed()
 
 void AFillainCharacter::AimButtonPressed()
 {
+	if (Combat && Combat->bHoldingTheSword) return;
 	if (bDisableGameplay)
 	{
 		bDisableGameplay = false;
@@ -768,6 +773,7 @@ void AFillainCharacter::AimButtonPressed()
 
 void AFillainCharacter::AimButtonReleased()
 {
+	if (Combat && Combat->bHoldingTheSword) return;
 	if (bDisableGameplay)
 	{
 		bDisableGameplay = false;
@@ -865,6 +871,7 @@ void AFillainCharacter::SimProxiesTurn()
 
 void AFillainCharacter::Jump()
 {
+	if (Combat && Combat->bHoldingTheSword) return;
 	if (bDisableGameplay)
 	{
 		bDisableGameplay = false;
@@ -881,6 +888,7 @@ void AFillainCharacter::Jump()
 
 void AFillainCharacter::FireButtonPressed()
 {
+	if (Combat && Combat->bHoldingTheSword) return;
 	if (bDisableGameplay)
 	{
 		bDisableGameplay = false;
@@ -894,6 +902,7 @@ void AFillainCharacter::FireButtonPressed()
 
 void AFillainCharacter::FireButtonReleased()
 {
+	if (Combat && Combat->bHoldingTheSword) return;
 	if (bDisableGameplay)
 	{
 		bDisableGameplay = false;
