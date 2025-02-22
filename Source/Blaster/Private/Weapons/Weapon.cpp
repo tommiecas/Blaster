@@ -76,7 +76,6 @@ void AWeapon::BeginPlay()
 void AWeapon::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
 void AWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -134,7 +133,6 @@ void AWeapon::FireSingleRoundOfAmmo()
 	{
 		++Sequence;
 	}
-
 }
 
 void AWeapon::ClientUpdateAmmo_Implementation(int32 ServerAmmo)
@@ -164,6 +162,7 @@ void AWeapon::ClientAddAmmo_Implementation(int32 AmmoToAdd)
 	}
 	SetHUDAmmo();
 }
+
 void AWeapon::OnRep_Owner()
 {
 	Super::OnRep_Owner();
@@ -228,6 +227,7 @@ void AWeapon::OnEquipped()
 		WeaponMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 	}
 	EnableCustomDepth(false);
+
 	FillainOwnerCharacter = FillainOwnerCharacter == nullptr ? Cast<AFillainCharacter>(GetOwner()) : FillainOwnerCharacter;
 	if (FillainOwnerCharacter && bUseServerSideRewind)
 	{
@@ -362,7 +362,7 @@ FVector AWeapon::TraceEndWithScatter(const FVector& HitTarget)
 	const FTransform SocketTransform = MuzzleFlashSocket->GetSocketTransform(GetWeaponMesh());
 	const FVector TraceStart = SocketTransform.GetLocation();
 
-	const FVector ToTargetNormalized = (HitTarget - TraceStart.GetSafeNormal());
+	const FVector ToTargetNormalized = (HitTarget - TraceStart).GetSafeNormal();
 	const FVector SphereCenter = TraceStart + ToTargetNormalized * DistanceToSphere;
 	const FVector RandVec = UKismetMathLibrary::RandomUnitVector() * FMath::FRandRange(0.f, SphereRadius);
 	const FVector EndLoc = SphereCenter + RandVec;

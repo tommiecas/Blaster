@@ -283,7 +283,6 @@ void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 
 		Character->GetCharacterMovement()->bOrientRotationToMovement = false;
 		Character->bUseControllerRotationYaw = true;
-		CombatState = ECombatState::ECS_Unoccupied;
 	}
 }
 
@@ -295,7 +294,6 @@ void UCombatComponent::SwapWeapons()
 	CombatState = ECombatState::ECS_SwappingWeapons;
 	Character->bFinishedSwapping = false;
 	if (SecondaryWeapon) SecondaryWeapon->EnableCustomDepth(false);
-	CombatState = ECombatState::ECS_Unoccupied;
 
 }
 
@@ -311,7 +309,6 @@ void UCombatComponent::EquipPrimaryWeapon(AWeapon* WeaponToEquip)
 	UpdateCarriedAmmo();
 	PlayWeaponEquipSound(WeaponToEquip);
 	ReloadEmptyWeapon();
-	CombatState = ECombatState::ECS_Unoccupied;
 
 }
 
@@ -323,7 +320,6 @@ void UCombatComponent::EquipSecondaryWeapon(AWeapon* WeaponToEquip)
 	AttachActorToBackpack(WeaponToEquip);
 	PlayWeaponEquipSound(WeaponToEquip);
 	SecondaryWeapon->SetOwner(Character);
-	CombatState = ECombatState::ECS_Unoccupied;
 
 }
 
@@ -377,7 +373,7 @@ void UCombatComponent::AttachActorToLeftHand(AActor* ActorToAttach)
 void UCombatComponent::AttachSwordToLeftHand(AWeapon* Sword)
 {
 	if (Character == nullptr || Character->GetMesh() == nullptr || Sword == nullptr) return;
-	const USkeletalMeshSocket* HandSocket = Character->GetMesh()->GetSocketByName(FName("FlagSocket"));
+	const USkeletalMeshSocket* HandSocket = Character->GetMesh()->GetSocketByName(FName("SwordSocket"));
 	if (HandSocket)
 	{
 		HandSocket->AttachActor(Sword, Character->GetMesh());
@@ -417,7 +413,6 @@ void UCombatComponent::ReloadEmptyWeapon()
 	{
 		Reloading();
 	}
-	CombatState = ECombatState::ECS_Unoccupied;
 
 }
 
@@ -428,7 +423,6 @@ void UCombatComponent::Reloading()
 		ServerReloading();
 		HandleReload();
 		bLocallyReloading = true;
-		CombatState = ECombatState::ECS_Unoccupied;
 	}
 }
 
@@ -438,7 +432,6 @@ void UCombatComponent::ServerReloading_Implementation()
 
 	CombatState = ECombatState::ECS_Reloading;
 	if (!Character->IsLocallyControlled()) HandleReload();
-	CombatState = ECombatState::ECS_Unoccupied;
 }
 
 void UCombatComponent::FinishReloading()
@@ -454,7 +447,6 @@ void UCombatComponent::FinishReloading()
 	{
 		Fire();
 	}
-	CombatState = ECombatState::ECS_Unoccupied;
 
 }
 
@@ -466,7 +458,6 @@ void UCombatComponent::FinishSwap()
 	}
 	if (Character) Character->bFinishedSwapping = true;
 	if (SecondaryWeapon) SecondaryWeapon->EnableCustomDepth(true);
-	CombatState = ECombatState::ECS_Unoccupied;
 
 }
 
@@ -484,13 +475,12 @@ void UCombatComponent::FinishSwapAttachWeapons()
 
 	SecondaryWeapon->SetWeaponState(EWeaponState::EWS_EquippedSecondary);
 	AttachActorToBackpack(SecondaryWeapon);
-	CombatState = ECombatState::ECS_Unoccupied;
 
 }
 
 void UCombatComponent::UpdateAmmoValues()
 {
-	if (EquippedWeapon == nullptr) return;
+	if (Character == nullptr || EquippedWeapon == nullptr) return;
 	int32 ReloadAmount = AmountToReload();
 	if (CarriedAmmoMap.Contains(EquippedWeapon->GetWeaponType()))
 	{
@@ -583,7 +573,7 @@ void UCombatComponent::OnRep_CombatState()
 	switch (CombatState)
 	{
 	case ECombatState::ECS_Reloading:
-		if (!Character->IsLocallyControlled()) HandleReload();
+		if (Character && !Character->IsLocallyControlled()) HandleReload();
 		break;
 	case ECombatState::ECS_Unoccupied:
 		if (bIsFireButtonPressed)
@@ -606,7 +596,6 @@ void UCombatComponent::OnRep_CombatState()
 		}
 		break;
 	}
-	CombatState = ECombatState::ECS_Unoccupied;
 }
 
 void UCombatComponent::HandleReload()
@@ -615,7 +604,6 @@ void UCombatComponent::HandleReload()
 	{
 		Character->PlayReloadingMontage();
 	}
-	CombatState = ECombatState::ECS_Unoccupied;
 }
 
 int32 UCombatComponent::AmountToReload()
@@ -675,14 +663,6 @@ void UCombatComponent::UpdateHUDGrenades()
 	if (Controller)
 	{
 		Controller->SetHUDGrenades(Grenades);
-	}
-}
-
-void UCombatComponent::OnRep_HoldingTheSword()
-{
-	if (bHoldingTheSword && Character && Character->IsLocallyControlled())
-	{
-		Character->Crouch();
 	}
 }
 
@@ -794,7 +774,6 @@ void UCombatComponent::SetHUDCrosshairs(float DeltaTime)
 				HUDPackage.CrosshairsRight = EquippedWeapon->CrosshairsRight;
 				HUDPackage.CrosshairsTop = EquippedWeapon->CrosshairsTop;
 				HUDPackage.CrosshairsBottom = EquippedWeapon->CrosshairsBottom;
-				PlayerHUD->SetHUDPackage(HUDPackage);
 			}
 			else
 			{
@@ -925,5 +904,13 @@ void UCombatComponent::InitializeCarriedAmmo()
 	CarriedAmmoMap.Emplace(EWeaponType::EWT_Shotgun, StartingShotgunAmmo);
 	CarriedAmmoMap.Emplace(EWeaponType::EWT_SniperRifle, StartingSniperAmmo);
 	CarriedAmmoMap.Emplace(EWeaponType::EWT_GrenadeLauncher, StartingGrenadeLauncherAmmo);
+}
+
+void UCombatComponent::OnRep_HoldingTheSword()
+{
+	if (bHoldingTheSword && Character && Character->IsLocallyControlled())
+	{
+		Character->Crouch();
+	}
 }
 
