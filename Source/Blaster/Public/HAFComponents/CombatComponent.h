@@ -257,6 +257,8 @@ private:
 	UPROPERTY(EditAnywhere)
 	int32 MaxGrenades = 4;
 
+	bool bHoldingTheSword = false;
+
 public:	
 	FORCEINLINE bool IsAiming() const { return bAiming; }
 	FORCEINLINE EWeaponType GetWeaponType() const { return WeaponType; }

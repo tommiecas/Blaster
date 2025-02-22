@@ -1093,6 +1093,13 @@ bool AFillainCharacter::IsLocallyReloading()
 	return Combat->bLocallyReloading;
 }
 
+bool AFillainCharacter::IsHoldingTheSword() const
+{
+	if (Combat == nullptr) return false;
+	return Combat->bHoldingTheSword;
+
+}
+
 
 
 
