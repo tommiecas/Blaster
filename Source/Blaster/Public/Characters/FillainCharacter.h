@@ -290,6 +290,9 @@ protected:
 
 	void DropOrDestroyWeapon(AWeapon* Weapon);
 	void DropOrDestroyBothWeapons();
+
+	void SetSpawnPoint();
+	void OnPlayerStateInitialized();
 	
 
 private:	
