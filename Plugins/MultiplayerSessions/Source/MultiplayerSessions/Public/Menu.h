@@ -19,7 +19,7 @@ class MULTIPLAYERSESSIONS_API UMenu : public UUserWidget
 
 public:
 	UFUNCTION(BlueprintCallable)
-	void MenuSetup(int32 NumberOfPublicConnections = 4, FString TypeOfMatch = FString(TEXT("FreeForAll")), FString LobbyPath = FString(TEXT("/Game/Maps/HAFLobby")));
+	void MenuSetup(int32 NumberOfPublicConnections = 4, FString TypeOfMatch = FString(TEXT("BattleRoyale")), FString LobbyPath = FString(TEXT("/Game/Maps/HAFLobby")));
 
 protected:
 	virtual bool Initialize() override;
@@ -58,7 +58,12 @@ private:
 	// The Subsystem designed to handle all online session functionality
 	class UMultiplayerSessionsSubsystem* MultiplayerSessionsSubsystem;
 
+	UPROPERTY(BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+
 	int32 NumPublicConnections{4};
-	FString MatchType{ TEXT("FreeForAll") };
+
+	UPROPERTY(BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	FString MatchType{TEXT("BattleRoyale") };
+
 	FString PathToLobby{ TEXT("")};
 };

@@ -5,6 +5,8 @@
 #include "Components/StaticMeshComponent.h"
 #include "Components/SphereComponent.h"
 #include "Components/WidgetComponent.h"
+#include "CHaracters/FillainCharacter.h"
+
 
 ASword::ASword()
 {
@@ -28,13 +30,39 @@ void ASword::DropWeapon()
 	FillainOwnerPlayerController = nullptr;
 }
 
+void ASword::ResetSword()
+{
+	AFillainCharacter* SwordWielder = Cast<AFillainCharacter>(GetOwner());
+	if (SwordWielder)
+	{
+		SwordWielder->SetWieldingTheSword(false);
+		SwordWielder->SetOverlappingWeapon(nullptr);
+		SwordWielder->UnCrouch();
+	}
+
+	if (!HasAuthority()) return;
+	FDetachmentTransformRules DetachRules(EDetachmentRule::KeepWorld, true);
+	SwordMesh->DetachFromComponent(DetachRules);
+	SetWeaponState(EWeaponState::EWS_Initial);
+	GetAreaSphere()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	GetAreaSphere()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
+	SetOwner(nullptr);
+	FillainOwnerCharacter = nullptr;
+	FillainOwnerPlayerController = nullptr;
+
+	SetActorTransform(InitialTransform);
+}
+
+
+
 void ASword::OnEquipped()
 {
 	ShowPickupWidgets(false);
 	GetAreaSphere()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	SwordMesh->SetSimulatePhysics(false);
 	SwordMesh->SetEnableGravity(false);
-	SwordMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	SwordMesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	SwordMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_WorldDynamic, ECollisionResponse::ECR_Overlap);
 	EnableCustomDepth(false);
 }
 
@@ -54,4 +82,10 @@ void ASword::OnDropped()
 	SwordMesh->SetCustomDepthStencilValue(CUSTOM_DEPTH_BLUE);
 	SwordMesh->MarkRenderStateDirty();
 	EnableCustomDepth(true);
+}
+
+void ASword::BeginPlay()
+{
+	Super::BeginPlay();
+	InitialTransform = GetActorTransform();
 }

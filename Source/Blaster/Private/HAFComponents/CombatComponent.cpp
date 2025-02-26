@@ -38,7 +38,7 @@ void UCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	DOREPLIFETIME_CONDITION(UCombatComponent, CarriedAmmo, COND_OwnerOnly);
 	DOREPLIFETIME(UCombatComponent, CombatState);
 	DOREPLIFETIME(UCombatComponent, Grenades);
-	DOREPLIFETIME(UCombatComponent, bHoldingTheSword);
+	DOREPLIFETIME(UCombatComponent, bWieldingTheSword);
 }
 
 void UCombatComponent::ShotgunShellReload()
@@ -264,7 +264,7 @@ void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 	if (WeaponToEquip->GetWeaponType() == EWeaponType::EWT_Sword)
 	{
 		Character->Crouch();
-		bHoldingTheSword = true;
+		bWieldingTheSword = true;
 		WeaponToEquip->SetWeaponState(EWeaponState::EWS_Equipped);
 		AttachSwordToLeftHand(WeaponToEquip);
 		WeaponToEquip->SetOwner(Character);
@@ -906,9 +906,9 @@ void UCombatComponent::InitializeCarriedAmmo()
 	CarriedAmmoMap.Emplace(EWeaponType::EWT_GrenadeLauncher, StartingGrenadeLauncherAmmo);
 }
 
-void UCombatComponent::OnRep_HoldingTheSword()
+void UCombatComponent::OnRep_WieldingTheSword()
 {
-	if (bHoldingTheSword && Character && Character->IsLocallyControlled())
+	if (bWieldingTheSword && Character && Character->IsLocallyControlled())
 	{
 		Character->Crouch();
 	}

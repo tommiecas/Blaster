@@ -17,13 +17,20 @@ class BLASTER_API ASword : public AWeapon
 public:
 	ASword();
 	virtual void DropWeapon() override;
+	void ResetSword();
 
 protected:
 	virtual void OnEquipped() override;
 	virtual void OnDropped() override;
+	virtual void BeginPlay() override;
 
 private: 
 	UPROPERTY(VisibleAnywhere)
 	UStaticMeshComponent* SwordMesh;
+
+	FTransform InitialTransform;
+
+public:
+	FORCEINLINE FTransform GetInitialTransform() const { return InitialTransform; }
 	
 };

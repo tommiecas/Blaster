@@ -227,6 +227,7 @@ public:
 	FORCEINLINE AProjectile* GetProjectile() const { return Projectile; }
 	FORCEINLINE float GetDamage() const { return Damage; }
 	FORCEINLINE float GetHeadShotDamage() const { return HeadShotDamage; }
+	FORCEINLINE ETeam GetTeam() const { return Team; }
 
 
 };

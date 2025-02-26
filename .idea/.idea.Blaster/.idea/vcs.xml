@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="VcsDirectoryMappings">
+    <mapping directory="$PROJECT_DIR$/../../../../../Program Files/Epic Games/UE_5.4/Engine/Intermediate/Build/BuildRulesProjects/MarketplaceRules" vcs="Perforce" />
+    <mapping directory="$PROJECT_DIR$/../../../../../Program Files/Epic Games/UE_5.4/Engine/Intermediate/Build/BuildRulesProjects/UE5ProgramRules" vcs="Perforce" />
+    <mapping directory="$PROJECT_DIR$/../../../../../Program Files/Epic Games/UE_5.4/Engine/Intermediate/Build/BuildRulesProjects/UE5Rules" vcs="Perforce" />
+    <mapping directory="$PROJECT_DIR$/../../../../../Program Files/Epic Games/UE_5.4/Engine/Platforms/VisionOS/Source/Programs/AutomationTool" vcs="Perforce" />
+    <mapping directory="$PROJECT_DIR$/../../../../../Program Files/Epic Games/UE_5.4/Engine/Plugins/ScriptPlugin/Source/ScriptGeneratorUbtPlugin" vcs="Perforce" />
+    <mapping directory="$PROJECT_DIR$/../../../../../Program Files/Epic Games/UE_5.4/Engine/Source/Programs/AutomationTool" vcs="Perforce" />
+    <mapping directory="$PROJECT_DIR$/../../../../../Program Files/Epic Games/UE_5.4/Engine/Source/Programs/Shared/EpicGames.AspNet" vcs="Perforce" />
+    <mapping directory="$PROJECT_DIR$/../../../../../Program Files/Epic Games/UE_5.4/Engine/Source/Programs/Shared/EpicGames.Build" vcs="Perforce" />
+    <mapping directory="$PROJECT_DIR$/../../../../../Program Files/Epic Games/UE_5.4/Engine/Source/Programs/Shared/EpicGames.BuildGraph" vcs="Perforce" />
+    <mapping directory="$PROJECT_DIR$/../../../../../Program Files/Epic Games/UE_5.4/Engine/Source/Programs/Shared/EpicGames.Core" vcs="Perforce" />
+    <mapping directory="$PROJECT_DIR$/../../../../../Program Files/Epic Games/UE_5.4/Engine/Source/Programs/Shared/EpicGames.Horde" vcs="Perforce" />
+    <mapping directory="$PROJECT_DIR$/../../../../../Program Files/Epic Games/UE_5.4/Engine/Source/Programs/Shared/EpicGames.IoHash" vcs="Perforce" />
+    <mapping directory="$PROJECT_DIR$/../../../../../Program Files/Epic Games/UE_5.4/Engine/Source/Programs/Shared/EpicGames.Jupiter" vcs="Perforce" />
+    <mapping directory="$PROJECT_DIR$/../../../../../Program Files/Epic Games/UE_5.4/Engine/Source/Programs/Shared/EpicGames.MongoDB" vcs="Perforce" />
+    <mapping directory="$PROJECT_DIR$/../../../../../Program Files/Epic Games/UE_5.4/Engine/Source/Programs/Shared/EpicGames.MsBuild" vcs="Perforce" />
+    <mapping directory="$PROJECT_DIR$/../../../../../Program Files/Epic Games/UE_5.4/Engine/Source/Programs/Shared/EpicGames.OIDC" vcs="Perforce" />
+    <mapping directory="$PROJECT_DIR$/../../../../../Program Files/Epic Games/UE_5.4/Engine/Source/Programs/Shared/EpicGames.Oodle" vcs="Perforce" />
+    <mapping directory="$PROJECT_DIR$/../../../../../Program Files/Epic Games/UE_5.4/Engine/Source/Programs/Shared/EpicGames.Perforce" vcs="Perforce" />
+    <mapping directory="$PROJECT_DIR$/../../../../../Program Files/Epic Games/UE_5.4/Engine/Source/Programs/Shared/EpicGames.Perforce.Fixture" vcs="Perforce" />
+    <mapping directory="$PROJECT_DIR$/../../../../../Program Files/Epic Games/UE_5.4/Engine/Source/Programs/Shared/EpicGames.Perforce.Managed" vcs="Perforce" />
+    <mapping directory="$PROJECT_DIR$/../../../../../Program Files/Epic Games/UE_5.4/Engine/Source/Programs/Shared/EpicGames.ProjectStore" vcs="Perforce" />
+    <mapping directory="$PROJECT_DIR$/../../../../../Program Files/Epic Games/UE_5.4/Engine/Source/Programs/Shared/EpicGames.Redis" vcs="Perforce" />
+    <mapping directory="$PROJECT_DIR$/../../../../../Program Files/Epic Games/UE_5.4/Engine/Source/Programs/Shared/EpicGames.Serialization" vcs="Perforce" />
+    <mapping directory="$PROJECT_DIR$/../../../../../Program Files/Epic Games/UE_5.4/Engine/Source/Programs/Shared/EpicGames.Slack" vcs="Perforce" />
+    <mapping directory="$PROJECT_DIR$/../../../../../Program Files/Epic Games/UE_5.4/Engine/Source/Programs/Shared/EpicGames.Tracing" vcs="Perforce" />
+    <mapping directory="$PROJECT_DIR$/../../../../../Program Files/Epic Games/UE_5.4/Engine/Source/Programs/Shared/EpicGames.UBA" vcs="Perforce" />
+    <mapping directory="$PROJECT_DIR$/../../../../../Program Files/Epic Games/UE_5.4/Engine/Source/Programs/Shared/EpicGames.UHT" vcs="Perforce" />
+    <mapping directory="$PROJECT_DIR$/../../../../../Program Files/Epic Games/UE_5.4/Engine/Source/Programs/UnrealBuildTool" vcs="Perforce" />
+    <mapping directory="$PROJECT_DIR$" vcs="Git" />
+  </component>
+</project>

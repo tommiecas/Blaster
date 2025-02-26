@@ -258,11 +258,11 @@ private:
 	UPROPERTY(EditAnywhere)
 	int32 MaxGrenades = 4;
 
-	UPROPERTY(ReplicatedUsing = OnRep_HoldingTheSword)
-	bool bHoldingTheSword = false;
+	UPROPERTY(ReplicatedUsing = OnRep_WieldingTheSword)
+	bool bWieldingTheSword = false;
 
 	UFUNCTION()
-	void OnRep_HoldingTheSword();
+	void OnRep_WieldingTheSword();
 
 	UPROPERTY()
 	AWeapon* TheSword;
