@@ -59,7 +59,6 @@ private:
 	class UMultiplayerSessionsSubsystem* MultiplayerSessionsSubsystem;
 
 	UPROPERTY(BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
-
 	int32 NumPublicConnections{4};
 
 	UPROPERTY(BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))

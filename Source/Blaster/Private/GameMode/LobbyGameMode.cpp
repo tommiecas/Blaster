@@ -3,6 +3,7 @@
 
 #include "GameMode/LobbyGameMode.h"
 #include "GameFramework/GameStateBase.h"
+#include "MultiplayerSessionsSubsystem.h"
 
 void ALobbyGameMode::PostLogin(APlayerController* NewPlayer)
 {
@@ -11,15 +12,36 @@ void ALobbyGameMode::PostLogin(APlayerController* NewPlayer)
 	// Add player to lobby
 	// LobbyPlayers.Add(NewPlayer);
 	int32 NumberOfPlayers = GameState.Get()->PlayerArray.Num();
-	if (NumberOfPlayers == 2)
+	UGameInstance* GameInstance = GetGameInstance();
+	if (GameInstance)
 	{
-		UWorld* World = GetWorld();
-		if (World)
+		UMultiplayerSessionsSubsystem* Subsystem = GameInstance->GetSubsystem<UMultiplayerSessionsSubsystem>();
+		check(Subsystem);
+
+		if (NumberOfPlayers == Subsystem->DesiredNumPublicConnections)
 		{
-			bUseSeamlessTravel = true;
-			World->ServerTravel(FString("/Game/Maps/HAFBattleMap?listen"));
+			UWorld* World = GetWorld();
+			if (World)
+			{
+				bUseSeamlessTravel = true;
+
+				FString MatchType = Subsystem->DesiredMatchType;
+				if (MatchType == "BattleRoyale")
+				{
+					World->ServerTravel(FString("/Game/Maps/HAFBattleMap?listen"));
+
+				}
+				else if (MatchType == "Teams")
+				{
+					World->ServerTravel(FString("/Game/Maps/HAFTeamsMap?listen"));
+				}
+				else if (MatchType == "SeizeTheSword")
+				{
+					World->ServerTravel(FString("/Game/Maps/HAFSeizeTheSwordMap?listen"));
+				}
+			}
 		}
+
 	}
-	
 }
 
