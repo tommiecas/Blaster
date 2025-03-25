@@ -13,6 +13,8 @@
 #include "PlayerController/FillainPlayerController.h"
 #include "HAFComponents/CombatComponent.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "HUD/PickupWidget.h"
+#include "Components/WidgetComponent.h"
 
 AWeapon::AWeapon()
 {
@@ -40,10 +42,11 @@ AWeapon::AWeapon()
 
 	PickupWidgetA = CreateDefaultSubobject<UWidgetComponent>(TEXT("PickupWidgetA"));
 	PickupWidgetA->SetupAttachment(Component);
+	PickupWidgetA->SetWidgetClass(UPickupWidget::StaticClass()); // Set the widget class to UPickupWidget
 
 	PickupWidgetB = CreateDefaultSubobject<UWidgetComponent>(TEXT("PickupWidgetB"));
 	PickupWidgetB->SetupAttachment(Component);
-
+	PickupWidgetB->SetWidgetClass(UPickupWidget::StaticClass()); // Set the widget class to UPickupWidget
 }
 
 void AWeapon::EnableCustomDepth(bool bEnable)
@@ -215,7 +218,7 @@ void AWeapon::OnRep_WeaponState()
 
 void AWeapon::OnEquipped()
 {
-	ShowPickupWidgets(false);
+	HidePickupWidgets();
 	AreaSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	WeaponMesh->SetSimulatePhysics(false);
 	WeaponMesh->SetEnableGravity(false);
@@ -269,7 +272,7 @@ void AWeapon::OnDropped()
 
 void AWeapon::OnEquippedSecondary()
 {
-	ShowPickupWidgets(false);
+	HidePickupWidgets();
 	AreaSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	WeaponMesh->SetSimulatePhysics(false);
 	WeaponMesh->SetEnableGravity(false);
@@ -297,15 +300,27 @@ void AWeapon::OnEquippedSecondary()
 	}
 }
 
-void AWeapon::ShowPickupWidgets(bool bShowWidget)
+void AWeapon::ShowPickupWidgets()
 {
 	if (PickupWidgetA)
 	{
-		PickupWidgetA->SetVisibility(bShowWidget);
+		PickupWidgetA->SetVisibility(true);
 	}
 	if (PickupWidgetB)
 	{
-		PickupWidgetB->SetVisibility(bShowWidget);
+		PickupWidgetB->SetVisibility(true);
+	}
+}
+
+void AWeapon::HidePickupWidgets()
+{
+	if (PickupWidgetA)
+	{
+		PickupWidgetA->SetVisibility(false);
+	}
+	if (PickupWidgetB)
+	{
+		PickupWidgetB->SetVisibility(false);
 	}
 }
 

@@ -42,7 +42,8 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void OnRep_Owner() override;
 	void SetHUDAmmo();
-	void ShowPickupWidgets(bool bShowWidget);
+	void ShowPickupWidgets();
+	void HidePickupWidgets();
 	virtual void Fire(const FVector& HitTarget);
 
 	FVector TraceEndWithScatter(const FVector& HitTarget);
@@ -216,7 +217,7 @@ public:
 	void SetWeaponState(EWeaponState State);
 	FORCEINLINE USphereComponent* GetAreaSphere() const { return AreaSphere; }
 	FORCEINLINE USkeletalMeshComponent* GetWeaponMesh() const { return WeaponMesh; }
-	FORCEINLINE UWidgetComponent* GetPickupWidgetA() const { return PickupWidgetA; }
+	FORCEINLINE class UWidgetComponent* GetPickupWidgetA() const { return PickupWidgetA; }
 	FORCEINLINE float GetZoomedFOV() const { return ZoomedFOV; }
 	FORCEINLINE float GetZoomInterpSpeed() const { return ZoomInterpSpeed; }
 	bool IsWeaponEmpty();

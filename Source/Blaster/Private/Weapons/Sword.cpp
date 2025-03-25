@@ -4,20 +4,29 @@
 #include "Weapons/Sword.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/SphereComponent.h"
-#include "Components/WidgetComponent.h"
-#include "CHaracters/FillainCharacter.h"
+#include "Characters/FillainCharacter.h"
+#include "HUD/PickupWidget.h"
 
 
-ASword::ASword()
-{
-	SwordMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("SwordMesh"));
-	SetRootComponent(SwordMesh);
+#include "Components/WidgetComponent.h"  
 
-	GetAreaSphere()->SetupAttachment(SwordMesh);
-	GetPickupWidgetA()->SetupAttachment(SwordMesh);
+ASword::ASword()  
+{  
+   SwordMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("SwordMesh"));  
+   SetRootComponent(SwordMesh);  
 
-	SwordMesh ->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
-	SwordMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+   GetAreaSphere()->SetupAttachment(SwordMesh);  
+   // Assuming GetPickupWidgetA() returns a UUserWidget or a subclass of it  
+   if (UWidgetComponent* WidgetComponent = GetPickupWidgetA())  
+   {  
+       if (UPickupWidget* PickupWidget = Cast<UPickupWidget>(WidgetComponent->GetUserWidgetObject()))  
+       {  
+           PickupWidget->AddToViewport();  
+       }  
+   }  
+
+   SwordMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);  
+   SwordMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);  
 }
 
 void ASword::DropWeapon()
@@ -57,7 +66,7 @@ void ASword::ResetSword()
 
 void ASword::OnEquipped()
 {
-	ShowPickupWidgets(false);
+	ShowPickupWidgets();
 	GetAreaSphere()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	SwordMesh->SetSimulatePhysics(false);
 	SwordMesh->SetEnableGravity(false);
